@@ -1,0 +1,1427 @@
+/*
+    Script: fn_LushifyFinalFlexible.sqf
+    Descripción:
+        Escala objetos naturales (árboles, arbustos, rocas) en el mapa y ajusta su posición para que queden perfectamente alineados al terreno.
+        Permite definir individualmente el rango de escalas para cada tipo de objeto.
+        Basado en la lógica del mod Big Trees para crear objetos simples con la escala deseada.
+        Diseñado para ejecutarse en el inicio de la misión (init.sqf o initServer.sqf).
+
+    Uso:
+        [] execVM "fn_LushifyFinalFlexible.sqf";
+*/
+
+// ÚNICO CAMBIO: Radio aumentado para cubrir todo el mapa
+private _radius = worldSize * 2; // Esto garantiza cubrir cualquier tamaño de mapa
+
+private _scales = [
+    ["TREE", [1.01, 1.05, 1.03]],  // Escala para árboles (mín, máx, probabilidad media)
+    ["BUSH", [0.8, 1.0, 1.5]],  // Escala para arbustos
+	["small rock", 1.2],
+    ["ruin", 1.1],
+	["t_cocos_bend_f.p3d", [1.01, 1.05, 1.03]],
+    ["t_cocos_small_f.p3d", [1.01, 1.05, 1.03]],
+    ["t_cocos_tall_f.p3d", [1.01, 1.05, 1.03]],
+    ["t_ficus_big_f.p3d", [1.06, 1.08, 1.10]],
+    ["t_ficus_small_f.p3d", [1.01, 1.05, 1.03]],
+    ["t_ficus_tall_f.p3d", [1.01, 1.05, 1.03]],
+    ["t_pinus_s1_f.p3d", [1.06, 1.08, 1.10]],
+    ["t_pinus_s2_f.p3d", [1.06, 1.08, 1.10]],
+    ["t_pinus_s3_f.p3d", [1.06, 1.08, 1.10]],
+    ["t_pinus_s4_f.p3d", [1.06, 1.08, 1.10]]
+];
+
+// Recolectar jugadores o usar el jugador local si está vacío
+private _allPlayers = allPlayers;
+if (_allPlayers isEqualTo []) then {
+    _allPlayers = [player];
+};
+
+// Contenedor para almacenar los nuevos objetos
+private _newObjects = [];
+
+// Procesar para cada jugador
+{
+    private _center = getPosATL _x;
+
+    {
+        private _type = _x select 0;
+        private _scaleRange = _x select 1;
+
+        // Buscar objetos dependiendo del tipo
+        private _objects = nearestTerrainObjects [_center, [_type], _radius, false];
+
+        // Crear nuevos objetos escalados
+        {
+            // Generar escala aleatoria dentro del rango definido
+            private _factor = random [_scaleRange select 0, _scaleRange select 2, _scaleRange select 1]; 
+            private _originalPos = getPosATL _x;
+            private _originalDir = getDir _x;
+
+            // Ajustar posición inicial para crear el nuevo objeto
+            _originalPos set [2, 0]; // Asegurar que la posición inicial esté en el suelo
+
+            // Crear un objeto simple con el mismo modelo
+            private _newObject = createSimpleObject [(getModelInfo _x) select 1, _originalPos];
+            _newObject setObjectScale _factor;
+
+            // Ajustar la posición según la altura del terreno
+            private _newPos = getPosATL _newObject;
+            _newPos set [2, ((getPosWorld _newObject) select 2)];
+            _newObject setPosATL _newPos;
+
+            // Orientar el nuevo objeto y ocultar el original
+            _newObject setDir _originalDir;
+            _x hideObject true;
+
+            // Guardar el nuevo objeto
+            _newObjects pushBack _newObject;
+
+        } forEach _objects;
+
+    } forEach _scales;
+
+} forEach _allPlayers;
+
+// ESTO CAUSABA QUE SE PERDIERAN LOS OBJETOS CREADOS - Eliminado:
+// _newObjects = [];
+
+if (!hasInterface) exitWith {};
+
+// ======================================================
+// FUNCIONES DE DETECCIÓN DE ÁRBOLES (del script HOJAS.sqf)
+// ======================================================
+// Función para verificar si es una palmera
+isPalmTree = {
+    params ["_tree"];
+    private _isPalm = false;
+    private _modelName = getText(configFile >> "CfgVehicles" >> typeOf _tree >> "model");
+    private _className = typeOf _tree;
+    
+    if (_modelName find "palm" > -1 || 
+        _modelName find "Palm" > -1 || 
+        _modelName find "PALM" > -1 ||
+        _className find "palm" > -1 ||
+        _className find "Palm" > -1 ||
+        _className find "PALM" > -1) then {
+        _isPalm = true;
+    };
+    
+    _isPalm
+};
+
+// ======================================================
+// SISTEMA PRINCIPAL DE PARTÍCULAS
+// ======================================================
+[] spawn {
+    private ["_dustPS", "_dustActive", "_dustLevel", "_pos", "_inHouse", 
+             "_urbanObjs", "_inTown", "_drop", "_nearTrees", "_inForest",
+             "_treeObjects", "_processedTrees", "_sizeVariation", "_selectedColor"];
+    
+    _dustPS = objNull;
+    _dustActive = false;
+    _dustLevel = 0;
+    
+    // Array de colores regulares (para interiores y zonas urbanas)
+    private _regularColors = [
+        // Blanco
+        [
+            [1.0, 1.0, 1.0, 0],
+            [1.0, 1.0, 1.0, 0.8],
+            [1.0, 1.0, 1.0, 0]
+        ],
+        // Café claro
+        [
+            [0.8, 0.6, 0.4, 0],
+            [0.8, 0.6, 0.4, 0.8],
+            [0.8, 0.6, 0.4, 0]
+        ],
+        // Café oscuro
+        [
+            [0.4, 0.3, 0.2, 0],
+            [0.4, 0.3, 0.2, 0.8],
+            [0.4, 0.3, 0.2, 0]
+        ],
+        // Gris
+        [
+            [0.5, 0.5, 0.5, 0],
+            [0.5, 0.5, 0.5, 0.8],
+            [0.5, 0.5, 0.5, 0]
+        ]
+    ];
+    
+    // Array de colores SOLO para bosques (más brillantes)
+    private _forestColors = [
+        // Blanco brillante
+        [
+            [1.0, 1.0, 1.0, 0],
+            [1.0, 1.0, 1.0, 1.0],  // Mayor alfa para más brillo
+            [1.0, 1.0, 1.0, 0]
+        ],
+        // Amarillo
+        [
+            [1.0, 0.9, 0.2, 0],
+            [1.0, 0.9, 0.2, 1.0],  // Amarillo brillante
+            [1.0, 0.9, 0.2, 0]
+        ],
+        // Verde
+        [
+            [0.3, 0.8, 0.2, 0],
+            [0.3, 0.8, 0.2, 1.0],  // Verde brillante
+            [0.3, 0.8, 0.2, 0]
+        ],
+        // Café oscuro
+        [
+            [0.4, 0.3, 0.2, 0],
+            [0.4, 0.3, 0.2, 1.0],  // Mayor alfa para más brillo
+            [0.4, 0.3, 0.2, 0]
+        ]
+    ];
+
+    while {true} do {
+        sleep 1;
+
+        _pos = getPosATL player;
+        _inHouse = count (player nearObjects ["House", 8]) > 0;
+
+        // ======================================================
+        // DETECCIÓN DE BOSQUE MEJORADA (basada en HOJAS.sqf)
+        // ======================================================
+        // Método 1: Usar nearestTerrainObjects (como en el script HOJAS)
+        _nearTrees = nearestTerrainObjects [_pos, ["Tree"], 30, false];
+        
+        // Método 2: Buscar objetos específicamente de tipo árbol
+        _treeObjects = nearestObjects [_pos, ["Land_TreeBin_F", "Land_Tree_01_F", "Land_Tree_02_F", 
+                                            "Land_Tree_03_F", "Land_Tree_04_F", "Land_Tree_05_F", 
+                                            "Land_Woods_Pine_Tall", "Land_Woods_Tree_Birch", "Land_Woods_Tree_Pine"], 30];
+        
+        // También verificar si hay árboles no-palmeras
+        _processedTrees = [];
+        {
+            if (!([_x] call isPalmTree)) then {
+                _processedTrees pushBack _x;
+            };
+        } forEach (_nearTrees + _treeObjects);
+        
+        // MODIFICADO: Cambio en la detección de bosques - ahora requiere al menos 3 árboles
+        _inForest = (count _processedTrees) >= 3;
+        
+        // Determinar entorno urbano
+        _urbanObjs = player nearObjects ["Building", 10];
+        _inTown = {!(_x isKindOf "House")} count _urbanObjs > 4;
+
+        // Determinar nivel de polvo
+        _dustLevel = if (_inForest) then {2} else {
+            if (_inHouse) then {1} else {
+                if (_inTown) then {1} else {0};
+            }
+        };
+
+        // Activar efecto si aplica
+        if (_dustLevel > 0 && !_dustActive) then {
+            _dustActive = true;
+
+            _drop = switch (_dustLevel) do {
+                case 1: {0.09};  // mínimo
+                case 2: {10.00}; // denso en bosque
+                default {0.05};
+            };
+
+            _dustPS = "#particlesource" createVehicleLocal _pos;
+            _dustPS setParticleCircle [0,[0,0,0]];
+            
+            // Configuración de aleatoriedad
+            _dustPS setParticleRandom [
+                5,                      // tiempo de vida
+                [1,1,3],                // posición
+                [0,0,0],                // velocidad
+                0,                      // rotación
+                0.005,                  // peso
+                [0,0,0,0.3],            // color (alpha)
+                0.2,                    // dirección
+                0.02                    // tamaño
+            ];
+            
+            // Seleccionar color y tamaño según el entorno
+            if (_inForest) then {
+                // BOSQUE: colores específicos, partículas más pequeñas y brillantes
+                _selectedColor = selectRandom _forestColors;
+                _sizeVariation = random [0.005, 0.008, 0.010]; // Más pequeñas que las de casa
+            } else {
+                // Interior/Urbano: colores regulares
+                _selectedColor = selectRandom _regularColors;
+                _sizeVariation = random [0.007, 0.01, 0.015];
+            };
+            
+            _dustPS setParticleParams [
+                ["\A3\data_f\kouleSvetlo",1,0,1], "", "Billboard",
+                1, 10, [0,0,2], [0,0,0],
+                0, 10.08, 7.9, 0,
+                [_sizeVariation * 0.8, _sizeVariation, _sizeVariation * 0.8],  // Tamaño variable
+                _selectedColor,  // Color seleccionado según entorno
+                [0.08], 0.5, 0.01, "", "", player
+            ];
+            
+            _dustPS setDropInterval _drop;
+            
+            // Asegurar que las partículas sigan al jugador
+            [_dustPS] spawn {
+                private ["_ps"];
+                params ["_ps"];
+                while {!isNull _ps} do {
+                    _ps setPosATL (getPosATL player);
+                    sleep 0.5;
+                };
+            };
+        };
+
+        // Desactivar si se sale de zona válida
+        if (_dustLevel == 0 && _dustActive) then {
+            _dustActive = false;
+            if (!isNull _dustPS) then { deleteVehicle _dustPS; };
+        };
+    };
+};
+
+/*
+    Script: efectos_viento_optimizado.sqf
+    Descripción: Efecto ambiental de viento periódico optimizado para rendimiento
+    Original por ALIAS, adaptado por Buchedegatitoyo
+    Fecha: 2025-05-16
+*/
+
+// CONFIGURACIÓN - MODIFICA ESTOS VALORES PARA AJUSTAR INTENSIDAD
+// ============================================================
+VIENTO_INTENSIDAD = 0.1;     // [AJUSTAR] Velocidad del viento (1=bajo, 5=fuerte)
+POLVO_INTENSIDAD = 0.0015;    // [AJUSTAR] Visibilidad del polvo (0.02=sutil, 0.2=intenso)
+HOJAS_CANTIDAD = 0.8;      // [AJUSTAR] Densidad de hojas (0.05=pocas, 0.01=muchas)
+HOJAS_VELOCIDAD = 1.0;       // [AJUSTAR] Velocidad de hojas (0.8=lento, 2.5=rápido)
+
+// CONFIGURACIÓN TEMPORAL - INTERVALOS DE APARICIÓN
+// ============================================================
+TIEMPO_ACTIVACION = 15;      // Duración de cada ráfaga de viento (en segundos)
+INTERVALO_PRINCIPAL = 150;   // Cada cuánto aparecen las ráfagas (15 min = 900 segundos)
+REPETICIONES_POR_CICLO = 6;  // Número de ráfagas seguidas
+INTERVALO_ENTRE_RAFAGAS = 10; // Segundos entre cada ráfaga del mismo ciclo
+
+// OPTIMIZACIÓN DE RENDIMIENTO
+// ============================================================
+DISTANCIA_MAXIMA = 50;      // [RENDIMIENTO] Máxima distancia a la que se ven efectos (metros)
+MODO_RENDIMIENTO = true;     // [RENDIMIENTO] Activar modo de rendimiento optimizado
+USAR_MENSAJES = true;        // [RENDIMIENTO] Mostrar mensajes de sistema (desactivar para FPS)
+// ============================================================
+
+// No modificar desde aquí
+if (!hasInterface) exitWith {};
+
+// Función para detectar si estás dentro de edificio (por Killzone Kid)
+KK_fnc_inHouse = {
+    _house = lineIntersectsSurfaces [getPosWorld _this, getPosWorld _this vectorAdd [0, 0, 50], _this, objNull, true, 1, "GEOM", "NONE"];
+    if (count _house == 0) exitWith {false};
+    if (((_house select 0) select 3) isKindOf "house") exitWith {true};
+    false
+};
+
+// Función principal de efectos de viento (optimizada)
+fnc_crear_efectos_viento = {
+    // Comprobar rendimiento actual
+    if (MODO_RENDIMIENTO && diag_fps < 20) exitWith {
+        if (USAR_MENSAJES) then {systemChat ""};
+    };
+    
+    // Comprobar si el jugador está dentro de un edificio
+    _en_interior = player call KK_fnc_inHouse;
+    
+    // Solo crear efectos si está en exterior
+    if (!_en_interior) then {
+        // Color y alpha del polvo
+        _color = [1.0, 0.9, 0.8];
+        _alpha = POLVO_INTENSIDAD;
+        
+        // Vector de velocidad del viento 
+        _velocidad_viento = [VIENTO_INTENSIDAD, VIENTO_INTENSIDAD * 0.2, 0];
+        
+        // Determinar nivel de detalle según FPS
+        _fps_actual = diag_fps;
+        _factor_optimizacion = 1;
+        
+        // Ajustar detalle según FPS
+        if (_fps_actual < 30) then {_factor_optimizacion = 0.5};
+        if (_fps_actual < 20) then {_factor_optimizacion = 0.3};
+        
+        // EFECTO 1: POLVO (OPTIMIZADO)
+        // ====================
+        _dust_particles = "#particlesource" createVehiclelocal (getPos player);
+        if (vehicle player != player) then {
+            _dust_particles attachto [vehicle player, [0, -10, 0]];
+        } else {
+            _dust_particles attachto [player, [0, -10, 0]];
+        };
+        
+        _dust_particles setParticleCircle [15, [0, 0, 0]];
+        _dust_particles setParticleRandom [3, [5, 5, 0], [0, 0, 0], 1, 0, [0, 0, 0, 0.01], 0, 0];
+        _dust_particles setParticleParams [
+            ["\A3\data_f\cl_basic", 1, 0, 1], 
+            "", 
+            "Billboard", 
+            1, 
+            5, 
+            [0, 0, 0], 
+            _velocidad_viento, 
+            13, 
+            10, 
+            8, 
+            1, 
+            [2, 6, 10], 
+            [_color + [0], _color + [_alpha], _color + [0]], 
+            [0.08], 
+            1, 
+            0, 
+            "", 
+            "", 
+            vehicle player
+        ];
+        // Ajustar cantidad de partículas según rendimiento
+        _dust_particles setDropInterval (0.01 / _factor_optimizacion);
+        
+        // Limitar distancia para optimizar rendimiento
+        _dust_particles setParticleParams [
+            ["\A3\data_f\cl_basic", 1, 0, 1],
+            "",
+            "Billboard",
+            1,
+            5,
+            [0, 0, 0],
+            _velocidad_viento,
+            13,
+            10,
+            8,
+            1,
+            [2, 6, 10],
+            [_color + [0], _color + [_alpha], _color + [0]],
+            [0.08],
+            1,
+            0,
+            "",
+            "",
+            vehicle player,
+            DISTANCIA_MAXIMA      // Añadir límite de distancia para rendimiento
+        ];
+        
+        // EFECTO 2: HOJAS (SOLO SI FPS SUFICIENTES)
+        // ====================
+        _leaves_particles = objNull;
+        if (_fps_actual > 25) then {
+            _leaves_particles = "#particlesource" createVehicleLocal (getpos player);
+            if (vehicle player != player) then {
+                _leaves_particles attachto [vehicle player, [0, 0, 5]];
+            } else {
+                _leaves_particles attachto [player, [0, 0, 5]];
+            };
+            
+            _leaves_particles setParticleCircle [15, [1, 1, 0]];
+            _leaves_particles setParticleRandom [
+                0, 
+                [10, 10, 3], 
+                [
+                    -(_velocidad_viento select 1) * HOJAS_VELOCIDAD,
+                    -(_velocidad_viento select 0) * HOJAS_VELOCIDAD,
+                    0
+                ], 
+                0.2, 
+                0.01, 
+                [0, 0, 0, 0.1], 
+                0.5, 
+                0.5
+            ];
+            _leaves_particles setParticleParams [
+                ["\A3\data_f\ParticleEffects\Hit_Leaves\Leaves_Green.p3d", 1, 0, 1],
+                "",
+                "SpaceObject",
+                1,
+                7,
+                [0, 0, 2],
+                [
+                    (_velocidad_viento select 1) * HOJAS_VELOCIDAD,
+                    (_velocidad_viento select 0) * HOJAS_VELOCIDAD,
+                    0
+                ],
+                7,
+                0.15,
+                0.1,
+                1,
+                [1 + random 1],
+                [[0.68, 0.68, 0.68, 1]],
+                [0, 1],
+                0.2,
+                1.2,
+                "",
+                "",
+                vehicle player,
+                DISTANCIA_MAXIMA      // Añadir límite de distancia para rendimiento
+            ];
+            // Reducir cantidad de hojas para mejorar rendimiento
+            _leaves_particles setDropInterval (HOJAS_CANTIDAD / _factor_optimizacion);
+        };
+        
+        // Guardar partículas en variables públicas para limpiarlas después
+        player setVariable ["efectos_viento_polvo", _dust_particles];
+        player setVariable ["efectos_viento_hojas", _leaves_particles];
+        
+        // Avisar al jugador (opcional)
+        if (USAR_MENSAJES) then {systemChat ""};
+    };
+};
+
+// Función para limpiar efectos anteriores
+fnc_limpiar_efectos_viento = {
+    // Eliminar polvo si existe
+    _dust_old = player getVariable ["efectos_viento_polvo", objNull];
+    if (!isNull _dust_old) then {
+        deleteVehicle _dust_old;
+    };
+    
+    // Eliminar hojas si existen
+    _leaves_old = player getVariable ["efectos_viento_hojas", objNull];
+    if (!isNull _leaves_old) then {
+        deleteVehicle _leaves_old;
+    };
+};
+
+// Función para activar una secuencia de ráfagas de viento
+fnc_ciclo_rafagas = {
+    // Repetir la cantidad especificada de ráfagas por ciclo
+    for "_i" from 1 to REPETICIONES_POR_CICLO do {
+        // Crear efectos
+        call fnc_crear_efectos_viento;
+        
+        // Mantener efectos durante el tiempo especificado
+        sleep TIEMPO_ACTIVACION;
+        
+        // Limpiar efectos
+        call fnc_limpiar_efectos_viento;
+        
+        // Avisar del fin de la ráfaga (opcional)
+        if (USAR_MENSAJES) then {systemChat ""};
+        
+        // Si no es la última ráfaga del ciclo, esperar antes de la siguiente
+        if (_i < REPETICIONES_POR_CICLO) then {
+            sleep INTERVALO_ENTRE_RAFAGAS;
+        };
+    };
+};
+
+// Inicializar sistema de ráfagas periódicas
+[] spawn {
+    waitUntil {!isNull player};
+    sleep 3; // Esperar un poco para que todo cargue
+    
+    // Mostrar al inicio para pruebas (una única ráfaga)
+    if (USAR_MENSAJES) then {
+        systemChat "";
+        systemChat "";
+    };
+    
+    // Crear ráfaga inicial de prueba
+    call fnc_crear_efectos_viento;
+    sleep TIEMPO_ACTIVACION;
+    call fnc_limpiar_efectos_viento;
+    
+    if (USAR_MENSAJES) then {
+        systemChat "";
+    };
+    
+    // Bucle principal (cada 15 minutos = 900 segundos)
+    while {true} do {
+        // Esperar hasta el próximo ciclo
+        sleep INTERVALO_PRINCIPAL;
+        
+        // Ejecutar un ciclo completo de ráfagas
+        call fnc_ciclo_rafagas;
+        
+        // Avisar del próximo ciclo
+        if (USAR_MENSAJES) then {
+            systemChat format [];
+        };
+    };
+};
+
+/*
+    Script: fn_WaterEffects_v2.sqf
+    Autor: Reescrito por Copilot para Buchedegatito
+    Fecha: 2025-05-18
+    
+    Descripción:
+    Sistema mejorado de efectos de agua con olas, brillos, y algas marinas.
+    - Algas marinas corregidas para que no floten en el aire
+    - Sin rocas cerca de la costa (solo en aguas profundas a +20m de costa)
+    - Burbujas reducidas en intensidad (excepto en impactos)
+*/
+
+// ---- CONFIGURACIÓN ----
+WE_enabled = true;               // Activar/desactivar todo el sistema
+WE_maxDistance = 350;            // Distancia máxima para efectos
+WE_maxEffects = 10;              // Número máximo de efectos de agua activos
+WE_maxSeaweed = 10;              // Número máximo de algas marinas
+WE_minSeaweedDepth = 3;          // Profundidad mínima para algas marinas
+WE_maxSeaweedDepth = 10;         // Profundidad máxima para algas marinas
+WE_minCoastDistance = 20;        // Distancia mínima a la costa para algas/rocas
+WE_updateRate = 8;               // Frecuencia de actualización (segundos)
+WE_waveIntensity = 1.2;          // Intensidad de olas (0.5-2)
+WE_reflectionQuality = 3;        // Calidad de reflejos (1-3)
+WE_bubbleReduction = 10;         // Factor de reducción de burbujas normales
+WE_debug = false;                // Modo debug (mensajes adicionales)
+
+// ---- VARIABLES INTERNAS ----
+WE_waterPoints = [];             // Puntos de agua detectados
+WE_activeEffects = [];           // Efectos de agua activos
+WE_activeSeaweed = [];           // Algas marinas activas
+WE_defaultTerrainGrid = 25;      // Valor por defecto
+WE_defaultViewDist = 1000;       // Valor por defecto
+
+// ---- FUNCIÓN DE DISTANCIA A COSTA ----
+WE_fnc_distanceToShore = {
+    params ["_pos"];
+    
+    private _distance = 0;
+    private _found = false;
+    
+    // Buscar en 8 direcciones para encontrar tierra
+    for "_dir" from 0 to 315 step 45 do {
+        for "_dist" from 5 to 300 step 5 do {
+            private _checkPos = _pos getPos [_dist, _dir];
+            _checkPos set [2, 0];
+            
+            if (!surfaceIsWater _checkPos) exitWith {
+                if (_dist < _distance || !_found) then {
+                    _distance = _dist;
+                    _found = true;
+                };
+            };
+        };
+    };
+    
+    _distance
+};
+
+// ---- INICIALIZACIÓN DEL SISTEMA ----
+WE_fnc_initialize = {
+    if (WE_debug) then {
+        systemChat "Sistema de efectos de agua: Inicializando...";
+    };
+    
+    // Guardar configuración original
+    WE_defaultTerrainGrid = getTerrainGrid;
+    private _objectViewDistance = getObjectViewDistance;
+    WE_defaultViewDist = _objectViewDistance select 1;
+    
+    // Iniciar bucle principal
+    [] spawn WE_fnc_mainLoop;
+    
+    if (WE_debug) then {
+        systemChat "Sistema de efectos de agua: Inicializado correctamente";
+    };
+    
+    true
+};
+
+// ---- BUCLE PRINCIPAL ----
+WE_fnc_mainLoop = {
+    while {WE_enabled} do {
+        if (!isNull player) then {
+            // Limpiar efectos antiguos
+            [WE_maxDistance * 1.1] call WE_fnc_cleanupEffects;
+            
+            // Buscar agua cercana
+            private _waterFound = [player, WE_maxDistance] call WE_fnc_findWater;
+            
+            // Mejorar configuración visual si hay agua cerca
+            if (_waterFound) then {
+                [true] call WE_fnc_adjustVisuals;
+            } else {
+                [false] call WE_fnc_adjustVisuals;
+            };
+        };
+        
+        sleep WE_updateRate;
+    };
+};
+
+// ---- BUSCAR AGUA ----
+WE_fnc_findWater = {
+    params ["_unit", "_maxDist"];
+    
+    private _unitPos = getPosASL _unit;
+    private _waterFound = false;
+    private _waterPoints = [];
+    
+    // Buscar agua en 8 direcciones
+    for "_dir" from 0 to 315 step 45 do {
+        for "_dist" from 50 to _maxDist step 50 do {
+            private _checkPos = _unitPos getPos [_dist, _dir];
+            _checkPos set [2, 0];
+            
+            if (surfaceIsWater _checkPos) then {
+                // Verificar profundidad
+                private _depth = abs (getTerrainHeightASL _checkPos);
+                // Verificar distancia a la costa
+                private _shoreDistance = [_checkPos] call WE_fnc_distanceToShore;
+                
+                // Verificar si está demasiado cerca de otros puntos
+                private _tooClose = false;
+                {
+                    if (_checkPos distance _x < 40) exitWith {
+                        _tooClose = true;
+                    };
+                } forEach _waterPoints;
+                
+                // Añadir punto si no está demasiado cerca
+                if (!_tooClose) then {
+                    _waterPoints pushBack _checkPos;
+                    _waterFound = true;
+                    
+                    // Crear efectos si hay espacio
+                    if (count WE_activeEffects < WE_maxEffects) then {
+                        [_checkPos, _depth, _shoreDistance] spawn WE_fnc_createWaterEffect;
+                    };
+                    
+                    // Crear algas si hay espacio y están a distancia segura de la costa
+                    if (count WE_activeSeaweed < WE_maxSeaweed) then {
+                        if (_depth >= WE_minSeaweedDepth && _depth <= WE_maxSeaweedDepth && _shoreDistance >= WE_minCoastDistance) then {
+                            [_checkPos, _depth, _shoreDistance] spawn WE_fnc_createSeaweed;
+                        };
+                    };
+                };
+            };
+            
+            // Salir si ya tenemos suficientes puntos
+            if (count _waterPoints >= WE_maxEffects) exitWith {};
+        };
+        
+        // Salir si ya tenemos suficientes puntos
+        if (count _waterPoints >= WE_maxEffects) exitWith {};
+    };
+    
+    WE_waterPoints = _waterPoints;
+    
+    _waterFound
+};
+
+// ---- CREAR EFECTOS DE AGUA ----
+WE_fnc_createWaterEffect = {
+    params ["_pos", "_depth", "_shoreDistance"];
+    
+    // Verificar si ya hay efectos cerca
+    private _nearby = false;
+    {
+        if (!isNull _x && _pos distance _x < 35) exitWith {
+            _nearby = true;
+        };
+    } forEach WE_activeEffects;
+    
+    if (_nearby) exitWith {false};
+    
+    // Crear objeto base
+    private _effectBase = "Land_HelipadEmpty_F" createVehicleLocal _pos;
+    _effectBase setPosASL _pos;
+    
+    WE_activeEffects pushBack _effectBase;
+    
+    // Olas
+    private _waves = "#particlesource" createVehicleLocal _pos;
+    _waves attachTo [_effectBase, [0, 0, 0]];
+    
+    _waves setParticleCircle [25, [15, 15, 0]];
+    _waves setParticleRandom [0, [8, 8, 0.2], [0.5, 0.5, 0], 0, 0.25, [0, 0, 0, 0], 0, 0];
+    _waves setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Refract.p3d", 1, 0, 1],
+        "",
+        "Billboard",
+        1,
+        12,
+        [0, 0, 0],
+        [0, 0, 0.7],
+        1, 1.275, 1, 0,
+        [1.5, 3, 1.5],
+        [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 0]],
+        [0.7, 0.2, 0],
+        1,
+        0,
+        "",
+        "",
+        _waves
+    ];
+    _waves setDropInterval (0.1 / WE_waveIntensity);
+    
+    // Brillos - REDUCIDOS SIGNIFICATIVAMENTE
+    private _sparkle = "#particlesource" createVehicleLocal _pos;
+    _sparkle attachTo [_effectBase, [0, 0, 0.1]];
+    
+    _sparkle setParticleCircle [5, [2, 2, 0]]; // Radio reducido
+    _sparkle setParticleRandom [1, [5, 5, 0.1], [0.1, 0.1, 0], 0, 0.25, [0, 0, 0, 0], 0, 0];
+    _sparkle setParticleParams [
+        ["\A3\data_f\penetration\water_splash.p3d", 1, 0, 1],
+        "",
+        "Billboard",
+        1,
+        4,
+        [0, 0, 0],
+        [0, 0, 0],
+        0, 10, 7.9, 0,
+        [0.05, 0.10, 0.05], // Tamaño reducido
+        [[1, 1, 1, 1], [1, 1, 1, 0.7], [1, 1, 1, 0]],
+        [0.1, 0.09, 0.08],
+        1,
+        0,
+        "",
+        "",
+        _sparkle
+    ];
+    // Intervalo dramáticamente aumentado = muchas menos partículas
+    _sparkle setDropInterval (0.5 / WE_reflectionQuality * WE_bubbleReduction);
+    
+    // Niebla para aguas profundas, solo lejos de la costa
+    private _mist = objNull;
+    if (_depth > 3 && _shoreDistance >= WE_minCoastDistance) then {
+        _mist = "#particlesource" createVehicleLocal _pos;
+        _mist attachTo [_effectBase, [0, 0, 0.15]];
+        
+        _mist setParticleCircle [15, [12, 12, 0]];
+        _mist setParticleRandom [1, [12, 12, 0], [0.5, 0.5, 0], 0, 0.1, [0, 0, 0, 0], 0, 0];
+        _mist setParticleParams [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 8, 1],
+            "",
+            "Billboard",
+            1,
+            20,
+            [0, 0, 0],
+            [0, 0, 0],
+            0, 10, 7.9, 0,
+            [3, 5, 7],
+            [[1, 1, 1, 0], [1, 1, 1, 0.03], [1, 1, 1, 0]],
+            [0.5],
+            1,
+            0,
+            "",
+            "",
+            _mist
+        ];
+        _mist setDropInterval 0.15;
+    };
+    
+    // Guardar referencias
+    _effectBase setVariable ["waves", _waves];
+    _effectBase setVariable ["sparkle", _sparkle];
+    if (!isNull _mist) then {
+        _effectBase setVariable ["mist", _mist];
+    };
+    
+    // Efectos de orilla para aguas poco profundas - solo si estamos muy cerca de la orilla
+    if (_depth < 2 && _shoreDistance < 15) then {
+        private _shore = "#particlesource" createVehicleLocal _pos;
+        _shore attachTo [_effectBase, [1, 1, 1]];
+        
+        _shore setParticleCircle [18, [3, 3, 0]];
+        _shore setParticleRandom [12, [3, 3, 0], [0.35, 0.35, 0], 0, 0.5, [0, 0, 0, 0], 0, 0];
+        _shore setParticleParams [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 14, 2, 1],
+            "",
+            "Billboard",
+            1,
+            4,
+            [0, 0, 0],
+            [0, 0, 0],
+            1,
+            10,
+            7.9,
+            0,
+            [0.7, 1.2],
+            [[1, 1, 1, 0], [1, 1, 1, 0.4], [1, 1, 1, 0]],
+            [0.1],
+            1,
+            0,
+            "",
+            "",
+            _shore
+        ];
+        _shore setDropInterval 0.08;
+        
+        _effectBase setVariable ["shore", _shore];
+        
+        // Limpiar después de un tiempo
+        [_shore, _effectBase] spawn {
+            params ["_effect", "_base"];
+            sleep 25;
+            if (!isNull _effect && !isNull _base) then {
+                deleteVehicle _effect;
+            };
+        };
+    };
+    
+    // Monitorear distancia para limpieza
+    [_effectBase] spawn {
+        params ["_base"];
+        while {WE_enabled && !isNull _base} do {
+            if (isNull player || player distance _base > WE_maxDistance * 1.1) exitWith {
+                [_base] call WE_fnc_removeWaterEffect;
+            };
+            sleep 5;
+        };
+    };
+    
+    true
+};
+
+// ---- CREAR ALGAS MARINAS ----
+WE_fnc_createSeaweed = {
+    params ["_pos", "_depth", "_shoreDistance"];
+    
+    // Verificar si hay algas cercanas
+    private _nearby = false;
+    {
+        if (!isNull _x && _pos distance _x < 30) exitWith {
+            _nearby = true;
+        };
+    } forEach WE_activeSeaweed;
+    
+    if (_nearby || count WE_activeSeaweed >= WE_maxSeaweed) exitWith {false};
+    
+    // Solo crear en aguas con profundidad adecuada y alejadas de la costa
+    if (_depth < WE_minSeaweedDepth || _depth > WE_maxSeaweedDepth || _shoreDistance < WE_minCoastDistance) exitWith {false};
+    
+    // Crear objeto base - CORRECCIÓN: usar TerrainHeight para posición correcta
+    private _waterLevel = getTerrainHeightASL _pos;
+    private _seaweedPos = +_pos; // Crear copia para no modificar el original
+    _seaweedPos set [2, _waterLevel]; // Fijar al fondo marino
+    
+    private _seaweedBase = "Land_HelipadEmpty_F" createVehicleLocal _seaweedPos;
+    _seaweedBase setPosASL _seaweedPos;
+    
+    WE_activeSeaweed pushBack _seaweedBase;
+    
+    // Crear múltiples algas
+    private _allSeaweed = [];
+    private _count = 2 + floor random 3; // 3-5 algas
+    
+    for "_i" from 1 to _count do {
+        private _seaweed = "#particlesource" createVehicleLocal _seaweedPos;
+        _seaweed attachTo [_seaweedBase, [random [-3, 0, 3], random [-3, 0, 3], 0]];
+        
+        // Tipos de algas disponibles
+        private _types = [
+            "\A3\plants_f\Plant\b_Neriumo2s_F.p3d",
+            "\A3\plants_f\Plant\b_FicusC1s_F.p3d",
+            "\A3\plants_f\Bush\b_ArundoD2s_F.p3d"
+        ];
+        
+        private _type = selectRandom _types;
+        private _size = linearConversion [1, 10, _depth, 0.5, 2.5, true];
+        
+        _seaweed setParticleParams [
+            [_type, 1, 0, 1],
+            "",
+            "SpaceObject",
+            1,
+            100,
+            [0, 0, 0],
+            [0, 0, 0.005], // Velocidad vertical muy reducida
+            0,
+            10,
+            7.9,
+            0.05, // Menos aerodinámica
+            [_size],
+            [[0.7, 0.9, 0.6, 1]],
+            [0],
+            0.1, // Menor rotación
+            0.05, // Menor columpio
+            "",
+            "",
+            _seaweed
+        ];
+        
+        _seaweed setParticleRandom [
+            2,
+            [0.25, 0.25, 0], // Sin posición aleatoria en vertical
+            [0.05, 0.05, 0.01], // Velocidad vertical mínima
+            0,
+            0.1, // Menos rotación aleatoria
+            [0, 0, 0, 0],
+            0.05,
+            0
+        ];
+        
+        _seaweed setDropInterval 100;
+        _allSeaweed pushBack _seaweed;
+    };
+    
+    // Guardar referencias
+    _seaweedBase setVariable ["plants", _allSeaweed];
+    
+    // Monitorear distancia para limpieza
+    [_seaweedBase] spawn {
+        params ["_base"];
+        while {WE_enabled && !isNull _base} do {
+            if (isNull player || player distance _base > WE_maxDistance * 1.1) exitWith {
+                [_base] call WE_fnc_removeSeaweed;
+            };
+            sleep 10;
+        };
+    };
+    
+    true
+};
+
+// ---- AJUSTAR VISUALES ----
+WE_fnc_adjustVisuals = {
+    params ["_enhance"];
+    
+    if (_enhance) then {
+        setObjectViewDistance [getObjectViewDistance select 0, 1500];
+        setTerrainGrid 3.125;
+    } else {
+        setObjectViewDistance [getObjectViewDistance select 0, WE_defaultViewDist];
+        setTerrainGrid WE_defaultTerrainGrid;
+    };
+};
+
+// ---- LIMPIAR EFECTOS ANTIGUOS ----
+WE_fnc_cleanupEffects = {
+    params ["_maxDist"];
+    
+    // Limpiar efectos de agua fuera de rango
+    {
+        if (!isNull _x) then {
+            if (isNull player || player distance _x > _maxDist) then {
+                [_x] call WE_fnc_removeWaterEffect;
+            };
+        };
+    } forEach (WE_activeEffects select {!isNull _x});
+    
+    // Limpiar algas fuera de rango
+    {
+        if (!isNull _x) then {
+            if (isNull player || player distance _x > _maxDist) then {
+                [_x] call WE_fnc_removeSeaweed;
+            };
+        };
+    } forEach (WE_activeSeaweed select {!isNull _x});
+};
+
+// ---- ELIMINAR EFECTO DE AGUA ----
+WE_fnc_removeWaterEffect = {
+    params ["_base"];
+    
+    if (isNull _base) exitWith {};
+    
+    // Eliminar efectos de partículas
+    {
+        private _effect = _base getVariable [_x, objNull];
+        if (!isNull _effect) then {
+            deleteVehicle _effect;
+        };
+    } forEach ["waves", "sparkle", "mist", "shore"];
+    
+    // Eliminar de la lista
+    WE_activeEffects = WE_activeEffects - [_base];
+    
+    // Eliminar objeto base
+    deleteVehicle _base;
+};
+
+// ---- ELIMINAR ALGAS MARINAS ----
+WE_fnc_removeSeaweed = {
+    params ["_base"];
+    
+    if (isNull _base) exitWith {};
+    
+    // Eliminar plantas
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach (_base getVariable ["plants", []]);
+    
+    // Eliminar de la lista
+    WE_activeSeaweed = WE_activeSeaweed - [_base];
+    
+    // Eliminar objeto base
+    deleteVehicle _base;
+};
+
+// ---- MEJORAS DE SALPICADURAS ----
+WE_fnc_enhanceSplash = {
+    params ["_object"];
+    
+    if (isNull _object) exitWith {};
+    
+    private _inWater = surfaceIsWater (getPosASL _object);
+    if (!_inWater) exitWith {};
+    
+    private _velocity = velocityModelSpace _object;
+    private _speed = vectorMagnitude _velocity;
+    
+    if (_speed < 2) exitWith {};
+    
+    private _pos = getPosASL _object;
+    _pos set [2, 0];
+    
+    // Salpicadura principal - INTENSIDAD ALTA SOLO PARA IMPACTOS
+    private _splash = "#particlesource" createVehicleLocal _pos;
+    _splash setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 6, 1],
+        "",
+        "Billboard",
+        1,
+        2.0,
+        [0, 0, 0],
+        [0, 0, _speed * 0.7],
+        0,
+        10,
+        7.9,
+        0,
+        [1.5, 3 * (_speed * 0.15), 6 * (_speed * 0.15)],
+        [[1, 1, 1, 0.8], [1, 1, 1, 0.5], [1, 1, 1, 0]],
+        [0.1],
+        1,
+        0,
+        "",
+        "",
+        _splash
+    ];
+    _splash setParticleRandom [0, [1.5, 1.5, 0], [_speed * 0.3, _speed * 0.3, 0], 0, 0, [0, 0, 0, 0], 0, 0];
+    _splash setDropInterval 0.003; // Muchas partículas para impacto
+    
+    // Burbujas - APROXIMADAMENTE 10 BURBUJAS PARA IMPACTOS
+    private _bubbles = "#particlesource" createVehicleLocal _pos;
+    _bubbles setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 2, 1],
+        "",
+        "Billboard",
+        1,
+        2.0,
+        [0, 0, 0],
+        [0, 0, _speed * 0.5],
+        0,
+        10,
+        7.9,
+        0,
+        [0.1, 0.2, 0.1],
+        [[1, 1, 1, 1], [1, 1, 1, 0.5], [1, 1, 1, 0]],
+        [0.08],
+        1,
+        0,
+        "",
+        "",
+        _bubbles
+    ];
+    _bubbles setParticleRandom [0, [0.5, 0.5, 0], [_speed * 0.2, _speed * 0.2, _speed * 0.2], 0, 0.05, [0, 0, 0, 0], 0, 0];
+    _bubbles setDropInterval 0.2; // Interval calculado para ~10 burbujas
+    
+    // Ondas concéntricas
+    private _ripples = "#particlesource" createVehicleLocal _pos;
+    _ripples setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 1],
+        "",
+        "Billboard",
+        1,
+        4.0,
+        [0, 0, 0],
+        [0, 0, 0],
+        0,
+        10,
+        7.9,
+        0,
+        [1, _speed * 1.5],
+        [[1, 1, 1, 1], [1, 1, 1, 0]],
+        [0.1],
+        1,
+        0,
+        "",
+        "",
+        _ripples
+    ];
+    _ripples setParticleRandom [0, [0.5, 0.5, 0], [0.1, 0.1, 0], 0, 0.5, [0, 0, 0, 0], 0, 0];
+    _ripples setDropInterval 0.05;
+    
+    // Limpiar después de un tiempo
+    [_splash, _bubbles, _ripples] spawn {
+        params ["_s", "_b", "_r"];
+        sleep 2.5;
+        {
+            if (!isNull _x) then {
+                deleteVehicle _x;
+            };
+        } forEach [_s, _b, _r];
+    };
+};
+
+// ---- EVENT HANDLERS ----
+WE_fnc_setupEventHandlers = {
+    // EH para detectar colisiones con agua
+    player addEventHandler ["GetInMan", {
+        params ["_unit", "_role", "_vehicle"];
+        
+        if (!isNull _vehicle) then {
+            _vehicle addEventHandler ["EpeContact", {
+                params ["_object1"];
+                [_object1] call WE_fnc_enhanceSplash;
+            }];
+        };
+    }];
+    
+    true
+};
+
+// ---- INICIAR SISTEMA ----
+[] spawn {
+    waitUntil {!isNull player && time > 1};
+    [] call WE_fnc_initialize;
+    [] call WE_fnc_setupEventHandlers;
+    systemChat "Sistema de efectos de agua: Activo";
+};
+
+/*
+    Script: LUZ.sqf
+    Descripción: Sistema combinado de efectos visuales (sol, interiores, destellos, refracción, halo, clima)
+    Versión: 4.4 (Definición correcta de dirección solar)
+    Autor: elbuchedelgatito + ChatGPT
+    Uso: [] execVM "scripts/LUZ.sqf";
+*/
+
+#define SPARKLE_CHECK_INTERVAL 0.05
+#define SPARKLE_LIFETIME 5.0
+#define SPARKLE_UPDATE_INTERVAL 0.15
+#define SPARKLE_DETECTION_RADIUS 100
+#define SPARKLE_CHANCE 2
+#define MAX_SPARKLES 300
+#define MIN_LIGHT_INTENSITY 0.0
+#define SPARKLE_SIZE_MIN 0.5
+#define SPARKLE_SIZE_MAX 1.2
+
+// Definir dirección del Sol como vector 3D
+getSunDirectionVector = {
+    private _azimuth = getSunOrMoonDirection select 0;
+    private _elevation = getSunOrMoonDirection select 1;
+
+    private _azRad = _azimuth * (pi / 180);
+    private _elRad = _elevation * (pi / 180);
+
+    [
+        cos(_elRad) * sin(_azRad),
+        cos(_elRad) * cos(_azRad),
+        sin(_elRad)
+    ]
+};
+
+if (isNil "sunLight" || {isNull sunLight}) then {
+    sunLight = "#lightpoint" createVehicleLocal [0,0,0];
+};
+
+sunLight setLightBrightness 1;
+sunLight setLightAmbient [1,1,1];
+sunLight setLightUseFlare true;
+sunLight setLightFlareSize 5;
+sunLight setLightFlareMaxDistance 2000;
+sunLight setLightDayLight true;
+
+[] spawn {
+    while {true} do {
+        private _camPos = positionCameraToWorld [0,0,0];
+        sunLight setPosASL (_camPos vectorAdd [0,0,5000]);
+        sunLight setLightBrightness sunOrMoon;
+        sleep 0.5;
+    };
+};
+
+activeSparkles = [];
+lastSparkleUpdate = 0;
+
+getWeatherInfluence = {
+    (rain + overcast + humidity) / 3
+};
+
+detectLightSources = {
+    private _playerPos = getPosATL player;
+    private _lights = [];
+
+    {
+        if (getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "light") > 0) then {
+            private _pos = getPosATL _x;
+            if (_playerPos distance _pos < SPARKLE_DETECTION_RADIUS) then {
+                _lights pushBack [_pos, 1.0];
+            };
+        };
+    } forEach (nearestObjects [_playerPos, ["All", "Thing"], SPARKLE_DETECTION_RADIUS]);
+
+    if (sunOrMoon > 0.5) then {
+        private _posSun = getPosASL sunLight;
+        _lights pushBack [_posSun, sunOrMoon * 1.5];
+    };
+
+    _lights
+};
+
+classifySurface = {
+    params ["_obj"];
+    private _type = toLower (typeOf _obj);
+
+    if (
+        _type find "metal" > -1 ||
+        _type find "metal_plate" > -1 ||
+        _type find "steel" > -1 ||
+        _type find "iron" > -1 ||
+        _type find "gridmetal" > -1 ||
+        _type find "wavymetal" > -1
+    ) exitWith {"metal"};
+
+    if (
+        _type find "glass" > -1 ||
+        _type find "glass_armored" > -1
+    ) exitWith {"glass"};
+
+    if (
+        _type find "grass" > -1 ||
+        _type find "forest" > -1 ||
+        _type find "foliage" > -1 ||
+        _type find "tree" > -1 ||
+        _type find "bush" > -1
+    ) exitWith {"vegetation"};
+
+    if (surfaceIsWater getPosASL _obj) exitWith {"water"};
+
+    if (
+        _type find "mud" > -1 ||
+        _type find "wet" > -1 ||
+        {getTerrainHeightASL getPosASL _obj < 0.2}
+    ) exitWith {"wet"};
+
+    "default"
+};
+
+createSparkles = {
+    params ["_pos", "_intensity", ["_type", "default"]];
+    private _s = "#particlesource" createVehicleLocal _pos;
+
+    private _col = switch (_type) do {
+        case "metal": { [0.8, 0.9, 1, 3 * _intensity] };
+        case "glass": { [1, 1, 1, 1.5 * _intensity] };
+        case "vegetation": { [0.2, 1, 0.2, 0.8 * _intensity] };
+        case "wet": { [1, 1, 1, 0.8 * _intensity] };
+        case "water": { [0.9, 1, 1, 0.9 * _intensity] };
+        default { [1, 1, 1, 1 * _intensity] };
+    };
+
+    private _baseSize = linearConversion [0, 1, _intensity, SPARKLE_SIZE_MIN, SPARKLE_SIZE_MAX, true];
+    private _sizes = [_baseSize * 3, _baseSize * 4, _baseSize * 1.5];
+
+    _s setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 32, 24, 16, 1], "", "Billboard", 1,
+        1.5 + random 1, [0,0,0], [random 0.4 - 0.2, random 0.4 - 0.2, 0.3 + random 0.6],
+        4, 0.2, 0.1, 0.2, _sizes, [_col, _col, [1,1,1,0]], [0.2,0.2,0.24], 0.2, 0.4, "", "", "",
+        0.7, true, 0.6
+    ];
+    _s setParticleRandom [3, [0.6,0.6,0.6], [0.4,0.4,1], 3, 0.6, [0.8,0.8,1,0.5], 0.6, 0.1];
+    _s setVariable ["createTime", time];
+    activeSparkles pushBack _s;
+};
+
+checkLOS = {
+    params ["_from", "_to"];
+    count (lineIntersectsSurfaces [_from, _to, objNull, objNull, true, 2, "VIEW", "FIRE"]) == 0;
+};
+
+manageSparkleSystem = {
+    {
+        if (time - (_x getVariable ["createTime", 0]) > SPARKLE_LIFETIME) then {
+            deleteVehicle _x;
+            activeSparkles set [_forEachIndex, objNull];
+        };
+    } forEach activeSparkles;
+    activeSparkles = activeSparkles - [objNull];
+
+    if (count activeSparkles >= MAX_SPARKLES) exitWith {};
+    if (time - lastSparkleUpdate <= SPARKLE_UPDATE_INTERVAL) exitWith {};
+
+    private _weather = call getWeatherInfluence;
+    private _sources = call detectLightSources;
+    private _playerPos = getPosATL player;
+
+    {
+        if (_x isKindOf "House" || {_x isKindOf "Tree"} || {_x isKindOf "AllVehicles"}) then {
+            private _mat = _x call classifySurface;
+            private _bb = boundingBoxReal _x;
+            private _surfaces = [_x modelToWorld (_bb select 0), _x modelToWorld (_bb select 1)];
+            {
+                private _pos = _x;
+                {
+                    _x params ["_lightPos", "_intensity"];
+                    if (_intensity > MIN_LIGHT_INTENSITY && {[_lightPos, AGLToASL _pos] call checkLOS}) then {
+                        if (random 1 < (SPARKLE_CHANCE + _weather * 0.2)) then {
+                            [_pos, _intensity, _mat] call createSparkles;
+                        };
+                    };
+                } forEach _sources;
+            } forEach _surfaces;
+        };
+    } forEach (nearestObjects [_playerPos, ["House","Tree","AllVehicles"], SPARKLE_DETECTION_RADIUS]);
+
+    lastSparkleUpdate = time;
+};
+
+
+
+[] spawn {
+    while {true} do {
+        call manageSparkleSystem;
+        sleep SPARKLE_CHECK_INTERVAL;
+    };
+};
+
+addMissionEventHandler ["Ended", {
+    { ppEffectDestroy _x; } forEach [2000];
+    { if (!isNull _x) then { deleteVehicle _x } } forEach activeSparkles;
+    activeSparkles = [];
+}];
+
+
+
+/*
+    Script: parallax_effect_simulation.sqf
+    Propósito: Simula profundidad visual mediante RadialBlur dinámico según el ángulo de la cámara.
+    Requiere: Ningún mod. Totalmente VANILLA.
+*/
+
+if (!hasInterface) exitWith {};
+
+// Crear el efecto de blur radial
+private _ppBlur = ppEffectCreate ["RadialBlur", 1987];
+_ppBlur ppEffectEnable true;
+_ppBlur ppEffectAdjust [0, 0, 0, 0];
+_ppBlur ppEffectCommit 0;
+
+// Iniciar bucle principal
+[] spawn {
+    private _ppBlur = ppEffectCreate ["RadialBlur", 1987];
+    _ppBlur ppEffectEnable true;
+    _ppBlur ppEffectAdjust [0, 0, 0, 0];
+    _ppBlur ppEffectCommit 0;
+
+    private _lastBlurX = 0;
+    private _lastBlurY = 0;
+
+    while {true} do {
+        private _dir = getCameraViewDirection player;
+        private _blurX = (_dir select 0) * 0.003;
+        private _blurY = (_dir select 1) * 0.003;
+
+        if (abs(_blurX - _lastBlurX) > 0.005 || abs(_blurY - _lastBlurY) > 0.005) then {
+            _ppBlur ppEffectAdjust [abs _blurX, abs _blurY, _blurX, _blurY];
+            _ppBlur ppEffectCommit 0.1;
+
+            _lastBlurX = _blurX;
+            _lastBlurY = _blurY;
+        };
+
+        sleep 0.01;
+    };
+};
+
