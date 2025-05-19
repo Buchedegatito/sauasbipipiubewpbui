@@ -5,6 +5,19 @@
     🎨 Descripción: Sistema optimizado para generar mobiliario en interiores automáticamente
 */
 
+// Asegurar que todas las variables necesarias existen
+if (isNil "tint_buildingCache") then { 
+    tint_buildingCache = createLocation ["NameVillage", [0,0,0], 0, 0]; 
+};
+
+// Reiniciar contador para consistencia
+tint_random_counter = 0;
+
+// Asegurar semilla consistente
+if (isNil "tint_seed") then {
+    tint_seed = 45;
+};
+
 // ⚙️ Inicialización de espacios de nombres y variables
 if (isNil "tint_compNamespace") then {
     tint_compNamespace = createLocation ["NameVillage", [0,0,0], 0, 0];
@@ -19,30 +32,24 @@ tint_houses = true;         // Activar/desactivar todo el sistema
 tint_houseLimit = 20;       // Número máximo de casas con muebles al mismo tiempo
 tint_range = 150;           // Rango en metros para buscar edificios
 tint_delay = 10;            // Retraso entre actualizaciones (segundos)
-if (isNil "tint_seed") then {
-    tint_seed = 45;        // Este número controla toda la distribución de muebles
-};
 
-// Asegurar que el namespace exista
-if (isNil "tint_buildingCache") then {
-    tint_buildingCache = createLocation ["NameVillage", [0,0,0], 0, 0];
-};
-
-// Contador para números aleatorios
-tint_random_counter = 0;
-
-// Versión arreglada - NO usar diag_tickTime aquí
+// FUNCIÓN DE ALEATORIEDAD QUE REALMENTE FUNCIONA
 tint_fnc_seedRandom = {
-    params ["_max"];
+    params ["_max", ["_forceInteger", false]];
     
-    // Incrementar contador
+    // Contador para asegurar secuencia consistente
     tint_random_counter = tint_random_counter + 1;
     
     // Solo usar valores fijos
     private _hash = ((tint_seed * 9781) + (tint_random_counter * 8675309)) % 2147483647;
     private _result = (_hash / 2147483647) * _max;
     
-    _result
+    // Devolver entero o decimal según se pida
+    if (_forceInteger) then {
+        floor _result
+    } else {
+        _result
+    };
 };
 
 // 🏢 Lista exhaustiva y final de edificios válidos para decorar
