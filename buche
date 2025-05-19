@@ -23,6 +23,10 @@ if (isNil "tint_seed") then {
     tint_seed = 45;        // Este número controla toda la distribución de muebles
 };
 
+// Namespace para guardar configuraciones
+if (isNil "tint_buildingCache") then {
+    tint_buildingCache = [] call CBA_fnc_createNamespace;
+};
 tint_fnc_seedRandom = {
     params ["_max"];
     private _hash = (tint_seed * 9781 + diag_tickTime * 8675309) % 32768;
