@@ -782,29 +782,67 @@ frn_fnc_getBuildingCategory = {
     _category
 };
 
-// Sistema avanzado de selección de composición
-// -----------------------------------------------------------------------------
-// Reemplazo completo de la función de selección de composición para usar tint_seed
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// Reemplazo completo de frn_fnc_selectSmartComposition para usar tint_seed
+// ----------------------------------------------------------------------------
 frn_fnc_selectSmartComposition = {
     params ["_house", "_compositions", "_defaultIndex"];
-    
-    // Determinar categoría del edificio
+
+    // 1) Determinar categoría del edificio
     private _buildingCategory = [_house] call frn_fnc_getBuildingCategory;
-    
-    // Filtrar composiciones relevantes (mantener código original de filtrado)
-    // ...código de filtrado existente...
-    
-    // IMPORTANTE: Si hay un índice guardado, respetarlo completamente
-    private _savedIndex = _house getVariable ["tint_house_index", -1];
-    if (_savedIndex >= 0 && _savedIndex < (count _compositions)) exitWith {
-        _compositions select _savedIndex
+
+    // 2) Filtrar composiciones según la categoría
+    private _filteredComps = [];
+    {
+        private _comp = _x;
+        private _hasMilitaryItems      = false;
+        private _hasCommercialItems    = false;
+        private _hasInstitutionalItems = false;
+        private _hasReligiousItems     = false;
+        private _hasBarricades         = false;
+
+        // Analizar cada objeto en la composición
+        {
+            private _objType = toLower (_x#0);
+            if ((_objType find "ammo")      > -1 ||
+                (_objType find "weapon")    > -1 ||
+                (_objType find "cargo")     > -1) then   { _hasMilitaryItems      = true; };
+            if ((_objType find "cashdesk")  > -1 ||
+                (_objType find "shop")      > -1 ||
+                (_objType find "market")    > -1) then   { _hasCommercialItems    = true; };
+            if ((_objType find "medical")   > -1 ||
+                (_objType find "bandage")   > -1 ||
+                (_objType find "paper")     > -1) then   { _hasInstitutionalItems = true; };
+            if ((_objType find "cross")     > -1 ||
+                (_objType find "candle")    > -1 ||
+                (_objType find "church")    > -1) then   { _hasReligiousItems     = true; };
+            if ((_objType find "sandbag")   > -1 ||
+                (_objType find "barricade") > -1) then   { _hasBarricades         = true; };
+        } forEach _comp;
+
+        // Push según categoría
+        if (_buildingCategory == "military"     && _hasMilitaryItems)      then { _filteredComps pushBack _comp; };
+        if (_buildingCategory == "commercial"   && _hasCommercialItems)    then { _filteredComps pushBack _comp; };
+        if (_buildingCategory == "institutional"&& _hasInstitutionalItems) then { _filteredComps pushBack _comp; };
+        if (_buildingCategory == "religious"    && _hasReligiousItems)     then { _filteredComps pushBack _comp; };
+        if (_buildingCategory == "residential"  && !_hasMilitaryItems && !_hasCommercialItems) then { _filteredComps pushBack _comp; };
+
+        // Mantener barricadas aleatorias
+        if (_hasBarricades && (random 100) < 35) then { _filteredComps pushBack _comp; };
+    } forEach _compositions;
+
+    // 3) Si no hay filtradas, usar todas
+    if ((count _filteredComps) == 0) then {
+        _filteredComps = _compositions;
     };
-    
-    // Si no hay índice guardado, calcularlo y almacenarlo
-    private _index = [_house, count _filteredComps] call tint_fnc_getConsistentIndex;
-    
-    // Devolver composición seleccionada
+
+    // 4) Selección determinística usando tint_seed
+    private _compCount = count _filteredComps;
+    private _index     = [_house, _compCount] call tint_fnc_getConsistentIndex;
+    // Asegurar que no desborde
+    _index = _index min (_compCount - 1);
+
+    // 5) Devolver la composición elegida
     _filteredComps select _index
 };
 
