@@ -23,14 +23,22 @@ if (isNil "tint_seed") then {
     tint_seed = 45;        // Este número controla toda la distribución de muebles
 };
 
-// Namespace para guardar configuraciones
-if (isNil "tint_buildingCache") then {
-    tint_buildingCache = [] call CBA_fnc_createNamespace;
-};
+// Contador para números aleatorios
+tint_random_counter = 0;
+
+// Función que respeta la semilla
 tint_fnc_seedRandom = {
     params ["_max"];
-    private _hash = (tint_seed * 9781 + diag_tickTime * 8675309) % 32768;
-    (_hash / 32768) * _max
+    
+    // Incrementar contador
+    tint_random_counter = tint_random_counter + 1;
+    
+    // Calcular número basado en semilla fija
+    private _hash = ((tint_seed * 9781) + (tint_random_counter * 8675309)) % 2147483647;
+    private _result = (_hash / 2147483647) * _max;
+    
+    // Devolver número
+    _result
 };
 
 // 🏢 Lista exhaustiva y final de edificios válidos para decorar
