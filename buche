@@ -20,12 +20,13 @@ tint_houseLimit = 20;       // Número máximo de casas con muebles al mismo tie
 tint_range = 150;           // Rango en metros para buscar edificios
 tint_delay = 10;            // Retraso entre actualizaciones (segundos)
 if (isNil "tint_seed") then {
-    tint_seed = 175;        // Este número controla toda la distribución de muebles
+    tint_seed = 45;        // Este número controla toda la distribución de muebles
 };
 
-// Namespace para guardar configuraciones
-if (isNil "tint_buildingCache") then {
-    tint_buildingCache = [] call CBA_fnc_createNamespace;
+tint_fnc_seedRandom = {
+    params ["_max"];
+    private _hash = (tint_seed * 9781 + diag_tickTime * 8675309) % 32768;
+    (_hash / 32768) * _max
 };
 
 // 🏢 Lista exhaustiva y final de edificios válidos para decorar
@@ -801,9 +802,9 @@ frn_fnc_selectSmartComposition = {
         private _hasReligiousItems     = false;
         private _hasBarricades         = false;
 
-        // Analizar cada objeto en la composición
+        // Analizar cada objeto de la composición
         {
-            private _objType = toLower (_x#0);
+            private _objType = toLower (_x select 0);
             if ((_objType find "ammo")      > -1 ||
                 (_objType find "weapon")    > -1 ||
                 (_objType find "cargo")     > -1) then   { _hasMilitaryItems      = true; };
@@ -827,19 +828,19 @@ frn_fnc_selectSmartComposition = {
         if (_buildingCategory == "religious"    && _hasReligiousItems)     then { _filteredComps pushBack _comp; };
         if (_buildingCategory == "residential"  && !_hasMilitaryItems && !_hasCommercialItems) then { _filteredComps pushBack _comp; };
 
-        // Mantener barricadas aleatorias
-        if (_hasBarricades && (random 100) < 35) then { _filteredComps pushBack _comp; };
+        // Mantener algunas composiciones con barricadas
+        if (_hasBarricades && ([100] call tint_fnc_seedRandom) < 35) then { _filteredComps pushBack _comp; };
+		
     } forEach _compositions;
 
-    // 3) Si no hay filtradas, usar todas
-    if ((count _filteredComps) == 0) then {
+    // 3) Si no hay ninguna tras el filtrado, usar todas
+    if (count _filteredComps == 0) then {
         _filteredComps = _compositions;
     };
 
     // 4) Selección determinística usando tint_seed
     private _compCount = count _filteredComps;
     private _index     = [_house, _compCount] call tint_fnc_getConsistentIndex;
-    // Asegurar que no desborde
     _index = _index min (_compCount - 1);
 
     // 5) Devolver la composición elegida
@@ -861,16 +862,16 @@ frn_fnc_addExteriorBarricades = {
     };
     
     // Decidir si añadir barricadas
-    if (random 100 > _exteriorProb) exitWith {};
+    if ([100] call tint_fnc_seedRandom > _exteriorProb) exitWith {};
     
     // Determinar cantidad basada en categoría
-    private _barricadeCount = switch (_buildingCategory) do {
-        case "military": {5 + floor(random 5)};       // 5-9 barricadas
-        case "commercial": {2 + floor(random 4)};     // 2-5 barricadas
-        case "institutional": {3 + floor(random 3)};  // 3-5 barricadas
-        case "religious": {1 + floor(random 2)};      // 1-2 barricadas
-        default {1 + floor(random 3)};                // 1-3 barricadas
-    };
+private _barricadeCount = switch (_buildingCategory) do {
+    case "military": {5 + floor([5] call tint_fnc_seedRandom)};       // 5-9 barricadas
+    case "commercial": {2 + floor([4] call tint_fnc_seedRandom)};     // 2-5 barricadas
+    case "institutional": {3 + floor([3] call tint_fnc_seedRandom)};  // 3-5 barricadas
+    case "religious": {1 + floor([2] call tint_fnc_seedRandom)};      // 1-2 barricadas
+    default {1 + floor([3] call tint_fnc_seedRandom)};                // 1-3 barricadas
+};
     
     // Tipos de barricadas según categoría
     private _barricadeTypes = switch (_buildingCategory) do {
@@ -908,8 +909,8 @@ frn_fnc_addExteriorBarricades = {
     private _objects = [];
     
     for "_i" from 1 to _barricadeCount do {
-        private _angle = _dir + (random 360);
-        private _distance = _maxSize * 0.7 + (random (_maxSize * 0.5));
+        private _angle = _dir + ([360] call tint_fnc_seedRandom);
+        private _distance = _maxSize * 0.7 + ([_maxSize * 0.5] call tint_fnc_seedRandom);
         private _barricadePos = _pos getPos [_distance, _angle];
         
         // Ajustar altura al terreno
@@ -917,11 +918,11 @@ frn_fnc_addExteriorBarricades = {
         
         // Verificar que está en exterior
         if !(lineIntersects [ATLtoASL _barricadePos, ATLtoASL [_barricadePos#0, _barricadePos#1, (_barricadePos#2) + 10]]) then {
-            private _type = selectRandom _barricadeTypes;
-            private _barricade = createSimpleObject [_type, _barricadePos];
+           private _index = floor([count _barricadeTypes] call tint_fnc_seedRandom);
+           private _type = _barricadeTypes select _index;
             
             // Orientar hacia la casa para protección
-            _barricade setDir ((_barricade getDir _house) + (random 40) - 20);
+            _barricade setDir ((_barricade getDir _house) + ([40] call tint_fnc_seedRandom) - 20);
             
             _objects pushBack _barricade;
         };
