@@ -1062,7 +1062,7 @@ frn_fnc_dressUp = {
             private _buildingId = format ["%1_%2_%3", _pos#0, _pos#1, _pos#2];
             
             // Ver si ya calculamos un índice para este edificio antes
-            private _cachedIndex = tint_buildingCache getVariable [_building, -1];
+            private _cachedIndex = tint_buildingCache getVariable [str(_this), -1];
             if (isNil "_cachedIndex") then {_cachedIndex = -1};
             
             if (_cachedIndex < 0) then {
