@@ -23,21 +23,25 @@ if (isNil "tint_seed") then {
     tint_seed = 45;        // Este número controla toda la distribución de muebles
 };
 
+// Asegurar que el namespace exista
+if (isNil "tint_buildingCache") then {
+    tint_buildingCache = createLocation ["NameVillage", [0,0,0], 0, 0];
+};
+
 // Contador para números aleatorios
 tint_random_counter = 0;
 
-// Función que respeta la semilla
+// Versión arreglada - NO usar diag_tickTime aquí
 tint_fnc_seedRandom = {
     params ["_max"];
     
     // Incrementar contador
     tint_random_counter = tint_random_counter + 1;
     
-    // Calcular número basado en semilla fija
+    // Solo usar valores fijos
     private _hash = ((tint_seed * 9781) + (tint_random_counter * 8675309)) % 2147483647;
     private _result = (_hash / 2147483647) * _max;
     
-    // Devolver número
     _result
 };
 
@@ -1051,7 +1055,7 @@ frn_fnc_dressUp = {
             private _buildingId = format ["%1_%2_%3", _pos#0, _pos#1, _pos#2];
             
             // Ver si ya calculamos un índice para este edificio antes
-            private _cachedIndex = tint_buildingCache getVariable _buildingId;
+            private _cachedIndex = tint_buildingCache getVariable [_building, -1];
             if (isNil "_cachedIndex") then {_cachedIndex = -1};
             
             if (_cachedIndex < 0) then {
