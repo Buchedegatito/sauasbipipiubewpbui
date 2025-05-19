@@ -20,7 +20,7 @@ tint_houseLimit = 20;       // Número máximo de casas con muebles al mismo tie
 tint_range = 150;           // Rango en metros para buscar edificios
 tint_delay = 10;            // Retraso entre actualizaciones (segundos)
 if (isNil "tint_seed") then {
-    tint_seed = 8941981917818465;        // Este número controla toda la distribución de muebles
+    tint_seed = 1;        // Este número controla toda la distribución de muebles
 };
 
 // Namespace para guardar configuraciones
@@ -885,17 +885,18 @@ frn_fnc_selectSmartComposition = {
         _filteredComps = _compositions;
     };
     
-    // Seleccionar una composición con semilla específica según categoría
-    private _pos = getPos _house;
-    private _factionSeed = switch (_buildingCategory) do {
-        case "military": {1337};
-        case "commercial": {7331};
-        case "institutional": {2468};
-        case "religious": {3141};
-        default {4242};
-    };
+    // CAMBIO AQUÍ: Usar la semilla global en lugar de semillas fijas
+    // Obtener posición con alta precisión
+    private _pos = getPosWorld _house;
     
-    private _index = (round((((_pos#0+_pos#1) * 5) * _factionSeed)) % (count _filteredComps)) max 0;
+    // Crear un hash único basado en la posición
+    private _uniquePositionHash = abs((_pos#0 * 10000) + (_pos#1 * 100) + (_pos#2));
+    
+    // Aplicar la semilla global como multiplicador
+    private _hashWithSeed = _uniquePositionHash * (tint_seed max 1); 
+    
+    // Calcular el índice final
+    private _index = floor(_hashWithSeed % (count _filteredComps)) max 0;
     
     // Devolver composición seleccionada
     _filteredComps select _index
