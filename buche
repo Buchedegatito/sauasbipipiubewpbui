@@ -250,82 +250,132 @@ BUCHEDEG_fnc_amueblarCasa = {
         
         // Crear muebles
         if (isServer) then {
-{
-    if (random 1 > 0.25) then {
-        // Inicialización segura con valores por defecto
-        private _item = "";
-        private _rawOffset = [0,0,0];
-        private _rawAngulo = 0;
-        
-        // Extraer datos con verificación
-        if (count _x > 0) then { _item = _x select 0; };
-        if (count _x > 1) then { _rawOffset = _x select 1; };
-        if (count _x > 2) then { _rawAngulo = _x select 2; };
-        
-        // Procesamiento seguro de coordenadas
-        private _x1 = 0;
-        private _y1 = 0;
-        private _z1 = 0;
-        
-        if (typeName _rawOffset == "ARRAY") then {
-            if (count _rawOffset > 0) then { 
-                _x1 = if (typeName (_rawOffset select 0) == "STRING") then { parseNumber (_rawOffset select 0) } else { _rawOffset select 0 }; 
-            };
-            if (count _rawOffset > 1) then { 
-                _y1 = if (typeName (_rawOffset select 1) == "STRING") then { parseNumber (_rawOffset select 1) } else { _rawOffset select 1 }; 
-            };
-            if (count _rawOffset > 2) then { 
-                _z1 = if (typeName (_rawOffset select 2) == "STRING") then { parseNumber (_rawOffset select 2) } else { _rawOffset select 2 }; 
-            };
-        };
-        
-        // Procesamiento seguro del ángulo
-        private _angulo = if (typeName _rawAngulo == "STRING") then { parseNumber _rawAngulo } else { _rawAngulo };
-        
-        // Cálculo de posición y creación del objeto
-        private _basePos = getPosATL _edificio;
-        private _pos = [
-            (_basePos select 0) + _x1,
-            (_basePos select 1) + _y1,
-            (_basePos select 2) + _z1
-        ];
-        
-        private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
-        _mueble setPosATL _pos;
-        _mueble setDir (_dir - _angulo);
-        _mueble enableSimulation false;
-        _mueble allowDamage false;
-        
-        _spawned pushBack _mueble;
-        sleep 0.05;
-    };
-} forEach _items;
+            {
+                if (random 1 > 0.25) then {
+                    // Inicialización segura con valores por defecto
+                    private _item = "";
+                    private _rawOffset = [0,0,0];
+                    private _rawAngulo = 0;
+                    
+                    // Extraer datos con verificación
+                    if (count _x > 0) then { _item = _x select 0; };
+                    if (count _x > 1) then { _rawOffset = _x select 1; };
+                    if (count _x > 2) then { _rawAngulo = _x select 2; };
+                    
+                    // Verificar que el item no esté vacío
+                    if (_item != "") then {
+                        // Procesar coordenadas seguras
+                        private _x1 = 0;
+                        private _y1 = 0;
+                        private _z1 = 0;
+                        
+                        if (typeName _rawOffset == "ARRAY") then {
+                            if (count _rawOffset > 0) then {
+                                _x1 = if (typeName (_rawOffset select 0) == "STRING") then {
+                                    parseNumber (_rawOffset select 0)
+                                } else {
+                                    _rawOffset select 0
+                                };
+                            };
+                            
+                            if (count _rawOffset > 1) then {
+                                _y1 = if (typeName (_rawOffset select 1) == "STRING") then {
+                                    parseNumber (_rawOffset select 1)
+                                } else {
+                                    _rawOffset select 1
+                                };
+                            };
+                            
+                            if (count _rawOffset > 2) then {
+                                _z1 = if (typeName (_rawOffset select 2) == "STRING") then {
+                                    parseNumber (_rawOffset select 2)
+                                } else {
+                                    _rawOffset select 2
+                                };
+                            };
+                        };
+                        
+                        // Procesar ángulo seguro
+                        private _angulo = if (typeName _rawAngulo == "STRING") then {
+                            parseNumber _rawAngulo
+                        } else {
+                            _rawAngulo
+                        };
+                        
+                        // Obtener posición segura del edificio
+                        private _basePos = getPosATL _edificio;
+                        private _pos = [0,0,0];
+                        
+                        // Verificar que _basePos es un array válido
+                        if (typeName _basePos == "ARRAY" && {count _basePos >= 3}) then {
+                            // Extraer componentes para prevenir errores en operaciones
+                            private _posX = _basePos select 0;
+                            private _posY = _basePos select 1;
+                            private _posZ = _basePos select 2;
+                            
+                            // Crear posición segura
+                            _pos = [
+                                _posX + _x1,
+                                _posY + _y1,
+                                _posZ + _z1
+                            ];
+                        };
+                        
+                        // Crear objeto con manejo de errores
+                        try {
+                            private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+                            _mueble setPosATL _pos;
+                            _mueble setDir (_dir - _angulo);
+                            _mueble enableSimulation false;
+                            _mueble allowDamage false;
+                            
+                            _spawned pushBack _mueble;
+                        } catch {
+                            ["Error al crear mueble: " + str(_item)] call BUCHEDEG_fnc_log;
+                        };
+                        
+                        sleep 0.05;
+                    };
+                };
+            } forEach _items;
             
-            // Registrar objetos
-            private _idsMuebles = _spawned apply {netId _x};
-            _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
-            
-            // Añadir event handlers
-            if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
-                _edificio setVariable ["BUCHEDEG_eventHandlers", true];
+            // Registrar objetos con control de errores
+            if (count _spawned > 0) then {
+                private _idsMuebles = [];
+                {
+                    if (!isNull _x) then {
+                        _idsMuebles pushBack (netId _x);
+                    };
+                } forEach _spawned;
                 
-                _edificio addEventHandler ["Deleted", {
-                    params ["_edificio"];
-                    { 
-                        deleteVehicle _x;
-                    } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply {objectFromNetId _x});
-                }];
+                _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
                 
-                _edificio addEventHandler ["Killed", {
-                    params ["_edificio"];
-                    [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
-                }];
+                // Añadir event handlers
+                if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
+                    _edificio setVariable ["BUCHEDEG_eventHandlers", true];
+                    
+                    _edificio addEventHandler ["Deleted", {
+                        params ["_edificio"];
+                        private _ids = _edificio getVariable ["BUCHEDEG_muebles_ids", []];
+                        {
+                            private _mueble = objectFromNetId _x;
+                            if (!isNull _mueble) then {
+                                deleteVehicle _mueble;
+                            };
+                        } forEach _ids;
+                    }];
+                    
+                    _edificio addEventHandler ["Killed", {
+                        params ["_edificio"];
+                        [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
+                    }];
+                };
             };
         };
         
         // Añadir a lista global
         BUCHEDEG_muebles_casas pushBack _edificio;
-        ["Casa amueblada"] call BUCHEDEG_fnc_log;
+        ["Casa amueblada: " + str(typeOf _edificio)] call BUCHEDEG_fnc_log;
     };
 };
 
@@ -513,4 +563,4 @@ if (isServer) then {
     };
 };
 
-["Sistema de amueblado iniciado"] call BUCHEDEG_fnc_log;
+["Sistema de amueblado iniciado - Versión " + BUCHEDEG_muebles_version] call BUCHEDEG_fnc_log;
