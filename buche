@@ -316,7 +316,7 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _dir = getDir _edificio;
         _spawned = [];
         
-    // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
+// 🔄 Creación de muebles sincronizada (PARCHE toNumber)
 params [["_edificio", objNull], ["_dir", 0]]; // Valores por defecto: objNull y 0
 
 if (isServer && {!isNull _edificio}) then { // Verifica que _edificio no sea null
@@ -362,7 +362,7 @@ if (isServer && {!isNull _edificio}) then { // Verifica que _edificio no sea nul
             params ["_edificio"];
             { 
                 deleteVehicle _x;
-            } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x }); // ✅ ] añadido
+            } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x });
         }];
 
         _edificio addEventHandler ["Killed", {
