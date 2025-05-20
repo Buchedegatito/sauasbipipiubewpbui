@@ -26,6 +26,15 @@
 // 🔄 INICIALIZACIÓN Y CONFIGURACIÓN
 // ═════════════════════════════════════════
 
+Buche_fnc_convertirANumero = {
+    params ["_dato"];
+    if (typeName _dato == "STRING") then {
+        parseNumber _dato
+    } else {
+        _dato
+    };
+};
+
 // 🌐 Verificar argumentos y establecer valores predeterminados
 if (isNil "_this") then { _this = [50, 5]; };
 if ((count _this) < 2) then { _this = [50, 5]; };
@@ -307,61 +316,61 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _spawned = [];
         
     // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
+
 if (isServer) then {
+    private _edificio = _this select 0; // Asegúrate que _edificio está definido
+    private _dir = [_this select 1] call Buche_fnc_convertirANumero; // Convertir dirección global
+    
+    private _spawned = [];
+    private _items = _edificio getVariable ["BUCHEDEG_muebles", []]; // Obtener items
+    
     {
         if (random 1 > 0.25) then {
-            private _item      = _x select 0;
+            private _item = _x select 0;
             private _rawOffset = _x select 1;
             private _rawAngulo = _x select 2;
-
-            // ===== ELIGE UNO DE LOS DOS MÉTODOS =====
-            // MÉTODO 1 (Datos son números):
-            private _offset = _rawOffset;
-            private _angulo = _rawAngulo;
-
-            // MÉTODO 2 (Datos son strings):
-            /*
+            
+            // 🔄 Conversión a números (segura para strings y números)
             private _offset = [
-                parseNumber (_rawOffset select 0),
-                parseNumber (_rawOffset select 1),
-                parseNumber (_rawOffset select 2)
+                [_rawOffset select 0] call Buche_fnc_convertirANumero,
+                [_rawOffset select 1] call Buche_fnc_convertirANumero,
+                [_rawOffset select 2] call Buche_fnc_convertirANumero
             ];
-            private _angulo = parseNumber _rawAngulo;
-            */
-
-            private _pos    = _edificio modelToWorld _offset;
+            private _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
+            
+            // 🏗️ Creación del mueble
+            private _pos = _edificio modelToWorld _offset;
             private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
             _mueble setPosATL _pos;
             _mueble setDir (_dir - _angulo);
             _mueble enableSimulation false;
             _mueble allowDamage false;
-
+            
+            // 📦 Guardar y anti-lag
             _spawned pushBack _mueble;
             sleep 0.05;
+            
+            // 🐛 Debug (opcional)
+            systemChat format ["Mueble: %1 | Pos: %2 | Ang: %3", _item, _pos, _angulo];
         };
     } forEach _items;
-
-        // 💾 Guardar IDs para JIP y sincronización
-        private _idsMuebles = [];
-        {
-            _idsMuebles pushBack (netId _x);
-        } forEach _spawned;
-        _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
-
-        // 🆕 Añadir event handlers
+    
+    // 💾 Guardar IDs para JIP
+    private _idsMuebles = _spawned apply {netId _x};
+    _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
+    
+    // 🚨 Event Handlers (solo si es necesario)
+    if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
+        _edificio setVariable ["BUCHEDEG_eventHandlers", true];
+        
         _edificio addEventHandler ["Deleted", {
             params ["_edificio"];
-            [_edificio] call BUCHEDEG_fnc_manejarEliminacion;
+            {deleteVehicle _x} forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply {objectFromNetId _x};
         }];
-        _edificio addEventHandler ["Hit", {
-            params ["_edificio", "_causedBy", "_damage", "_instigator"];
-            if (_damage > 0.9 && {_edificio getVariable ["BUCHEDEG_amueblado", 0] == 2}) then {
-                [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
-            };
-        }];
+        
         _edificio addEventHandler ["Killed", {
-            params ["_edificio", "_killer", "_instigator", "_useEffects"];
-            [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
+            params ["_edificio"];
+            [_edificio] call Buche_fnc_manejarDestruccion; // Asegúrate de definir esta función
         }];
     };
         
