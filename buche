@@ -319,7 +319,7 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
 // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
 BUCHEDEG_fnc_amueblarCasa = {
     params ["_edificio"];
-    private ["_tipo", "_items", "_item", "_offset", "_angulo", "_pos", "_spawned", "_plantillas", "_dir"];
+    private ["_tipo", "_items", "_item", "_offset", "_angulo", "_pos", "_spawned", "_plantillas"];
     
     // ⛔ Saltear casas previamente marcadas como no amueblables o destruidas
     if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == -1 || 
@@ -329,8 +329,7 @@ BUCHEDEG_fnc_amueblarCasa = {
     if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 0) then {
         _tipo = typeOf _edificio;
         switch _tipo do {
-            // Cases de edificios (tu código actual aquí)
-            // ...
+            // Aquí están todos tus cases (no los modifiques)
             default {
                 _edificio setvariable ["BUCHEDEG_amueblado",-1];
             };
@@ -345,41 +344,32 @@ BUCHEDEG_fnc_amueblarCasa = {
         _spawned = [];
         
         // 🔄 Creación de muebles sincronizada
-        if (isServer && {!isNull _edificio}) then {
-            private _dirConvertida = [_dir] call Buche_fnc_convertirANumero;
-            
+        if (isServer) then {
             {
                 if (random 1 > 0.25) then {
-                    private _item = _x select 0;
-                    private _rawOffset = _x select 1;
-                    private _rawAngulo = _x select 2;
+                    _item = _x select 0;
+                    _rawOffset = _x select 1;
+                    _rawAngulo = _x select 2;
                     
-                    // CORRECCIÓN AQUÍ: Convertir el offset y asegurarlo como array
-                    private _offset = [];
-                    if (typeName _rawOffset == "ARRAY") then {
-                        _offset = [
-                            [_rawOffset select 0] call Buche_fnc_convertirANumero,
-                            [_rawOffset select 1] call Buche_fnc_convertirANumero,
-                            [_rawOffset select 2] call Buche_fnc_convertirANumero
-                        ];
-                    } else {
-                        // Si no es un array, crear uno predeterminado
-                        _offset = [0,0,0];
-                    };
+                    // Solución segura para el error Vector/Número
+                    _coordX = if (typeName (_rawOffset select 0) == "STRING") then { parseNumber (_rawOffset select 0) } else { _rawOffset select 0 };
+                    _coordY = if (typeName (_rawOffset select 1) == "STRING") then { parseNumber (_rawOffset select 1) } else { _rawOffset select 1 };
+                    _coordZ = if (typeName (_rawOffset select 2) == "STRING") then { parseNumber (_rawOffset select 2) } else { _rawOffset select 2 };
+                    _offset = [_coordX, _coordY, _coordZ];
                     
-                    private _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
+                    _angulo = if (typeName _rawAngulo == "STRING") then { parseNumber _rawAngulo } else { _rawAngulo };
                     
-                    // CORRECCIÓN AQUÍ: Usar getPos + vectorAdd para posicionamiento alternativo
-                    private _basePos = getPos _edificio;
-                    private _pos = [
+                    // Posicionamiento mediante suma de posiciones en vez de modelToWorld directo
+                    _basePos = getPos _edificio;
+                    _pos = [
                         _basePos select 0 + (_offset select 0),
-                        _basePos select 1 + (_offset select 1),
+                        _basePos select 1 + (_offset select 1), 
                         _basePos select 2 + (_offset select 2)
                     ];
                     
-                    private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+                    _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
                     _mueble setPosATL _pos;
-                    _mueble setDir (_dirConvertida - _angulo);
+                    _mueble setDir (_dir - _angulo);
                     _mueble enableSimulation false;
                     _mueble allowDamage false;
                     
@@ -388,17 +378,17 @@ BUCHEDEG_fnc_amueblarCasa = {
                 };
             } forEach _items;
             
-            private _idsMuebles = _spawned apply { netId _x };
+            _idsMuebles = _spawned apply {netId _x};
             _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
             
-            if (isNil { _edificio getVariable "BUCHEDEG_eventHandlers" }) then {
+            if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
                 _edificio setVariable ["BUCHEDEG_eventHandlers", true];
                 
                 _edificio addEventHandler ["Deleted", {
                     params ["_edificio"];
                     { 
                         deleteVehicle _x;
-                    } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x });
+                    } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply {objectFromNetId _x});
                 }];
                 
                 _edificio addEventHandler ["Killed", {
