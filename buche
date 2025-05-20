@@ -27,9 +27,10 @@
 // ═════════════════════════════════════════
 
 Buche_fnc_convertirANumero = {
-    params ["_dato"];
+    params [["_dato", 0]]; // ✅ 0 es valor por defecto si no se pasa nada
     if (typeName _dato == "STRING") then {
-        parseNumber _dato
+        private _num = parseNumber _dato;
+        if (isNil "_num" || {_num == 0 && {_dato != "0"}}) then {0} else {_num}
     } else {
         _dato
     };
@@ -316,63 +317,60 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _spawned = [];
         
     // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
+params [["_edificio", objNull], ["_dir", 0]]; // Valores por defecto: objNull y 0
 
-if (isServer) then {
-    private _edificio = _this select 0; // Asegúrate que _edificio está definido
-    private _dir = [_this select 1] call Buche_fnc_convertirANumero; // Convertir dirección global
-    
+if (isServer && {!isNull _edificio}) then { // Verifica que _edificio no sea null
+    private _dirConvertida = [_dir] call Buche_fnc_convertirANumero;
     private _spawned = [];
-    private _items = _edificio getVariable ["BUCHEDEG_muebles", []]; // Obtener items
-    
+    private _items = _edificio getVariable ["BUCHEDEG_muebles", []];
+
     {
         if (random 1 > 0.25) then {
             private _item = _x select 0;
             private _rawOffset = _x select 1;
             private _rawAngulo = _x select 2;
-            
-            // 🔄 Conversión a números (segura para strings y números)
+
+            // Conversión segura
             private _offset = [
                 [_rawOffset select 0] call Buche_fnc_convertirANumero,
                 [_rawOffset select 1] call Buche_fnc_convertirANumero,
                 [_rawOffset select 2] call Buche_fnc_convertirANumero
             ];
             private _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
-            
-            // 🏗️ Creación del mueble
+
+            // Posicionamiento
             private _pos = _edificio modelToWorld _offset;
             private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
             _mueble setPosATL _pos;
-            _mueble setDir (_dir - _angulo);
+            _mueble setDir (_dirConvertida - _angulo);
             _mueble enableSimulation false;
             _mueble allowDamage false;
-            
-            // 📦 Guardar y anti-lag
+
             _spawned pushBack _mueble;
             sleep 0.05;
-            
-            // 🐛 Debug (opcional)
-            systemChat format ["Mueble: %1 | Pos: %2 | Ang: %3", _item, _pos, _angulo];
         };
     } forEach _items;
-    
-    // 💾 Guardar IDs para JIP
-    private _idsMuebles = _spawned apply {netId _x};
+
+    private _idsMuebles = _spawned apply { netId _x };
     _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
-    
-    // 🚨 Event Handlers (solo si es necesario)
-    if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
+
+    if (isNil { _edificio getVariable "BUCHEDEG_eventHandlers" }) then {
         _edificio setVariable ["BUCHEDEG_eventHandlers", true];
-        
+
+        // ✅ EventHandler "Deleted" corregido
         _edificio addEventHandler ["Deleted", {
             params ["_edificio"];
-            {deleteVehicle _x} forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply {objectFromNetId _x};
+            { 
+                deleteVehicle _x;
+            } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x }); // ✅ ] añadido
         }];
-        
+
         _edificio addEventHandler ["Killed", {
             params ["_edificio"];
-            [_edificio] call Buche_fnc_manejarDestruccion; // Asegúrate de definir esta función
+            [_edificio] call Buche_fnc_manejarDestruccion;
         }];
     };
+};
         
         // Añadir casa a la lista global
         BUCHEDEG_muebles_casas pushBack _edificio;
