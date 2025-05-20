@@ -306,36 +306,40 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _dir = getDir _edificio;
         _spawned = [];
         
-        // 🔄 Creación de muebles sincronizada
-    if (isServer) then {
-        {
-            if (random 1 > 0.25) then {
-                // 1) Datos crudos
-                private _item      = _x select 0;
-                private _rawOffset = _x select 1;
-                private _rawAngulo = _x select 2;
+    // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
+if (isServer) then {
+    {
+        if (random 1 > 0.25) then {
+            private _item      = _x select 0;
+            private _rawOffset = _x select 1;
+            private _rawAngulo = _x select 2;
 
-                // 2) Forzar conversión a número
-                private _offset = [
-                    toNumber (_rawOffset select 0),
-                    toNumber (_rawOffset select 1),
-                    toNumber (_rawOffset select 2)
-                ];
-                private _angulo = toNumber _rawAngulo;
+            // ===== ELIGE UNO DE LOS DOS MÉTODOS =====
+            // MÉTODO 1 (Datos son números):
+            private _offset = _rawOffset;
+            private _angulo = _rawAngulo;
 
-                // 3) Crear y posicionar
-                private _pos    = _edificio modelToWorld _offset;
-                private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
-                _mueble setPosATL _pos;
-                _mueble setDir (_dir - _angulo);
-                _mueble enableSimulation false;
-                _mueble allowDamage false;
+            // MÉTODO 2 (Datos son strings):
+            /*
+            private _offset = [
+                parseNumber (_rawOffset select 0),
+                parseNumber (_rawOffset select 1),
+                parseNumber (_rawOffset select 2)
+            ];
+            private _angulo = parseNumber _rawAngulo;
+            */
 
-                // 4) Guardar en lista y pausa anti-lag
-                _spawned pushBack _mueble;
-                sleep 0.05;
-            };
-        } forEach _items;
+            private _pos    = _edificio modelToWorld _offset;
+            private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+            _mueble setPosATL _pos;
+            _mueble setDir (_dir - _angulo);
+            _mueble enableSimulation false;
+            _mueble allowDamage false;
+
+            _spawned pushBack _mueble;
+            sleep 0.05;
+        };
+    } forEach _items;
 
         // 💾 Guardar IDs para JIP y sincronización
         private _idsMuebles = [];
@@ -344,7 +348,7 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         } forEach _spawned;
         _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
 
-        // 🆕 EventHandlers
+        // 🆕 Añadir event handlers
         _edificio addEventHandler ["Deleted", {
             params ["_edificio"];
             [_edificio] call BUCHEDEG_fnc_manejarEliminacion;
