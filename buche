@@ -317,60 +317,96 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _spawned = [];
         
 // 🔄 Creación de muebles sincronizada (PARCHE toNumber)
-params [["_edificio", objNull], ["_dir", 0]]; // Valores por defecto: objNull y 0
-
-if (isServer && {!isNull _edificio}) then { // Verifica que _edificio no sea null
-    private _dirConvertida = [_dir] call Buche_fnc_convertirANumero;
-    private _spawned = [];
-    private _items = _edificio getVariable ["BUCHEDEG_muebles", []];
-
-    {
-        if (random 1 > 0.25) then {
-            private _item = _x select 0;
-            private _rawOffset = _x select 1;
-            private _rawAngulo = _x select 2;
-
-            // Conversión segura
-            private _offset = [
-                [_rawOffset select 0] call Buche_fnc_convertirANumero,
-                [_rawOffset select 1] call Buche_fnc_convertirANumero,
-                [_rawOffset select 2] call Buche_fnc_convertirANumero
-            ];
-            private _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
-
-            // Posicionamiento
-            private _pos = _edificio modelToWorld _offset;
-            private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
-            _mueble setPosATL _pos;
-            _mueble setDir (_dirConvertida - _angulo);
-            _mueble enableSimulation false;
-            _mueble allowDamage false;
-
-            _spawned pushBack _mueble;
-            sleep 0.05;
+BUCHEDEG_fnc_amueblarCasa = {
+    params ["_edificio"];
+    private ["_tipo", "_items", "_item", "_offset", "_angulo", "_pos", "_spawned", "_plantillas", "_dir"];
+    
+    // ⛔ Saltear casas previamente marcadas como no amueblables o destruidas
+    if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == -1 || 
+        _edificio getVariable ["BUCHEDEG_amueblado", 0] == -2) exitWith {};
+    
+    // 📂 Asignar plantilla de muebles según tipo de casa
+    if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 0) then {
+        _tipo = typeOf _edificio;
+        switch _tipo do {
+            // Cases de edificios (tu código actual aquí)
+            // ...
+            default {
+                _edificio setvariable ["BUCHEDEG_amueblado",-1];
+            };
         };
-    } forEach _items;
-
-    private _idsMuebles = _spawned apply { netId _x };
-    _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
-
-    if (isNil { _edificio getVariable "BUCHEDEG_eventHandlers" }) then {
-        _edificio setVariable ["BUCHEDEG_eventHandlers", true];
-
-        // ✅ EventHandler "Deleted" corregido
-        _edificio addEventHandler ["Deleted", {
-            params ["_edificio"];
-            { 
-                deleteVehicle _x;
-            } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x });
-        }];
-
-        _edificio addEventHandler ["Killed", {
-            params ["_edificio"];
-            [_edificio] call Buche_fnc_manejarDestruccion;
-        }];
     };
-};
+    
+    // 🛋️ Amueblar casa si está asignada, visible y sin personas cerca
+    if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 1 && {!(isObjectHidden _edificio)} && {count (_edificio nearEntities ["Man", 7]) == 0}) then {
+        _items = _edificio getVariable ["BUCHEDEG_muebles", []];
+        _edificio setVariable ["BUCHEDEG_amueblado", 2, true];
+        _dir = getDir _edificio;
+        _spawned = [];
+        
+        // 🔄 Creación de muebles sincronizada
+        if (isServer && {!isNull _edificio}) then {
+            private _dirConvertida = [_dir] call Buche_fnc_convertirANumero;
+            
+            {
+                if (random 1 > 0.25) then {
+                    private _item = _x select 0;
+                    private _rawOffset = _x select 1;
+                    private _rawAngulo = _x select 2;
+                    
+                    // CORRECCIÓN AQUÍ: Convertir el offset y asegurarlo como array
+                    private _offset = [];
+                    if (typeName _rawOffset == "ARRAY") then {
+                        _offset = [
+                            [_rawOffset select 0] call Buche_fnc_convertirANumero,
+                            [_rawOffset select 1] call Buche_fnc_convertirANumero,
+                            [_rawOffset select 2] call Buche_fnc_convertirANumero
+                        ];
+                    } else {
+                        // Si no es un array, crear uno predeterminado
+                        _offset = [0,0,0];
+                    };
+                    
+                    private _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
+                    
+                    // CORRECCIÓN AQUÍ: Usar getPos + vectorAdd para posicionamiento alternativo
+                    private _basePos = getPos _edificio;
+                    private _pos = [
+                        _basePos select 0 + (_offset select 0),
+                        _basePos select 1 + (_offset select 1),
+                        _basePos select 2 + (_offset select 2)
+                    ];
+                    
+                    private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+                    _mueble setPosATL _pos;
+                    _mueble setDir (_dirConvertida - _angulo);
+                    _mueble enableSimulation false;
+                    _mueble allowDamage false;
+                    
+                    _spawned pushBack _mueble;
+                    sleep 0.05;
+                };
+            } forEach _items;
+            
+            private _idsMuebles = _spawned apply { netId _x };
+            _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
+            
+            if (isNil { _edificio getVariable "BUCHEDEG_eventHandlers" }) then {
+                _edificio setVariable ["BUCHEDEG_eventHandlers", true];
+                
+                _edificio addEventHandler ["Deleted", {
+                    params ["_edificio"];
+                    { 
+                        deleteVehicle _x;
+                    } forEach (_edificio getVariable ["BUCHEDEG_muebles_ids", []] apply { objectFromNetId _x });
+                }];
+                
+                _edificio addEventHandler ["Killed", {
+                    params ["_edificio"];
+                    [_edificio] call Buche_fnc_manejarDestruccion;
+                }];
+            };
+        };
         
         // Añadir casa a la lista global
         BUCHEDEG_muebles_casas pushBack _edificio;
