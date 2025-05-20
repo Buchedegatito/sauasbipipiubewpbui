@@ -1,5 +1,26 @@
-
-¿Puedes analizar este script? Me da el error dela imagen.
+/*
+    🏠 SISTEMA DE AMUEBLADO AUTOMÁTICO DE CASAS 🏠
+    🪑 Para Arma 3 - Versión Mejorada y Sincronizada
+    👨‍💻 Autor: Buchedegatito
+    📅 2025
+    
+    📋 USO: 
+    [radioDetección, tiempoEscaneo] execVM "buchedegatito_amueblado.sqf";
+    
+    Ejemplo: [50, 5] execVM "buchedegatito_amueblado.sqf";
+    
+    ⚙️ PARÁMETROS:
+    - radioDetección: Radio en metros para buscar casas (por defecto: 50m)
+    - tiempoEscaneo: Segundos entre escaneos para muebles (por defecto: 5s)
+    
+    ✨ CARACTERÍSTICAS:
+    - Funcionamiento en cualquier entorno (local, multi, dedicado)
+    - Sincronización total entre jugadores
+    - Sistema optimizado para evitar lag
+    - Múltiples estilos de muebles aleatorios
+    - Sistema de reacción física para edificios destruidos
+    - Limpieza automática cuando el Zeus elimina edificios
+*/
 
 // ═════════════════════════════════════════
 // 🔄 INICIALIZACIÓN Y CONFIGURACIÓN
@@ -286,61 +307,59 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         _spawned = [];
         
         // 🔄 Creación de muebles sincronizada
-        if (isServer) then {
-            {
-                if (random 1 > 0.25) then {
-                    _item = _x select 0;
-                    _offset = _x select 1;
-                    _angulo = _x select 2;
-                    _pos = _edificio modelToWorld _offset;
-                    
-                    // Usar createVehicle para sincronización completa entre clientes
-                    _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
-                    _mueble setPosATL _pos;
-                    _mueble setDir (_dir - _angulo);
-                    _mueble enableSimulation false; // Deshabilitar física para mejor rendimiento
-                    _mueble allowDamage false; // Evitar que se dañe
-                    
-                    // Agregar a la lista de muebles para esta casa
-                    _spawned pushBack _mueble;
-                    
-                    // Pequeña pausa para evitar lagspikes
-                    sleep 0.05;
-                };
-            } forEach _items;
-            
-            // 💾 Guardar IDs para JIP y sincronización
-            _idsMuebles = [];
-            {
-                _idsMuebles pushBack (netId _x);
-            } forEach _spawned;
-            
-            _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
-            
-            // 🆕 Añadir event handler para eliminación por Zeus u otros medios
-            _edificio addEventHandler ["Deleted", {
-                params ["_edificio"];
-                [_edificio] call BUCHEDEG_fnc_manejarEliminacion;
-            }];
-            
-            // 🆕 Añadir event handler para daño y destrucción
-_edificio addEventHandler ["Hit", {
-    params ["_edificio", "_causedBy", "_damage", "_instigator"];
-    
-    // Si el daño es grande (>0.9) y el edificio ya tiene muebles
-    if (_damage > 0.9 && {_edificio getVariable ["BUCHEDEG_amueblado", 0] == 2}) then {
-        // Llamar a la función de manejo de destrucción
-        [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
-    };
-}];
-            
-            _edificio addEventHandler ["Killed", {
-                params ["_edificio", "_killer", "_instigator", "_useEffects"];
-                
-                // Llamar a la función de manejo de destrucción
+    if (isServer) then {
+        {
+            if (random 1 > 0.25) then {
+                // 1) Datos crudos
+                private _item      = _x select 0;
+                private _rawOffset = _x select 1;
+                private _rawAngulo = _x select 2;
+
+                // 2) Forzar conversión a número
+                private _offset = [
+                    toNumber (_rawOffset select 0),
+                    toNumber (_rawOffset select 1),
+                    toNumber (_rawOffset select 2)
+                ];
+                private _angulo = toNumber _rawAngulo;
+
+                // 3) Crear y posicionar
+                private _pos    = _edificio modelToWorld _offset;
+                private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+                _mueble setPosATL _pos;
+                _mueble setDir (_dir - _angulo);
+                _mueble enableSimulation false;
+                _mueble allowDamage false;
+
+                // 4) Guardar en lista y pausa anti-lag
+                _spawned pushBack _mueble;
+                sleep 0.05;
+            };
+        } forEach _items;
+
+        // 💾 Guardar IDs para JIP y sincronización
+        private _idsMuebles = [];
+        {
+            _idsMuebles pushBack (netId _x);
+        } forEach _spawned;
+        _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
+
+        // 🆕 EventHandlers
+        _edificio addEventHandler ["Deleted", {
+            params ["_edificio"];
+            [_edificio] call BUCHEDEG_fnc_manejarEliminacion;
+        }];
+        _edificio addEventHandler ["Hit", {
+            params ["_edificio", "_causedBy", "_damage", "_instigator"];
+            if (_damage > 0.9 && {_edificio getVariable ["BUCHEDEG_amueblado", 0] == 2}) then {
                 [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
-            }];
-        };
+            };
+        }];
+        _edificio addEventHandler ["Killed", {
+            params ["_edificio", "_killer", "_instigator", "_useEffects"];
+            [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
+        }];
+    };
         
         // Añadir casa a la lista global
         BUCHEDEG_muebles_casas pushBack _edificio;
