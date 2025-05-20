@@ -65,218 +65,179 @@ BUCHEDEG_fnc_amueblarCasa = {
         // Detectar tipo de edificio
         switch (_tipo) do {
             case "Land_i_Barracks_V1_F": {
-                _plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0]]];
+                _plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0],["CUP_vojenska_palanda",[-12.9707,-2.98145,3.88763],90]]];
                 _edificio setVariable ["BUCHEDEG_amueblado", 1];
                 _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
             };
             
-            // PUEDES AÑADIR MÁS CASOS AQUÍ
+            case "Land_House_2W05_F": {
+                _plantillas = [[["Land_WoodenTable_large_F",[4.16514,-3.94405,1.02289],359.74],["Land_ChairWood_F",[4.2833,-4.99288,0.594582],-198.35]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1W07_F": {
+                _plantillas = [[["Land_Table_EP1",[-3.49841,-1.91229,0.54191],-271.56],["CUP_Kitchenstove_Elec",[1.98498,1.52179,0.1379],0.44]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1W10_F": {
+                _plantillas = [[["CUP_vojenska_palanda",[-3.67661,-0.246263,0.58894],0.07],["CUP_vojenska_palanda",[1.06362,-1.02165,0.58894],359.93]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1W11_F": {
+                _plantillas = [[["Land_Bench_EP1",[-5.64888,-1.05785,0.770939],0.53],["Land_TableDesk_F",[-2.04975,2.18337,1.12288],0.47]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1W09_F": {
+                _plantillas = [[["Land_OfficeCabinet_02_F",[-4.27849,0.776488,1.35533],-271.21],["Land_Metal_rack_F",[-2.94841,3.21985,1.47484],-270.79]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1B01_F": {
+                _plantillas = [[["CUP_Skrin_bar",[-0.483921,-2.54648,0.13305],0],["Land_TableDesk_F",[-1.35599,-4.74057,0.54011],90]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_2W04_F": {
+                _plantillas = [[["Land_Boots_EP1",[-1.92258,0.890834,0.970484],-272],["Land_Boots_EP1",[-1.91111,-0.539836,0.970484],-272]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_2W03_F": {
+                _plantillas = [[["Land_GarbageHeap_04_F",[-1.42803,-0.226821,0.996608],-166.05],["Land_Ground_sheet_blue_F",[-4.3615,1.32445,5.28363],357.84]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_VillageStore_01_F": {
+                _plantillas = [[["Land_CashDesk_F",[-1.86461,1.42983,0.74716],-0.51],["Land_Icebox_F",[-0.0550334,1.31558,1.36906],-0.51]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_House_1W03_F": {
+                _plantillas = [[["SmallTable",[0.801584,1.19811,0.694487],359.71],["Land_Photoframe_01_broken_F",[-1.72869,4.50194,0.310377],-117.28]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_PoliceStation_01_F": {
+                _plantillas = [[["CUP_office_table_a",[4.91359,-2.70477,4.60219],0.57],["Land_HumanSkeleton_F",[3.3506,-2.89373,1.04318],22.69]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_Offices_01_V1_F": {
+                _plantillas = [[["Land_Sofa_01_F",[0.495095,-4.14843,1.37311],0],["Land_Photoframe_01_F",[-0.120139,1.91505,2.8394],90]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_Garage_V1_F": {
+                _plantillas = [[["Land_Pallet_vertical_F",[-1.50049,2.52451,0.891365],-270],["Land_CanisterFuel_Red_F",[0.126464,-2.13174,0.429497],330]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_Slum_House01_F": {
+                _plantillas = [[["Land_CanisterPlastic_F",[-1.42668,-1.49434,0.34782],90],["Land_Basket_F",[0.850666,0.597452,0.344494],-120]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_Shed_Ind_F": {
+                _plantillas = [[["Land_Camera_01_F",[-7.46147,0.331328,0.921127],-87.15],["Land_CinderBlocks_F",[4.0688,-1.0759,-0.00965142],-45]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_CarService_F": {
+                _plantillas = [[["Land_ToolTrolley_01_F",[-4.7163,-0.427365,0.999079],75],["Land_CanisterPlastic_F",[-4.67431,-4.61194,0.877817],71.5]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_u_Addon_02_V1_F": {
+                _plantillas = [[["Land_CanisterFuel_Blue_F",[-3.13876,1.15385,0.575845],-15],["Land_Pallet_vertical_F",[-3.23984,-1.41647,1.03994],0]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_Stone_Shed_V1_F": {
+                _plantillas = [[["Land_WoodenTable_small_F",[-2.89829,0.718148,0.669911],270],["Land_ChairWood_F",[-2.39438,0.757211,0.228291],65]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_Stone_HouseSmall_V1_F": {
+                _plantillas = [[["Land_Sacks_heap_F",[-1.23016,-1.92039,1.61942],90],["Land_MetalBarrel_empty_F",[-2.38641,-2.06102,1.64298],-80]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_House_Small_02_V1_F": {
+                _plantillas = [[["Land_Sleeping_bag_brown_folded_F",[3.84399,-2.66361,0.827129],90],["Land_Ground_sheet_folded_F",[4.04907,-2.72123,1.10575],-285]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "i_House_Big_01_b_base_F": {
+                _plantillas = [[["Land_FlowerPot_01_F",[-4.17919,-4.98271,0.484679],-180],["Land_FlowerPot_01_Flower_F",[-3.97021,1.39229,1.24438],15]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "i_House_Big_02_b_base_F": {
+                _plantillas = [[["Land_ShelvesWooden_blue_F",[-4.25422,-4.04848,4.16836],90],["Land_ShelvesWooden_khaki_F",[-4.25422,4.07603,4.16836],90]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "i_House_Small_01_b_base_F": {
+                _plantillas = [[["Land_TableBig_01_F",[-2.16441,-0.984987,0.697113],330],["Land_ChairWood_F",[-1.89781,-1.67249,0.258186],330]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "i_Stone_House_Big_01_b_base_F": {
+                _plantillas = [[["Land_Camping_Light_off_F",[-3.27483,-1.2476,4.08806],90],["Land_Rope_01_F",[-3.27336,-1.65385,3.34361],-15]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_i_House_Small_03_V1_F": {
+                _plantillas = [[["Land_File_F",[-5.15211,-0.975126,0.740405],-140],["Land_WoodenBed_01_F",[-4.38428,0.509249,0.724895],-90]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "i_Shop_02_b_base_F": {
+                _plantillas = [[["Land_WoodenBed_01_F",[-2.1706,-2.68326,4.79094],-270],["Land_Can_V2_F",[-1.86835,-1.57632,1.34749],78]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
+            
+            case "Land_FuelStation_01_workshop_F": {
+                _plantillas = [[["Land_Bucket_painted_F",[-3.02768,4.67394,1.36981],340],["Land_ButaneCanister_F",[0.458643,4.75597,0.464888],-5]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
+            };
             
             default {
                 _edificio setVariable ["BUCHEDEG_amueblado", -1];
             };
         };
     };
-case "Land_i_Barracks_V1_F":
-{
-_plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0],["CUP_vojenska_palanda",[-12.9707,-2.98145,3.88763],90],["CUP_metalcrate",[3.45356,2.33209,3.8869],0],["CUP_sink",[6.73083,4.77417,4.2379],0],["Land_FlowerPot_01_F",[6.69263,2.01758,3.88719],0],["Land_WoodenBed_01_F",[6.0705,0.264404,3.88763],90],["Land_WoodenBed_01_F",[6.08801,-1.65674,3.88763],90],["Land_WoodenBed_01_F",[6.04565,-3.69574,3.88763],90],["Land_WoodenBed_01_F",[0.583984,-4.03003,3.88763],0],["Land_WoodenBed_01_F",[-2.63281,-4.03491,3.88763],0],["Land_WoodenBed_01_F",[-5.69629,-4.04749,3.88763],0],["Land_WoodenBed_01_F",[-8.07227,-4.08862,3.88763],0],["Land_WoodenBed_01_F",[-10.2607,-4.1106,3.88763],0],["Land_OfficeCabinet_01_F",[3.20288,2.34277,4.2668],180],["Land_OfficeCabinet_01_F",[0.996826,2.08276,4.2668],180],["Land_TableDesk_F",[-1.38013,0.354858,3.88763],0],["Land_ChairWood_F",[-0.729736,0.465881,3.43494],0],["Land_PaperBox_closed_F",[1.77905,4.44775,3.88763],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_2W05_F":
-{
-_plantillas = [[["Land_WoodenTable_large_F",[4.16514,-3.94405,1.02289],359.74],["Land_ChairWood_F",[4.2833,-4.99288,0.594582],-198.35],["Land_ChairWood_F",[3.22864,-3.83545,0.594582],-19.69],["Land_Notepad_F",[4.3736,-3.89014,1.4595],330.85],["Land_PencilRed_F",[4.10913,-3.56812,1.45998],64.27],["Land_DuctTape_F",[3.9126,-3.95233,1.4583],359.74],["Land_Tableware_01_cup_F",[3.73828,-4.17908,1.46266],359.74],["Land_TableDesk_F",[0.0141602,2.86645,0.995941],265.11],["Land_OfficeChair_01_F",[0.00219727,3.84351,1.22996],250.11],["Land_OfficeCabinet_01_F",[-2.00244,2.85645,1.64953],85.11],["Land_PaperBox_closed_F",[-3.08789,1.40576,0.594437],353.21],["Land_ShelvesWooden_F",[-2.87646,-3.31934,0.59444],353.21]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1W07_F":
-{
-_plantillas = [[["Land_Table_EP1",[-3.49841,-1.91229,0.54191],-271.56],["CUP_Kitchenstove_Elec",[1.98498,1.52179,0.1379],0.44],["CUP_kitchen_table_a",[1.12872,-5.26804,0.136271],35.63],["CUP_lekarnicka",[0.459229,1.53992,0.887566],0.44],["CUP_sink",[3.23169,1.49243,0.140564],0.44],["CUP_kitchen_chair_a",[1.99634,-4.36157,0.136271],35.63],["CUP_kitchen_chair_a",[0.32959,-5.0116,0.136271],15.63],["CUP_kitchen_chair_a",[0.809082,-6.10046,0.136271],85.63],["CUP_kitchen_chair_a",[2.17529,-5.82214,0.136271],180.63],["Land_Rug_01_F",[0.111084,-1.90198,0.136208],270.44],["Land_MobilePhone_old_F",[1.09814,-5.51392,0.551117],327.95],["Land_File_F",[0.893311,-5.1676,0.53952],56.91],["Land_File1_F",[1.05127,-4.92542,0.552177],303.71],["Land_PenBlack_F",[1.40161,-5.40125,0.546772],90.37],["Land_PencilRed_F",[1.42334,-5.18457,0.546879],44.31],["Fridge_01_closed_F",[3.37842,0.0148926,0.136257],0.44],["Land_ChairWood_F",[-2.75854,-1.92139,0.0811195],45.15],["Land_ChairWood_F",[-3.50708,-1.04932,0.0811195],345.15],["Land_ChairWood_F",[-4.34521,-1.9375,0.0811195],105.15],["Land_OfficeCabinet_01_F",[-1.43335,-3.59644,0.529636],90.44]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1W10_F":
-{
-_plantillas = [[["CUP_vojenska_palanda",[-3.67661,-0.246263,0.58894],0.07],["CUP_vojenska_palanda",[1.06362,-1.02165,0.58894],359.93],["CUP_vojenska_palanda",[3.89948,-0.246069,0.58894],0.07],["Land_FlowerPot_01_F",[-3.12695,2.73315,0.588913],0.07],["Land_FlowerPot_01_F",[0.0222168,3.21533,0.588913],0.07],["Land_OfficeCabinet_01_F",[-1.84863,2.95337,1.03191],180.07],["Land_PaperBox_closed_F",[-2.82556,-2.97632,0.588913],0.07],["Land_TableDesk_F",[0.0175781,1.71533,0.961275],0.07],["Land_ChairWood_F",[0.807129,1.51881,0.135306],230.07],["Land_ChairWood_F",[-0.814941,1.50684,0.135306],140.07],["Land_PenBlack_F",[0.34082,1.75269,1.37637],24.55],["Land_FMradio_F",[0.0786133,2.02783,1.5239],320.07],["Land_Notepad_F",[-0.259277,1.74023,1.37701],140.07],["Land_PencilYellow_F",[0.109863,1.56006,1.37702],267.69]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1W11_F":
-{
-_plantillas = [[["Land_Bench_EP1",[-5.64888,-1.05785,0.770939],0.53],["Land_TableDesk_F",[-2.04975,2.18337,1.12288],0.47],["CUP_Kitchenstove_Elec",[0.0749559,1.67957,0.137946],0.47],["CUP_sink",[1.30957,1.66937,0.141144],0.47],["Land_ChairWood_F",[-1.46777,1.86804,0.690552],210.47],["Land_ChairWood_F",[-2.17163,1.47363,0.690552],155.47],["Land_ChairWood_F",[-2.60376,2.81726,0.690552],5.47],["Land_ArmChair_01_F",[-7.69867,-1.16223,1.19291],20.53],["Land_OfficeCabinet_02_F",[-0.979492,3.34692,1.1356],120.47],["Land_Leaflet_01_F",[-2.35962,2.12402,1.53798],310.47],["Land_PenBlack_F",[-2.02295,2.5293,1.53769],244.69],["Fridge_01_closed_F",[2.14099,0.206787,0.137957],0.47],["Land_TableSmall_01_F",[-4.91846,-1,1.14145],240.53],["Land_CanOpener_F",[0.0761719,1.27685,0.551908],38.47],["Land_WaterBottle_01_full_F",[0.163574,1.06641,0.5519],308.47],["Land_TinContainer_F",[0.318359,1.45581,0.5519],68.47]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-_plantillas = [[["CUP_picture_b_02",[1.12798,4.85231,1.44867],-0.47],["Land_Bench_EP1",[-5.64888,-1.05785,0.770939],0.53],["Land_TableDesk_F",[-2.04975,2.18337,1.12288],0.47],["CUP_Kitchenstove_Elec",[0.0749559,1.67957,0.137946],0.47],["CUP_sink",[1.30957,1.66937,0.141144],0.47],["Land_ChairWood_F",[-1.46777,1.86804,0.690552],210.47],["Land_ChairWood_F",[-2.17163,1.47363,0.690552],155.47],["Land_ChairWood_F",[-2.60376,2.81726,0.690552],5.47],["Land_ArmChair_01_F",[-7.69867,-1.16223,1.19291],20.53],["Land_OfficeCabinet_02_F",[-0.979492,3.34692,1.1356],120.47],["Land_Leaflet_01_F",[-2.35962,2.12402,1.53798],310.47],["Land_PenBlack_F",[-2.02295,2.5293,1.53769],244.69],["Fridge_01_closed_F",[2.14099,0.206787,0.137957],0.47],["Land_TableSmall_01_F",[-4.91846,-1,1.14145],240.53],["Land_CanOpener_F",[0.0761719,1.27685,0.551908],38.47],["Land_WaterBottle_01_full_F",[0.163574,1.06641,0.5519],308.47],["Land_TinContainer_F",[0.318359,1.45581,0.5519],68.47]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1W09_F":
-{
-_plantillas = [[["Land_OfficeCabinet_02_F",[-4.27849,0.776488,1.35533],-271.21],["Land_Metal_rack_F",[-2.94841,3.21985,1.47484],-270.79],["CUP_Kitchenstove_Elec",[4.26276,0.645992,0.137932],0.21],["CUP_sink",[4.2605,1.90381,0.141113],0.21],["Land_FlowerPot_01_F",[-4.55615,-1.67383,0.853683],-270.79],["Land_FlowerPot_01_Flower_F",[2.18799,1.32288,1.3863],0.21],["Land_WoodenBed_01_F",[-3.0925,-1.74585,0.85373],-0.79],["Land_WoodenBed_01_F",[0.0161133,4.39624,0.856033],180.21],["Land_WoodenBed_01_F",[3.02405,4.39538,0.856033],180.21],["Land_Rug_01_F",[-3.05695,-1.10767,0.370438],89.21],["Land_TableSmall_01_F",[-1.4856,-1.67896,1.21968],-270.79],["Land_Fridge_01_open_F",[4.27307,-0.606934,0.137932],0.21],["Land_TableBig_01_F",[2.01538,3.21924,0.856033],90.21],["Land_ChairWood_F",[0.968018,3.19897,0.400763],180.21],["Land_ChairWood_F",[2.00781,2.46899,0.400763],270.21],["Land_ChairWood_F",[3.11743,3.19714,0.400763],0.21],["Land_ChairWood_F",[2.01001,3.9585,0.400763],90.21],["Land_CerealsBox_F",[2.15125,3.28418,1.27111],131.33],["Land_MobilePhone_old_F",[1.82678,3.33496,1.27028],232.31],["Leaflet_05_Stack_F",[2.27808,3.01221,1.27002],0.21]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1B01_F": // only takes 1 interior. Addendum: What?
-{
-_plantillas = [[["CUP_Skrin_bar",[-0.483921,-2.54648,0.13305],0],["Land_TableDesk_F",[-1.35599,-4.74057,0.54011],90],["Land_CashDesk_F",[-3.7175,-5.1531,0.54011],90],["Land_ChairWood_F",[-1.39532,-3.97107,0.0871],0],["Land_BakedBeans_F",[-1.67908,-4.80011,0.953255],0],["Land_Garbage_square5_F",[-2.80054,-4.85968,0.539658],0],["Land_Garbage_square5_F",[-3.36304,-2.93347,0.129196],0],["Land_Garbage_square5_F",[-0.443604,-1.17871,0.131161],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_2W04_F":
-{
-_plantillas = [[["Land_Boots_EP1",[-1.92258,0.890834,0.970484],-272],["Land_Boots_EP1",[-1.91111,-0.539836,0.970484],-272],["Land_GarbageBags_F",[-0.918494,1.16425,0.971089],-1.75],["Land_GarbageBags_F",[-0.871521,-1.60718,0.971089],-31.75],["Land_GarbageBags_F",[0.548096,-2.21161,0.971089],-91.75],["Land_Garbage_square5_F",[-0.90564,-0.00122309,0.970484],-31.75],["Land_Ground_sheet_folded_blue_F",[-2.17468,5.60791,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[-5.52557,5.86096,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[-2.77213,2.62219,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[-5.6333,2.90112,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[1.32635,6.67603,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[4.43066,5.97961,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[7.73804,6.38458,5.23822],90.11],["Land_Ground_sheet_folded_blue_F",[6.11194,3.4447,5.23822],90.11],["Land_Pillow_F",[-2.09033,5.26697,5.28822],90.11],["Land_Pillow_F",[-5.55396,5.43689,5.28822],90.11],["Land_Pillow_F",[-2.77301,2.2981,5.28822],90.11],["Land_Pillow_F",[-5.67285,2.52429,5.28822],90.11],["Land_Pillow_F",[1.23071,6.31305,5.28822],90.11],["Land_Pillow_F",[4.36182,5.60242,5.28822],90.11],["Land_Pillow_F",[7.65076,5.95343,5.28822],90.11],["Land_Pillow_F",[6.08887,3.12036,5.28822],90.11]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_2W03_F":
-{
-_plantillas = [[["Land_GarbageHeap_04_F",[-1.42803,-0.226821,0.996608],-166.05],["Land_Ground_sheet_blue_F",[-4.3615,1.32445,5.28363],357.84],["Land_Sleeping_bag_brown_F",[-2.05475,-0.0532098,5.28363],0.94],["Land_Pillow_F",[-4.40375,0.895142,5.39644],356.39],["Land_Pillow_F",[-1.92712,-0.395233,5.39644],358.41],["Land_Pillow_grey_F",[-4.26031,-0.245117,5.28363],176.97],["Land_Sleeping_bag_folded_F",[-4.68488,-0.243469,5.39644],356.39],["Land_EmergencyBlanket_01_stack_F",[-3.00061,0.0581055,5.39644],357.33],["Land_GarbageHeap_04_F",[-2.96082,-0.230125,0.996608],-166.05]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_VillageStore_01_F":
-{
-_plantillas = [[["Land_CashDesk_F",[-1.86461,1.42983,0.74716],-0.51],["Land_Icebox_F",[-0.0550334,1.31558,1.36906],-0.51],["Land_ShelvesWooden_F",[-0.0693389,-3.76697,0.753071],-0.51],["Land_ShelvesMetal_F",[-1.66797,-0.482178,0.750305],-0.51],["CUP_vegetables_box",[0.0307617,-1.58099,0.149199],-0.51],["Land_GarbageBag_open_F",[-2.54785,-4.09491,0.145473],-70.51],["Land_Metal_rack_Tall_F",[2.22504,-0.453918,0.747017],-0.51],["Land_Metal_rack_Tall_F",[3.55664,-3.71436,0.747017],-0.51],["Land_Metal_rack_F",[2.22321,-3.71143,0.747017],-0.51],["Land_Metal_rack_F",[3.55298,-0.453125,0.747017],-0.51],["Land_Can_V1_F",[2.3533,-0.694824,0.749626],115.35],["Land_Can_V1_F",[2.19824,-0.703613,0.749626],44.33],["Land_Can_V2_F",[2.06055,-0.667969,0.749626],224.58],["Land_Can_V3_F",[3.8501,-3.95435,0.749626],168.93],["Land_Money_F",[0.119629,1.49292,1.15408],309.49],["Land_Money_F",[-1.68848,1.48828,1.15814],99.49],["CUP_case_wall_unit_part_c",[1.52173,4.28394,0.14637],-0.51],["CUP_case_wooden_b",[-4.13647,2.70679,0.152817],-0.51],["CUP_case_wall_unit_part_c",[-3.92432,0.254639,0.144573],-0.51],["Land_Basket_F",[0.0908203,-2.8894,0.14859],-0.51]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_House_1W03_F":
-{
-_plantillas = [[["SmallTable",[0.801584,1.19811,0.694487],359.71],["Land_Photoframe_01_broken_F",[-1.72869,4.50194,0.310377],-117.28],["Land_WoodenCounter_01_F",[0.0146536,4.5158,0.294411],91.2],["Land_TableBig_01_F",[-3.52435,-4.6525,0.310492],359.71],["Land_Bench_F",[-3.52698,-5.6665,0.112633],359.71],["Land_Bench_F",[-3.52716,-3.6438,0.112633],179.71],["Land_Sofa_01_F",[-0.926262,-5.03833,0.310492],359.71],["Land_Pillow_old_F",[-3.6687,-4.86621,0.727138],350.93],["Land_FMradio_F",[0.00939941,1.44092,1.10961],359.71],["Land_MobilePhone_old_F",[-0.148438,0.948975,1.10976],327.97],["Land_Can_V2_F",[-0.169922,0.712891,1.10977],267.97],["Land_BottlePlastic_V1_F",[-1.71716,4.52026,0.727058],52.62],["Land_ButaneCanister_F",[-1.43408,4.55908,0.310496],359.71],["Land_ShelvesWooden_khaki_F",[0.840576,-1.95508,0.310492],359.71],["Land_WoodenBed_01_F",[-1.69678,2.68762,0.310492],269.71],["Land_OfficeCabinet_02_F",[-1.69385,0.862793,0.310492],269.71],["Land_Metal_rack_Tall_F",[-1.71143,6.00684,0.310495],359.71],["Land_Bucket_painted_F",[-1.04395,4.8772,0.310496],359.71],["Land_Bucket_F",[-0.453857,4.56104,0.310496],359.71],["Land_TableSmall_01_F",[-3.54114,-1.0166,0.669247],359.71],["Land_WaterBottle_01_full_F",[-3.35449,-1.03345,1.08432],359.71],["Land_ShelvesWooden_F",[0.0170898,-1.95508,0.310492],359.71]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_PoliceStation_01_F":
-{
-_plantillas = [[["CUP_office_table_a",[4.91359,-2.70477,4.60219],0.57],["Land_HumanSkeleton_F",[3.3506,-2.89373,1.04318],22.69],["Land_HumanSkull_F",[0.901732,-2.13809,1.92947],25.4],["Land_Bodybag_01_black_F",[3.25046,-2.9054,1.36328],22.69],["Land_Bucket_bloody_F",[2.83813,-2.05054,4.59922],0.57],["BloodPool_01_Large_New_F",[3.30652,-2.8479,4.60219],0.57],["Land_ArmChair_01_F",[3.58066,-5.56396,4.64087],90.57],["Land_Sofa_01_F",[0.843628,-5.5426,4.64087],90.57],["Land_Portable_generator_F",[1.88501,-8.29309,4.59986],0.57],["Land_MetalBarrel_F",[4.01294,-7.86841,4.59986],20.57],["Land_GymBench_01_F",[0.0275879,7.71558,1.04324],270.57],["Land_Sleeping_bag_blue_folded_F",[-3.02942,5.56934,4.59987],0.57],["Land_Sleeping_bag_brown_folded_F",[-3.30908,6.54346,4.59987],40.57],["Land_Ground_sheet_folded_F",[-3.27673,7.64771,4.59987],0.57],["Land_DuctTape_F",[3.67969,-3.54541,5.01727],270.57],["Land_Pliers_F",[3.58984,-3.86743,5.01727],202.57],["Land_Screwdriver_V1_F",[3.39307,-3.60962,5.01727],245.99],["Land_Flashlight_01_F",[3.11511,-4.1217,5.01727],50.95],["Land_Canteen_F",[0.786987,-4.89038,5.01707],340.57],["Land_Pillow_F",[-3.0551,7.58667,4.66269],41.71],["Land_Pillow_grey_F",[-3.29382,5.85254,4.69733],340.57],["Land_Pillow_old_F",[-3.30695,6.52881,4.69733],40.57],["Land_CampingChair_V2_F",[5.11853,-5.56885,4.59987],270.57],["Land_CampingChair_V2_F",[5.39819,-7.58545,4.59987],0.57],["Land_CampingTable_small_F",[4.98657,-7.58447,4.59987],0.57],["Land_CampingTable_F",[3.64453,-3.92255,4.59987],0.57],["Land_ButaneCanister_F",[5.14795,-7.3623,5.01395],0.57],["Land_GasCanister_F",[4.83154,-7.83545,5.01395],0.57],["Land_CerealsBox_F",[0.797974,-5.20703,5.03082],55.75],["Land_FoodContainer_01_F",[0.49707,-5.07227,5.01405],80.57],["Land_TinContainer_F",[3.96655,-7.6,5.01529],50.57],["Land_BakedBeans_F",[4.67554,-7.48926,5.01529],10.57],["Land_BottlePlastic_V1_F",[4.24976,-7.33203,5.01529],320.57],["Land_TacticalBacon_F",[4.5127,-7.75244,5.01529],0.57],["Land_Can_V3_F",[0.629272,-5.36108,5.01405],120.57],["Land_Can_Rusty_F",[0.968628,-5.0199,5.01405],120.57],["Land_OfficeCabinet_01_F",[1.90808,-2.64551,5.01405],0.57],["Land_PCSet_01_case_F",[5.08813,-5.58838,0.993242],0.57],["Land_PCSet_01_keyboard_F",[5.23877,-5.22607,1.45435],350.57],["Land_PCSet_01_mousepad_F",[5.59644,-5.31787,1.45435],0.57],["Land_PCSet_01_screen_F",[5.23877,-5.02637,1.65435],350.57],["Land_PCSet_01_mouse_F",[5.60645,-5.31787,1.48338],0.57],["Land_USMCLauncher_01_F",[5.46582,-6.1123,1.44071],0.57],["GroundWeaponHolder",[5.4458,-6.09814,1.44071],0.57],["Land_BagFence_01_short_green_F",[0.839356,-0.982422,0.994346],90.57],["Land_BagFence_01_short_green_F",[0.839356,1.26807,0.994346],90.57],["Land_BagFence_01_short_green_F",[1.96924,0.142578,0.994346],0.57],["Land_TableDesk_F",[5.27039,-5.35254,0.994324],270.57],["Land_ChairWood_F",[4.01099,-6.11768,0.54129],22.69],["Land_ChairWood_F",[4.68848,-6.08691,0.54129],355],["Land_ChairWood_F",[5.06604,-6.56396,0.54129],318.19],["Land_OfficeCabinet_02_F",[6.59229,-7.81641,1.45435],90.57],["Land_CratesShabby_F",[-1.05835,-5.12793,4.61697],0.57],["Land_PaperBox_closed_F",[-0.0534668,-7.55811,4.61697],0.57],["Land_PaperBox_closed_F",[-0.453247,-5.15332,0.998253],0.57],["Land_Bench_01_F",[1.36084,6.14209,0.987823],90.57],["Land_Bench_01_F",[1.36084,4.14209,0.987823],90.57],["Land_Bench_01_F",[1.36084,0.142078,0.987823],90.57],["Land_Bench_01_F",[1.36084,2.14209,0.987823],90.57],["Land_Bench_01_F",[4.86084,6.14209,0.987823],270.57],["Land_Bench_01_F",[4.86084,4.14209,0.987823],270.57],["Land_Bench_01_F",[4.86084,0.142078,0.987823],270.57],["Land_Bench_01_F",[4.86084,2.14209,0.987823],270.57],["Land_Bench_01_F",[-1.63916,6.14209,0.987823],90.57],["Land_Bench_01_F",[-1.63916,4.14209,0.987823],90.57],["Land_Bench_01_F",[-1.63916,0.142078,0.987823],90.57],["Land_Bench_01_F",[-1.63916,2.14209,0.987823],90.57],["Land_Bench_01_F",[-5.13916,6.14209,0.987823],270.57],["Land_Bench_01_F",[-5.13916,4.14209,0.987823],270.57],["Land_Bench_01_F",[-5.13916,0.142078,0.987823],270.57],["Land_Bench_01_F",[-5.13916,2.14209,0.987823],270.57],["Land_ChairWood_F",[-3.64453,-3.49805,0.54129],22.69],["Land_Bandage_F",[3.11975,-3.43604,5.0179],12.29],["Land_DisinfectantSpray_F",[3.44739,-4.18115,5.01855],28.47],["Land_BottlePlastic_V2_F",[3.19019,-4.44775,5.0179],348.47],["Land_Money_F",[1.9397,-2.57227,5.52008],270.57],["Land_Map_F",[5.36267,-5.5332,1.45435],270.57],["Land_VitaminBottle_F",[0.89563,-5.35254,5.01405],0.57],["Land_PainKillers_F",[0.647217,-5.20801,5.01405],50.57],["Land_PenBlack_F",[5.44629,-4.97266,1.45455],225.57],["Land_File_F",[5.67798,-5.33447,1.45455],80.57]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_Offices_01_V1_F":
-{
-_plantillas = [[["Land_Sofa_01_F",[0.495095,-4.14843,1.37311],0],["Land_Photoframe_01_F",[-0.120139,1.91505,2.8394],90],["Land_FlowerPot_01_F",[-9.42092,4.17384,1.03768],90],["Land_CratesPlastic_F",[-11.8936,4.22559,1.13466],90],["Land_FireExtinguisher_F",[0.311502,3.62208,5.18504],90],["Land_OfficeCabinet_01_F",[-12.7959,4.04884,1.6555],-180],["Land_OfficeCabinet_01_F",[0.0790796,3.17384,1.6955],-180],["Land_PortableSpeakers_01_F",[12.0791,-4.07616,13.5161],-180],["Land_FlowerPot_01_F",[9.32908,-3.45214,4.93747],-180],["Land_PaperBox_01_small_closed_brown_F",[12.0791,-0.827141,12.832],90],["Land_Shovel_F",[14.458,0.801765,1.93272],-180],["Land_Rug_01_F",[11.0791,-6.32714,0.900431],15],["Land_Sacks_heap_F",[4.84275,-0.996086,1.28813],-180],["Land_Sack_F",[10.3291,0.422859,1.31227],90],["Land_Printer_01_F",[11.9541,-0.827141,13.6693],90],["Land_PCSet_01_keyboard_F",[12.2041,-4.07616,13.4921],-180],["Land_PCSet_01_mousepad_F",[12.2041,-3.46191,13.4877],30],["Land_PCSet_01_mouse_F",[12.2041,-3.45214,13.5166],-15],["Land_PCSet_01_screen_F",[11.9541,-4.07714,13.7388],-180],["Land_PCSet_01_case_F",[12.0791,-4.70116,12.8964],-180],["Land_ChairWood_F",[10.8799,-3.89257,0.914341],90],["Land_GamingSet_01_powerSupply_F",[11.9541,-4.32812,13.5088],-240],["Land_PlasticBucket_01_closed_F",[10.5791,-0.452141,1.13771],90],["Land_Microwave_01_F",[11.0478,0.165047,1.552],-180],["Fridge_01_closed_F",[10.3291,-0.702141,13.1574],90],["Land_WaterCooler_01_new_F",[5.70408,-0.576164,13.3709],90],["Land_WaterCooler_01_new_F",[9.32908,-4.57714,9.53659],0],["Land_Metal_rack_F",[14.4541,0.798836,1.81499],0],["Land_Metal_rack_F",[11.3291,0.172859,1.81499],-180],["Land_Bucket_painted_F",[13.2138,-0.67675,12.7365],90],["Land_Bucket_F",[11.6064,0.149422,1.17802],90],["Land_PortableLongRangeRadio_F",[11.9365,-3.32812,13.4996],-210],["Land_MobilePhone_smart_F",[11.8291,-3.45214,13.4886],-15],["OfficeTable_01_new_F",[12.3291,-0.701164,13.0618],90],["OfficeTable_01_new_F",[9.57908,-3.20214,1.33741],-180],["OfficeTable_01_new_F",[10.7041,-4.20116,1.33741],-180],["OfficeTable_01_new_F",[12.0791,-3.82714,13.0617],-180],["Land_OfficeChair_01_F",[12.8291,-4.07714,13.3139],15],["Land_OfficeCabinet_02_F",[5.07908,0.673836,13.4055],-180],["Land_OfficeCabinet_01_F",[11.3291,-0.451164,1.6955],90],["Land_OfficeCabinet_01_F",[11.0791,-0.577141,13.4196],90],["Land_FlowerPot_01_Flower_F",[8.32908,3.54981,5.61536],90],["Land_FlowerPot_01_Flower_F",[9.32908,1.79786,1.71607],-180],["Land_ArmChair_01_F",[8.95408,2.92481,1.39879],-180],["Land_PaperBox_01_small_destroyed_brown_F",[7.70408,3.42286,12.8453],90],["Land_PaperBox_01_small_open_brown_F",[5.57908,3.17384,12.8379],-15],["Land_PaperBox_01_small_closed_white_med_F",[9.07908,7.04884,1.5216],-195],["Land_PaperBox_01_small_closed_white_med_F",[9.07908,7.29786,1.10723],90],["Land_PaperBox_01_small_closed_brown_IDAP_F",[9.07908,6.67384,1.10518],90],["Land_PaperBox_01_small_closed_brown_F",[8.57908,3.29884,12.832],90],["Land_BarrelEmpty_grey_F",[10.7041,7.04688,1.31975],0],["Land_Bench_F",[2.70603,3.29786,9.06079],-180],["Land_MetalCase_01_small_F",[10.0439,2.90723,2.62263],-180],["Land_BarrelEmpty_grey_F",[10.0791,2.17384,1.31975],-30],["Land_CerealsBox_F",[10.0791,3.17286,1.89312],30],["Land_WoodenBox_F",[14.2197,5.18555,0.914998],-180],["Land_WoodenBox_F",[14.2197,5.18555,1.3496],-180],["OfficeTable_01_new_F",[14.2041,2.79884,2.15542],0],["OfficeTable_01_new_F",[8.82908,3.42188,13.7974],90],["OfficeTable_01_old_F",[8.82908,3.42188,13.0474],90],["OfficeTable_01_old_F",[14.2041,2.79884,1.33741],0],["Land_OfficeCabinet_02_F",[10.0791,2.92384,1.6955],-180]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_Garage_V1_F":
-{
-_plantillas = [[["Land_Pallet_vertical_F",[-1.50049,2.52451,0.891365],-270],["Land_CanisterFuel_Red_F",[0.126464,-2.13174,0.429497],330],["Land_ButaneTorch_F",[0.296875,-2.17723,1.09544],330],["Land_VitaminBottle_F",[0.865966,-2.26113,0.525093],-30],["Land_ButaneCanister_F",[0.384277,-1.52954,0.431183],20],["Land_ButaneTorch_F",[1.23657,-2.27578,1.27891],-150],["Land_VitaminBottle_F",[0.865966,-2.26113,0.525093],-30],["Land_DustMask_F",[0.927734,-1.93042,0.433449],180],["Land_Matches_F",[1.37451,-2.35049,0.797935],0],["Land_Bucket_clean_F",[1.81982,-2.34903,0.294365],0],["Land_CanisterFuel_Blue_F",[0.123534,-2.13125,0.429481],330],["Land_CanisterFuel_Red_F",[0.497558,-2.22573,0.429489],75],["Land_ButaneCanister_F",[0.384277,-1.52954,0.431183],20],["Land_Basket_F",[4.24853,-2.22647,0.500496],0],["Land_Bucket_F",[5.50342,-0.575588,1.90014],0],["Land_CanOpener_F",[5.5542,-0.0428727,0.246269],0],["Land_FoodContainer_01_F",[5.5459,-0.412109,0.382797],0],["Land_ButaneTorch_F",[0.249511,-1.97598,1.10416],-45],["Land_FoodContainer_01_F",[-0.250489,-2.22598,0.383796],0],["Land_PlasticCase_01_small_F",[-0.264161,-1.97598,0.385414],0],["Land_TinContainer_F",[-1.24953,-2.05049,0.89835],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_Slum_House01_F":
-{
-_plantillas = [[["Land_CanisterPlastic_F",[-1.42668,-1.49434,0.34782],90],["Land_Basket_F",[0.850666,0.597452,0.344494],-120],["Land_Bucket_F",[0.893518,-0.991449,0.344409],211.39],["Land_Shovel_F",[1.55707,-0.00151002,0.859306],260],["Land_Shovel_F",[1.55707,-0.00151002,0.859306],260],["Land_CanisterPlastic_F",[-1.42668,-1.49434,0.34782],90]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_Shed_Ind_F":
-{
-_plantillas = [[["Land_Camera_01_F",[-7.46147,0.331328,0.921127],-87.15],["Land_CinderBlocks_F",[4.0688,-1.0759,-0.00965142],-45],["Land_CastleRuins_01_basalt_F",[-4.8587,0.345887,3.99986],270],["Land_ChairWood_F",[-7.52153,-1.72238,0.0566328],-75],["Land_Sacks_heap_F",[-7.24663,1.30496,0.390785],-180],["Land_Sacks_heap_F",[-4.91797,1.28467,0.409622],-180],["Land_Pallets_stack_F",[-0.598633,1.6001,0.407898],60],["Land_Portable_generator_F",[-0.598389,0.267578,0.465996],0],["Land_Tyre_F",[-8.39844,0.302734,0.453712],0],["Land_Tyre_F",[-8.21143,-0.578125,0.477127],90],["Land_Tyre_F",[-6.95898,-1.09961,0.477127],45],["Land_Axe_F",[-8.24561,-0.583739,1.11993],180],["Land_Shovel_F",[-8.51465,1.24902,0.891125],180],["Land_StallWater_F",[-3.8042,-1.27686,0.511623],90],["Land_BarrelWater_F",[-5.35059,-1.30078,0.475273],0],["Land_WoodenLog_F",[-7.12939,1.47925,1.34589],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_CarService_F":
-{
-_plantillas = [[["Land_ToolTrolley_01_F",[-4.7163,-0.427365,0.999079],75],["Land_CanisterPlastic_F",[-4.67431,-4.61194,0.877817],71.5],["Land_Antibiotic_F",[2.65918,-1.83777,1.07515],22],["Land_BakedBeans_F",[4.98536,-0.769162,1.423],-6],["Land_TacticalBacon_F",[5.37793,-0.676758,1.42126],254],["Land_BakedBeans_F",[6.04883,-1.08545,1.42126],149],["Land_Can_V1_F",[5.51758,-0.980957,1.42126],254],["Land_Can_V2_F",[6.21924,-0.808105,1.42126],149],["Land_Can_V3_F",[5.81055,-0.887695,1.42126],0],["Land_Can_Rusty_F",[5.04688,-1.02686,1.42126],0],["Land_Can_Dented_F",[6.38916,-0.966309,1.42126],0],["Land_ShelvesWooden_F",[2.66211,-3.32861,0.887817],90],["Land_ShelvesWooden_F",[2.66211,-3.32861,0.887817],90],["Land_GasCooker_F",[4.5542,-1.2085,1.41866],0],["Land_PaperBox_open_empty_F",[0.249389,-0.419434,0.877817],0],["Land_PaperBox_open_empty_F",[0.249389,-3.49316,0.877817],0],["Land_PaperBox_open_full_F",[0.249268,-1.91943,0.877826],0],["Land_Bench_01_F",[-4.69287,-2.18506,0.877842],90],["Land_WeldingTrolley_01_F",[-2.70239,-4.59521,0.877826],70],["Land_Metal_wooden_rack_F",[4.62524,-0.454102,0.887833],0],["Land_ToolTrolley_02_F",[-2.70239,-0.41748,0.877808],150],["Land_BarrelSand_F",[-4.69531,-5.31836,0.877808],0],["Land_BarrelSand_grey_F",[-3.70508,-5.31836,0.877808],0],["Land_WeldingTrolley_01_F",[-3.70679,-3.41309,0.877826],150],["Land_BarrelWater_F",[-4.22314,-5.31836,0.877808],0],["Land_TinContainer_F",[5.03027,-1.12183,1.42126],50],["Land_PlasticBucket_01_open_F",[-4.16992,-2.18506,0.877808],0],["Land_PlasticBucket_01_closed_F",[-3.69824,-2.18506,0.877808],0],["Land_Meter_02_F",[-4.70459,-0.418457,2.04282],90],["Land_MetalWire_F",[-2.70459,1.08154,0.896835],0],["Land_ExtensionCord_F",[-3.69824,1.0835,0.897629],0],["Land_SatellitePhone_F",[2.08398,-0.425293,1.29282],0],["Land_TorqueWrench_01_F",[-2.20313,-0.419434,1.29782],0],["Land_Map_F",[2.39819,-0.405273,1.29282],150],["Land_FlowerPot_01_F",[6.4624,-0.457031,0.887826],0],["Land_ShelvesWooden_F",[1.65479,-3.33203,0.887802],90],["Land_Portable_generator_F",[-2.20264,-2.90869,0.877863],180]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_u_Addon_02_V1_F":
-{
-_plantillas = [[["Land_CanisterFuel_Blue_F",[-3.13876,1.15385,0.575845],-15],["Land_Pallet_vertical_F",[-3.23984,-1.41647,1.03994],0],["Land_BarrelEmpty_grey_F",[-3.01767,1.89213,0.696222],0],["Land_CratesPlastic_F",[1.40909,1.89799,0.530389],90],["Land_ChairWood_F",[2.76553,1.79447,0.29046],48]],[["Land_PaperBox_01_open_boxes_F",[-2.41862,-1.31686,0.922111],90],["Land_Sacks_heap_F",[0.391932,-1.04732,0.704307],45],["Land_Basket_F",[-2.90104,1.78666,0.630668],15],["Land_Basket_F",[1.1224,1.92143,0.627556],0],["Land_MetalBarrel_empty_F",[2.06381,1.814,0.703453],-75]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_Stone_Shed_V1_F":
-{
-_plantillas = [[["Land_WoodenTable_small_F",[-2.89829,0.718148,0.669911],270],["Land_ChairWood_F",[-2.39438,0.757211,0.228291],65],["Land_ShelvesWooden_F",[1.19924,0.856938,0.669911],270],["Land_PlasticBucket_01_open_F",[-3.14243,-1.59142,0.468266],-150],["Land_CratesShabby_F",[1.25308,2.65077,1.00773],0],["Land_BarrelWater_F",[1.50073,-1.4324,0.234035],0],["Land_WoodenTable_small_F",[-2.89829,0.718392,0.669927],270],["Land_ChairWood_F",[-2.36704,0.718881,0.228276],65],["Land_CampingChair_V1_F",[-3.39868,0.739746,0.228363],295]],[["Land_CratesWooden_F",[-1.54333,-1.59125,0.228119],75],["Land_ShelvesWooden_F",[1.19924,0.856938,0.669911],270],["Land_Photos_V6_F",[3.38882,2.44666,0.554692],50],["Land_TinContainer_F",[3.4982,1.99745,0.964024],-32],["Land_PencilRed_F",[1.25537,0.827515,1.08492],33]],[["Land_Tableware_01_napkin_F",[0.830933,0.900879,1.08492],33],["Land_Tableware_01_fork_F",[0.599487,0.88501,1.08498],23],["Land_Tableware_01_knife_F",[1.03613,0.759033,1.08492],135],["Land_PaperBox_open_empty_F",[0.35437,-1.6582,0.23407],90],["Land_CanisterPlastic_F",[1.51929,-1.85889,0.234062],0]],[["Land_CanisterFuel_Red_F",[3.35681,2.25513,0.234062],210],["Land_CanisterFuel_Blue_F",[3.35681,1.85889,0.234062],150],["Land_WoodenBox_F",[2.8606,-1.59131,0.23407],0],["Land_FMradio_F",[-3.08698,0.876465,1.08492],240],["Land_Tableware_01_tray_F",[0.793335,0.85791,1.09992],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_Stone_HouseSmall_V1_F":
-{
-_plantillas = [[["Land_Sacks_heap_F",[-1.23016,-1.92039,1.61942],90],["Land_MetalBarrel_empty_F",[-2.38641,-2.06102,1.64298],-80],["Land_BarrelWater_F",[-2.37868,-0.842773,1.64298],-190],["Land_ChairWood_F",[-3.9074,0.460956,1.20494],-28],["Land_ChairWood_F",[-2.49285,0.460468,1.20494],331],["Land_ChairWood_F",[-3.32239,1.4646,1.20494],160],["Land_WoodenTable_large_F",[-3.20605,0.464355,1.61963],270],["Land_WoodenTable_small_F",[-5.29004,-3.2334,1.61942],270],["Land_Matches_F",[-3.31592,0.709961,2.03463],180]],[["Land_PenBlack_F",[-2.98193,0.220215,2.03463],240],["Land_PencilYellow_F",[-3.47607,0.46875,2.03463],150],["Land_Canteen_F",[-5.2417,-3.00049,2.03442],198],["Land_BottlePlastic_V2_F",[-5.39063,-3.20459,2.03442],260],["Land_Can_V3_F",[-5.2063,-3.4502,2.03442],310],["Land_FoodContainer_01_F",[-5.09619,-3.32935,2.03442],267],["Land_TacticalBacon_F",[-3.29688,0.213867,2.03463],30],["Land_WoodenBed_01_F",[-0.890625,-1.6499,1.61942],180],["Land_Pillow_F",[-0.885742,-1.98193,2.03442],180]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_House_Small_02_V1_F":
-{
-_plantillas = [[["Land_Sleeping_bag_brown_folded_F",[3.84399,-2.66361,0.827129],90],["Land_Ground_sheet_folded_F",[4.04907,-2.72123,1.10575],-285],["Land_Sleeping_bag_brown_F",[0.0789557,-2.73108,0.593687],270],["Land_SurvivalRadio_F",[3.91748,-2.11096,0.94245],60],["Land_Ground_sheet_folded_khaki_F",[-1.50066,-1.61673,1.30899],-180],["Land_Sleeping_bag_brown_folded_F",[-1.54705,-1.14856,0.977013],45],["Land_CampingChair_V1_F",[3.31775,2.81506,0.399124],240],["Land_CampingChair_V1_F",[4.13599,2.27051,0.399124],207],["Land_CampingTable_F",[3.49414,2.17603,0.399124],210],["Land_Sleeping_bag_blue_F",[-1.27979,-0.0532227,0.618607],270],["Land_Sleeping_bag_brown_F",[-1.2998,1.85034,0.618607],270],["Land_Sleeping_bag_F",[0.0598145,1.85303,0.593687],270],["Land_FoodContainer_01_F",[3.58154,2.29468,0.814124],0],["Land_TacticalBacon_F",[3.47119,2.06567,0.814124],180],["Land_MobilePhone_smart_F",[3.60394,2.03418,0.814124],270],["Land_BottlePlastic_V1_F",[3.67676,2.21997,0.814124],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "i_House_Big_01_b_base_F":
-{
-_plantillas = [[["Land_FlowerPot_01_F",[-4.17919,-4.98271,0.484679],-180],["Land_FlowerPot_01_Flower_F",[-3.97021,1.39229,1.24438],15],["Land_ArmChair_01_F",[-4.13284,-2.2771,0.778854],150],["Land_FlowerPot_01_F",[-2.81201,-7.19901,0.480445],90],["Land_Basket_F",[-4.0747,2.36837,0.844496],90],["Land_PlasticBucket_01_open_F",[-4.09814,1.4043,0.829498],90],["Land_TableSmall_01_F",[-3.23608,-2.27417,0.777561],180],["Land_WoodenBed_01_F",[-1.34595,-7.13086,0.778976],180],["Land_Sink_F",[-4.0105,-0.689697,0.779556],270],["Land_ShelvesWooden_khaki_F",[-0.792358,-0.62384,0.778488],180],["Land_FlowerPot_01_Flower_F",[-2.8081,-7.2727,1.15883],90],["Land_MetalBarrel_empty_F",[-4.07177,2.29371,0.922667],90],["Land_FoodContainer_01_White_F",[-3.81909,-0.619873,0.779053],150],["Land_RattanTable_01_F",[-3.13257,-4.09082,0.481029],0],["Land_ChairWood_F",[-2.89673,-4.73267,0.027813],20],["Land_ChairWood_F",[-3.33386,-3.54175,0.027813],195],["Land_Tableware_01_stackOfNapkins_F",[-3.19653,-4.09082,0.896029],0],["Land_WoodenTable_large_F",[-1.15259,-2.92114,0.778488],0],["Land_Tableware_01_cup_F",[-1.37109,-2.90674,1.19349],0],["Land_Tableware_01_fork_F",[-1.07703,-3.04639,1.19351],45],["Land_Tableware_01_knife_F",[-1.09521,-2.87476,1.19349],315],["Land_Tableware_01_plate_F",[-1.2041,-2.92114,1.19849],0],["Land_Tableware_01_napkin_F",[-0.925415,-2.92114,1.19349],0],["Land_Tableware_01_tray_F",[-1.2041,-2.92114,1.19349],0],["Land_ShelvesWooden_khaki_F",[1.42889,-0.62384,0.778488],180]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "i_House_Big_02_b_base_F":
-{
-_plantillas = [[["Land_ShelvesWooden_blue_F",[-4.25422,-4.04848,4.16836],90],["Land_ShelvesWooden_khaki_F",[-4.25422,4.07603,4.16836],90],["Land_OfficeCabinet_01_F",[4.33978,4.08784,4.16836],90],["Land_FlowerPot_01_Flower_F",[4.31316,2.8607,1.02043],-180],["Land_FMradio_F",[1.6989,4.36436,4.5629],-254],["Land_PortableSpeakers_01_F",[4.35458,2.8916,4.57773],-180],["Land_MobilePhone_old_F",[1.66809,3.88239,4.58023],135],["Land_ShelvesWooden_khaki_F",[1.51726,4.30113,0.736034],0],["Land_FlowerPot_01_F",[3.2509,-5.46206,0.713149],90],["Land_FlowerPot_01_Flower_F",[3.2509,-6.81129,1.34782],90],["Land_FlowerPot_01_Flower_F",[4.35132,2.15112,1.68274],0],["Land_WoodenBed_01_F",[-2.60425,-5.02618,4.16836],90],["Land_TableDesk_F",[4.25488,4.22485,4.54336],90],["Land_LargeWoodenBox_F",[-2.95392,2.1629,0.773903],0],["Land_CratesShabby_F",[-0.602539,2.1629,0.797516],0],["Land_CratesWooden_F",[1.3186,2.1629,0.797516],0],["Land_ChairWood_F",[3.86841,3.64465,4.08823],230],["Land_ChairWood_F",[2.41309,-5.07031,0.25815],30],["Land_ChairWood_F",[4.0979,-5.07031,0.25815],330],["Land_ChairWood_F",[3.2509,-6.15454,0.25815],180],["Land_TableBig_01_F",[3.2509,-5.07031,0.713169],0],["Land_TableSmall_01_F",[4.4209,2.1629,1.02043],0],["Land_ArmChair_01_F",[1.74384,-5.46582,4.22704],200],["Land_ArmChair_01_F",[-0.75354,-5.46582,4.22704],160],["Land_Basket_F",[1.35156,4.19971,4.5854],0],["Land_GarbageBin_01_F",[-2.84326,-2.05225,0.758591],345],["Land_Can_V2_F",[4.46582,2.15112,1.43543],0],["Land_Can_V3_F",[4.27832,2.06982,1.43543],90],["Land_Can_Rusty_F",[4.37256,2.25293,1.43543],270],["Land_WaterBottle_01_full_F",[4.46582,1.92676,1.43543],315],["Land_WaterBottle_01_empty_F",[1.66895,3.72144,4.5854],205],["Land_Rug_01_F",[0.495117,-5.69897,3.68336],0],["Land_BottlePlastic_V1_F",[4.16943,1.92676,1.43543],0],["Land_BottlePlastic_V2_F",[1.76855,4.25,4.5854],160]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "i_House_Small_01_b_base_F":
-{
-_plantillas = [[["Land_TableBig_01_F",[-2.16441,-0.984987,0.697113],330],["Land_ChairWood_F",[-1.89781,-1.67249,0.258186],330],["Land_ChairWood_F",[-1.36246,-0.639901,0.258186],60],["Land_ArmChair_01_F",[-4.24009,-1.349,0.760437],180],["Land_PensAndPencils_F",[-4.42588,-2.56384,0.731072],-87],["Land_BakedBeans_F",[-4.17786,-2.74738,0.681072],0],["Land_TacticalBacon_F",[-4.41089,-2.83398,0.681072],0],["Land_Tableware_01_cup_F",[-4.27209,-2.48108,0.691072],0],["Land_ArmChair_01_F",[-4.05943,1.06995,0.725364],300],["Land_ArmChair_01_F",[-3.90416,-2.91028,0.753014],60],["Land_ArmChair_01_F",[-5.80725,-0.797852,0.757751],210],["Land_TableSmall_01_F",[-4.89252,-0.799805,0.731072],270],["Land_ShelvesWooden_F",[-5.70197,2.69142,0.725365],270],["Land_ShelvesWooden_khaki_F",[-0.903078,2.69142,0.725365],270],["Land_RiceBox_F",[-2.51744,2.66321,1.22684],-19],["Land_Can_Rusty_F",[-1.66002,2.51184,1.17135],28],["Land_Can_V1_F",[-2.56757,2.3063,1.17135],213],["Land_Can_V2_F",[-2.37939,2.81665,1.17135],153],["Land_Can_V3_F",[-1.8512,2.74142,1.17135],293],["Land_Basket_F",[-4.37095,-0.668824,0.626128],0],["Land_WoodenBed_01_F",[-1.3524,-2.58142,0.729781],-90],["Land_Bucket_F",[-1.67564,0.680664,0.728241],0],["Land_WoodenTable_large_F",[-2.30225,2.69142,0.725365],270],["Land_CampingChair_V1_F",[-2.01441,1.85254,0.270096],230],["Land_CampingChair_V1_F",[-2.3269,3.48413,0.270096],310],["Land_FoodContainer_01_F",[-2.59192,1.85254,0.270096],200],["Land_TinContainer_F",[-4.86105,-0.801147,1.14607],20],["Land_PenBlack_F",[-4.84961,-0.712524,1.14607],110],["Land_Pillow_F",[-1.35254,-2.30664,1.14478],0],["Land_Pillow_old_F",[-1.35254,-2.85474,1.14478],180]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "i_Stone_House_Big_01_b_base_F":
-{
-_plantillas = [[["Land_Camping_Light_off_F",[-3.27483,-1.2476,4.08806],90],["Land_Rope_01_F",[-3.27336,-1.65385,3.34361],-15],["Land_RattanTable_01_F",[-3.27873,-2.0267,3.34361],0],["Land_BakedBeans_F",[0.111401,-0.483441,3.92611],299],["Land_Bandage_F",[-2.52239,-2.86528,3.95315],-32],["Land_Basket_F",[-2.55142,-1.99878,0.367134],180],["Land_Can_V1_F",[0.254883,-0.282368,3.92611],240],["Land_Can_V2_F",[0.0300293,-0.643021,3.92611],190],["Land_Can_V3_F",[-0.113403,-0.399322,3.92611],110],["Land_BottlePlastic_V1_F",[-0.127808,-0.113892,3.92611],150],["Land_CerealsBox_F",[0.261597,0.0322266,3.92611],120],["Land_RiceBox_F",[0.0253906,0.186768,3.92611],60],["Land_GamingSet_01_camera_F",[-2.94952,-2.18066,4.35815],0],["Land_GamingSet_01_controller_F",[-3.44019,-2.03809,3.75861],90],["Land_GamingSet_01_console_F",[-3.40332,-1.74817,3.75861],0],["Land_GamingSet_01_powerSupply_F",[-3.60254,-1.82861,3.75861],-60],["Land_ChairWood_F",[-2.62134,-1.33691,3.34361],150],["Land_TablePlastic_01_F",[-0.00183105,-0.286629,3.34361],0],["Land_RattanChair_01_F",[0.503906,-0.786499,3.34361],330],["Land_RattanChair_01_F",[-0.502075,0.213257,3.34361],150]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_i_House_Small_03_V1_F":
-{
-_plantillas = [[["Land_File_F",[-5.15211,-0.975126,0.740405],-140],["Land_WoodenBed_01_F",[-4.38428,0.509249,0.724895],-90],["Land_ArmChair_01_F",[-6.01611,-0.799051,0.766396],275],["Land_ArmChair_01_F",[2.80126,-5.64895,0.763079],15],["Land_Basket_F",[-0.35694,1.28903,0.627793],15],["Land_Bucket_clean_F",[2.21924,-0.429344,0.744659],0],["Land_CampingTable_F",[-3.69312,-3.96924,0.744659],90],["Land_CratesShabby_F",[-3.69312,-2.42657,0.744659],90],["Land_GarbageBin_01_F",[3.9696,-1.94333,0.744659],240],["Land_GarbageBin_03_F",[3.21313,-1.13562,0.744659],180],["Land_OfficeCabinet_01_F",[-0.321777,3.97559,0.727654],180],["Land_OfficeCabinet_01_F",[1.45337,3.97571,0.727654],180],["Land_PCSet_01_case_F",[-0.321777,2.974,0.727654],270],["Land_PCSet_01_keyboard_F",[-0.321777,2.47571,1.14265],180],["Land_PCSet_01_mousepad_IDAP_F",[0.0839844,2.50067,1.14265],180],["Land_PCSet_01_mouse_F",[0.0839844,2.50171,1.17165],180],["Land_PCSet_01_screen_F",[-0.322266,2.22424,1.34265],180],["Land_TableDesk_F",[-0.321777,2.47571,0.727654],180],["Land_ChairWood_F",[-0.321777,1.67719,0.272385],0],["Land_TacticalBacon_F",[2.43579,1.37619,1.46076],0],["Land_BakedBeans_F",[-4.21412,0.691622,1.203],-54],["Land_Can_V1_F",[-4.44751,0.365265,1.203],-34],["Land_Can_V2_F",[-4.04834,0.403351,1.203],-94],["Land_TableDesk_F",[2.43579,1.37619,0.727654],180],["Land_Tableware_01_cup_F",[2.59644,1.22595,1.14265],180],["Land_Tableware_01_fork_F",[2.30273,1.27588,1.14265],240],["Land_Tableware_01_knife_F",[2.56909,1.52612,1.14265],300],["Land_Tableware_01_napkin_F",[2.29126,1.52612,1.14265],0],["Land_Tableware_01_plate_F",[2.43579,1.37619,1.15265],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "i_Shop_02_b_base_F":
-{
-_plantillas = [[["Land_WoodenBed_01_F",[-2.1706,-2.68326,4.79094],-270],["Land_Can_V2_F",[-1.86835,-1.57632,1.34749],78],["Land_Can_V2_F",[-1.74713,-1.66383,1.34749],29.2],["Land_Basket_F",[0.31109,-1.26724,0.848776],-180],["Land_Sacks_goods_F",[-0.616645,-3.18912,0.980673],90],["Land_DustMask_F",[1.43011,-3.82135,0.904518],0],["Land_Shovel_F",[1.92889,-1.28564,0.918243],0],["Land_PaperBox_01_small_ransacked_brown_F",[0.45874,-0.124512,0.898399],0],["Land_ShelvesWooden_blue_F",[-3.30298,-2.9942,0.848778],-180],["Land_ShelvesWooden_blue_F",[-3.30298,-0.994202,0.848778],-180],["Land_ShelvesWooden_khaki_F",[2.70044,-0.996094,0.848778],0],["Land_ShelvesWooden_khaki_F",[2.70044,-2.99609,0.848778],0],["Land_ArmChair_01_F",[1.24761,2.36459,4.85879],-120],["Land_Bandage_F",[3.12603,-1.71158,1.77569],-28],["Land_Bandage_F",[3.04089,-1.53027,1.77569],-68],["Land_Bandage_F",[2.97461,-1.87183,1.77569],-8],["Land_CerealsBox_F",[1.42334,-2.41907,1.30853],180],["Land_RiceBox_F",[1.22559,-2.41907,1.30853],180],["Land_TableDesk_F",[2.9762,-1.70947,1.34749],0],["Land_TableDesk_F",[-2.01062,-1.51404,0.898399],90],["Land_PenBlack_F",[-1.63953,-1.50562,1.31339],90],["Land_PencilYellow_F",[-1.76001,-1.68604,1.31339],30],["Land_Notepad_F",[-1.97119,-1.67615,1.31339],-15],["Land_File_F",[-2.31018,-1.58643,1.31339],-48],["Land_WaterBottle_01_full_F",[1.30444,-2.19751,1.30853],0],["Land_TacticalBacon_F",[1.1114,-2.18115,1.30853],45],["Land_Can_V1_F",[1.63403,-2.19751,1.30853],90],["Land_Can_V3_F",[1.81226,-2.28479,1.30853],120],["Land_Can_Rusty_F",[1.81226,-2.11084,1.30853],145],["Land_WoodenTable_small_F",[1.42334,-2.31323,0.848776],0],["Land_Sack_F",[0.75,-3.29675,0.898403],180],["Land_Sacks_heap_F",[-1.60425,-3.17615,0.980673],90]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-
-case "Land_FuelStation_01_workshop_F":
-{
-_plantillas = [[["Land_Bucket_painted_F",[-3.02768,4.67394,1.36981],340],["Land_ButaneCanister_F",[0.458643,4.75597,0.464888],-5],["Land_Shovel_F",[-3.30293,4.5199,1.36981],10],["Land_Grinder_F",[-1.35022,4.67017,1.36981],340],["Land_DrillAku_F",[-1.83374,4.61523,1.36981],279],["Land_ButaneCanister_F",[0.458643,4.56836,0.879888],-5],["Land_PlasticCase_01_small_F",[-0.833129,4.68945,0.464986],0],["Land_Hammer_F",[-0.833129,4.93176,0.879986],0],["Land_Pliers_F",[-1.05255,4.83472,0.879986],340],["Land_Screwdriver_V1_F",[-0.970947,4.53918,0.879986],45],["Land_PortableLongRangeRadio_F",[1.96588,4.93176,0.879986],0],["Land_Portable_generator_F",[5.44269,-0.28418,0.465],0],["Land_ExtensionCord_F",[3.1084,4.93176,0.879986],0],["Land_WeldingTrolley_01_F",[3.67303,-0.211426,0.465],150],["Land_WeldingTrolley_01_F",[5.33862,4.75684,0.465],240],["Land_Workbench_01_F",[1.20361,4.75635,0.464882],180],["Land_Sink_F",[-4.42151,4.67383,1.36981],70],["Land_ToolTrolley_01_F",[-2.50098,2.10376,0.464872],270],["Land_ToolTrolley_02_F",[0.458145,2.10376,0.464872],270],["Land_ShelvesWooden_khaki_F",[3.1084,2.10376,1.36982],270],["Land_WoodenCounter_01_F",[-0.633789,0.00292969,0.464993],0],["Land_Wrench_F",[-0.633789,0.00292969,0.879993],0],["Land_DustMask_F",[-0.833984,-0.197266,0.879993],0],["Land_PlasticCase_01_large_F",[-4.22205,-0.197266,0.465012],0],["Land_BarrelWater_F",[1.81384,0.0029297,0.465],0],["Land_DisinfectantSpray_F",[-0.433594,0.00292969,0.879993],0],["Land_MetalWire_F",[-0.433594,0.203125,0.879993],0],["Land_Rope_01_F",[5.44287,1.42871,0.465],0],["Land_GasCooker_F",[3.1084,4.33765,0.879986],0],["Land_Camping_Light_F",[4.21161,4.93176,0.879986],0],["Land_Camping_Light_off_F",[3.91089,4.93176,0.879986],0],["Land_Battery_F",[3.51025,4.93176,0.879986],0]]];
-_edificio setvariable ["BUCHEDEG_amueblado",1];
-_edificio setvariable ["BUCHEDEG_muebles",_plantillas];
-};
-	
-	
+    
     // Procesar si está configurado y visible
     if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 1 && 
         {!(isObjectHidden _edificio)} && 
@@ -289,40 +250,56 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
         
         // Crear muebles
         if (isServer) then {
-            {
-                if (random 1 > 0.25) then {
-                    private _item = _x select 0;
-                    private _rawOffset = _x select 1;
-                    private _rawAngulo = _x select 2;
-                    
-                    // Procesar coordenadas
-                    private ["_x1", "_y1", "_z1"];
-                    _x1 = [_rawOffset select 0] call BUCHEDEG_fnc_toNumber;
-                    _y1 = [_rawOffset select 1] call BUCHEDEG_fnc_toNumber;
-                    _z1 = [_rawOffset select 2] call BUCHEDEG_fnc_toNumber;
-                    
-                    // Procesar ángulo
-                    private _angulo = [_rawAngulo] call BUCHEDEG_fnc_toNumber;
-                    
-                    // Calcular posición
-                    private _basePos = getPosATL _edificio;
-                    private _pos = [
-                        (_basePos select 0) + _x1,
-                        (_basePos select 1) + _y1,
-                        (_basePos select 2) + _z1
-                    ];
-                    
-                    // Crear objeto
-                    private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
-                    _mueble setPosATL _pos;
-                    _mueble setDir (_dir - _angulo);
-                    _mueble enableSimulation false;
-                    _mueble allowDamage false;
-                    
-                    _spawned pushBack _mueble;
-                    sleep 0.05;
-                };
-            } forEach _items;
+{
+    if (random 1 > 0.25) then {
+        // Inicialización segura con valores por defecto
+        private _item = "";
+        private _rawOffset = [0,0,0];
+        private _rawAngulo = 0;
+        
+        // Extraer datos con verificación
+        if (count _x > 0) then { _item = _x select 0; };
+        if (count _x > 1) then { _rawOffset = _x select 1; };
+        if (count _x > 2) then { _rawAngulo = _x select 2; };
+        
+        // Procesamiento seguro de coordenadas
+        private _x1 = 0;
+        private _y1 = 0;
+        private _z1 = 0;
+        
+        if (typeName _rawOffset == "ARRAY") then {
+            if (count _rawOffset > 0) then { 
+                _x1 = if (typeName (_rawOffset select 0) == "STRING") then { parseNumber (_rawOffset select 0) } else { _rawOffset select 0 }; 
+            };
+            if (count _rawOffset > 1) then { 
+                _y1 = if (typeName (_rawOffset select 1) == "STRING") then { parseNumber (_rawOffset select 1) } else { _rawOffset select 1 }; 
+            };
+            if (count _rawOffset > 2) then { 
+                _z1 = if (typeName (_rawOffset select 2) == "STRING") then { parseNumber (_rawOffset select 2) } else { _rawOffset select 2 }; 
+            };
+        };
+        
+        // Procesamiento seguro del ángulo
+        private _angulo = if (typeName _rawAngulo == "STRING") then { parseNumber _rawAngulo } else { _rawAngulo };
+        
+        // Cálculo de posición y creación del objeto
+        private _basePos = getPosATL _edificio;
+        private _pos = [
+            (_basePos select 0) + _x1,
+            (_basePos select 1) + _y1,
+            (_basePos select 2) + _z1
+        ];
+        
+        private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+        _mueble setPosATL _pos;
+        _mueble setDir (_dir - _angulo);
+        _mueble enableSimulation false;
+        _mueble allowDamage false;
+        
+        _spawned pushBack _mueble;
+        sleep 0.05;
+    };
+} forEach _items;
             
             // Registrar objetos
             private _idsMuebles = _spawned apply {netId _x};
