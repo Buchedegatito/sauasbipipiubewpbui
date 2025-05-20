@@ -1,41 +1,23 @@
 /*
     🏠 SISTEMA DE AMUEBLADO AUTOMÁTICO DE CASAS 🏠
-    🪑 Para Arma 3 - Versión Mejorada y Sincronizada
+    🪑 Para Arma 3 - Versión Mejorada 2025
     👨‍💻 Autor: Buchedegatito
-    📅 2025
 */
 
-// ═════════════════════════════════════════
-// 🔄 INICIALIZACIÓN Y CONFIGURACIÓN
-// ═════════════════════════════════════════
-
-// Función para convertir valores a números
-Buche_fnc_convertirANumero = {
-    params [["_dato", 0]];
-    if (typeName _dato == "STRING") then {
-        private _num = parseNumber _dato;
-        if (isNil "_num" || {_num == 0 && {_dato != "0"}}) then {0} else {_num}
-    } else {
-        _dato
-    };
-};
-
-// Verificar argumentos y establecer valores predeterminados
+// ════ INICIALIZACIÓN ════
 if (isNil "_this") then { _this = [50, 5]; };
 if ((count _this) < 2) then { _this = [50, 5]; };
-
-// Esperar a que la interfaz esté lista
 waitUntil {!isNull findDisplay 46};
 
 // Variables principales
-BUCHEDEG_muebles_version = "2.5"; 
-BUCHEDEG_muebles_activo = true; 
+BUCHEDEG_muebles_version = "2.5";
+BUCHEDEG_muebles_activo = true;
 BUCHEDEG_muebles_radio = _this select 0;
 BUCHEDEG_muebles_tiempo = _this select 1;
-BUCHEDEG_muebles_casas = []; 
-BUCHEDEG_muebles_ultimapos = [0,0,0]; 
+BUCHEDEG_muebles_casas = [];
+BUCHEDEG_muebles_ultimapos = [0,0,0];
 
-// Seed para sincronización entre jugadores (clave JIP)
+// Seed para sincronización entre jugadores
 if (isServer) then {
     if (isNil "BUCHEDEG_muebles_seed") then {
         BUCHEDEG_muebles_seed = floor(random 100000);
@@ -46,39 +28,55 @@ if (isServer) then {
         waitUntil {!isNil "BUCHEDEG_muebles_seed"};
     };
 };
-
-// Inicializar generador aleatorio con la seed compartida
 random BUCHEDEG_muebles_seed;
 
-// Registro para depuración
+// Función de log
 BUCHEDEG_fnc_log = {
-    // diag_log format ["[BUCHEDEG_MUEBLES] %1", _this];
+    diag_log format ["[BUCHEDEG] %1", _this];
 };
 
-// ═════════════════════════════════════════
-// 🏗️ FUNCIONES PRINCIPALES
-// ═════════════════════════════════════════
+// CONVERTIR A NÚMERO (CRITICAL)
+BUCHEDEG_fnc_toNumber = {
+    private _value = _this;
+    private _result = 0;
+    
+    if (typeName _value == "STRING") then {
+        _result = parseNumber _value;
+    } else {
+        _result = _value;
+    };
+    
+    _result
+};
 
-// 🪑 Función para amueblar una casa
+// AMUEBLAR CASA
 BUCHEDEG_fnc_amueblarCasa = {
     params ["_edificio"];
-    private ["_tipo", "_items", "_item", "_offset", "_angulo", "_pos", "_spawned", "_plantillas", "_dir"];
+    private ["_tipo", "_items", "_plantillas", "_spawned"];
     
-    // Saltear casas previamente marcadas
+    // Ignorar casas marcadas
     if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == -1 || 
         _edificio getVariable ["BUCHEDEG_amueblado", 0] == -2) exitWith {};
     
-    // Asignar plantilla de muebles según tipo de casa
+    // Configurar muebles según tipo
     if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 0) then {
         _tipo = typeOf _edificio;
+        
+        // Detectar tipo de edificio
         switch (_tipo) do {
             case "Land_i_Barracks_V1_F": {
-                _plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0],["CUP_vojenska_palanda",[-12.9707,-2.98145,3.88763],90]]];
-                _edificio setvariable ["BUCHEDEG_amueblado",1];
-                _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
+                _plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0]]];
+                _edificio setVariable ["BUCHEDEG_amueblado", 1];
+                _edificio setVariable ["BUCHEDEG_muebles", _plantillas];
             };
             
-// 🏝️ CASAS DE TANOA
+            // PUEDES AÑADIR MÁS CASOS AQUÍ
+            
+            default {
+                _edificio setVariable ["BUCHEDEG_amueblado", -1];
+            };
+        };
+    };
 case "Land_i_Barracks_V1_F":
 {
 _plantillas = [[["CUP_vojenska_palanda",[-7.69653,-1.73047,3.88763],0],["CUP_vojenska_palanda",[-12.9707,-2.98145,3.88763],90],["CUP_metalcrate",[3.45356,2.33209,3.8869],0],["CUP_sink",[6.73083,4.77417,4.2379],0],["Land_FlowerPot_01_F",[6.69263,2.01758,3.88719],0],["Land_WoodenBed_01_F",[6.0705,0.264404,3.88763],90],["Land_WoodenBed_01_F",[6.08801,-1.65674,3.88763],90],["Land_WoodenBed_01_F",[6.04565,-3.69574,3.88763],90],["Land_WoodenBed_01_F",[0.583984,-4.03003,3.88763],0],["Land_WoodenBed_01_F",[-2.63281,-4.03491,3.88763],0],["Land_WoodenBed_01_F",[-5.69629,-4.04749,3.88763],0],["Land_WoodenBed_01_F",[-8.07227,-4.08862,3.88763],0],["Land_WoodenBed_01_F",[-10.2607,-4.1106,3.88763],0],["Land_OfficeCabinet_01_F",[3.20288,2.34277,4.2668],180],["Land_OfficeCabinet_01_F",[0.996826,2.08276,4.2668],180],["Land_TableDesk_F",[-1.38013,0.354858,3.88763],0],["Land_ChairWood_F",[-0.729736,0.465881,3.43494],0],["Land_PaperBox_closed_F",[1.77905,4.44775,3.88763],0]]];
@@ -277,54 +275,45 @@ _plantillas = [[["Land_Bucket_painted_F",[-3.02768,4.67394,1.36981],340],["Land_
 _edificio setvariable ["BUCHEDEG_amueblado",1];
 _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
 };
-            
-            default {
-                _edificio setvariable ["BUCHEDEG_amueblado",-1];
-            };
-        };
-    };
-    
-    // Amueblar casa si está asignada, visible y sin personas cerca
-    if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 1 && {!(isObjectHidden _edificio)} && {count (_edificio nearEntities ["Man", 7]) == 0}) then {
+	
+	
+    // Procesar si está configurado y visible
+    if (_edificio getVariable ["BUCHEDEG_amueblado", 0] == 1 && 
+        {!(isObjectHidden _edificio)} && 
+        {count (_edificio nearEntities ["Man", 7]) == 0}) then {
+        
         _items = _edificio getVariable ["BUCHEDEG_muebles", []];
         _edificio setVariable ["BUCHEDEG_amueblado", 2, true];
-        _dir = getDir _edificio;
+        private _dir = getDir _edificio;
         _spawned = [];
         
-        // Creación de muebles sincronizada
+        // Crear muebles
         if (isServer) then {
             {
                 if (random 1 > 0.25) then {
-                    _item = _x select 0;
-                    _rawOffset = _x select 1;
-                    _rawAngulo = _x select 2;
+                    private _item = _x select 0;
+                    private _rawOffset = _x select 1;
+                    private _rawAngulo = _x select 2;
                     
-                    // Conversión segura
-                    private _coordX = 0;
-                    private _coordY = 0;
-                    private _coordZ = 0;
+                    // Procesar coordenadas
+                    private ["_x1", "_y1", "_z1"];
+                    _x1 = [_rawOffset select 0] call BUCHEDEG_fnc_toNumber;
+                    _y1 = [_rawOffset select 1] call BUCHEDEG_fnc_toNumber;
+                    _z1 = [_rawOffset select 2] call BUCHEDEG_fnc_toNumber;
                     
-                    if (typeName _rawOffset == "ARRAY") then {
-                        if (count _rawOffset >= 3) then {
-                            _coordX = [_rawOffset select 0] call Buche_fnc_convertirANumero;
-                            _coordY = [_rawOffset select 1] call Buche_fnc_convertirANumero;
-                            _coordZ = [_rawOffset select 2] call Buche_fnc_convertirANumero;
-                        };
-                    };
+                    // Procesar ángulo
+                    private _angulo = [_rawAngulo] call BUCHEDEG_fnc_toNumber;
                     
-                    _offset = [_coordX, _coordY, _coordZ];
-                    _angulo = [_rawAngulo] call Buche_fnc_convertirANumero;
-                    
-                    // Crear posición manualmente
-                    _basePos = getPosATL _edificio;
-                    _pos = [
-                        _basePos select 0 + _coordX,
-                        _basePos select 1 + _coordY,
-                        _basePos select 2 + _coordZ
+                    // Calcular posición
+                    private _basePos = getPosATL _edificio;
+                    private _pos = [
+                        (_basePos select 0) + _x1,
+                        (_basePos select 1) + _y1,
+                        (_basePos select 2) + _z1
                     ];
                     
-                    // Crear y posicionar mueble
-                    _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
+                    // Crear objeto
+                    private _mueble = createVehicle [_item, [0,0,0], [], 0, "CAN_COLLIDE"];
                     _mueble setPosATL _pos;
                     _mueble setDir (_dir - _angulo);
                     _mueble enableSimulation false;
@@ -335,11 +324,11 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
                 };
             } forEach _items;
             
-            // Guardar referencias
-            _idsMuebles = _spawned apply {netId _x};
+            // Registrar objetos
+            private _idsMuebles = _spawned apply {netId _x};
             _edificio setVariable ["BUCHEDEG_muebles_ids", _idsMuebles, true];
             
-            // Añadir event handlers si no existen
+            // Añadir event handlers
             if (isNil {_edificio getVariable "BUCHEDEG_eventHandlers"}) then {
                 _edificio setVariable ["BUCHEDEG_eventHandlers", true];
                 
@@ -352,18 +341,18 @@ _edificio setvariable ["BUCHEDEG_muebles",_plantillas];
                 
                 _edificio addEventHandler ["Killed", {
                     params ["_edificio"];
-                    [_edificio] call Buche_fnc_manejarDestruccion;
+                    [_edificio] call BUCHEDEG_fnc_manejarDestruccion;
                 }];
             };
         };
         
-        // Añadir casa a la lista global
+        // Añadir a lista global
         BUCHEDEG_muebles_casas pushBack _edificio;
-        ["Casa amueblada con éxito"] call BUCHEDEG_fnc_log;
+        ["Casa amueblada"] call BUCHEDEG_fnc_log;
     };
 };
 
-// 🔄 Función para sincronizar JIP
+// JIP SINCRONIZACIÓN
 BUCHEDEG_fnc_sincronizarJIP = {
     {
         private _casa = _x;
@@ -385,7 +374,7 @@ BUCHEDEG_fnc_sincronizarJIP = {
     } forEach (nearestObjects [player, ["House"], BUCHEDEG_muebles_radio * 1.5]);
 };
 
-// ❌ Función para eliminar muebles
+// ELIMINAR MUEBLES
 BUCHEDEG_fnc_eliminarMuebles = {
     params ["_edificio"];
     
@@ -404,7 +393,7 @@ BUCHEDEG_fnc_eliminarMuebles = {
     };
 };
 
-// 💥 Función para manejar destrucción
+// MANEJAR DESTRUCCIÓN
 BUCHEDEG_fnc_manejarDestruccion = {
     params ["_edificio"];
     
@@ -421,7 +410,7 @@ BUCHEDEG_fnc_manejarDestruccion = {
     } forEach _ids;
     
     if (({_x distance _edificio < 100} count allPlayers) == 0) then {
-        ["Edificio destruido: muebles permanecen intactos"] call BUCHEDEG_fnc_log;
+        ["Edificio destruido: muebles intactos"] call BUCHEDEG_fnc_log;
     } else {
         if (isServer) then {
             private _pos = getPosATL _edificio;
@@ -454,7 +443,7 @@ BUCHEDEG_fnc_manejarDestruccion = {
     BUCHEDEG_muebles_casas = BUCHEDEG_muebles_casas - [_edificio];
 };
 
-// 🔮 Función para manejar eliminación por Zeus
+// EVENTOS ZEUS
 BUCHEDEG_fnc_manejarEliminacion = {
     params ["_edificio"];
     
@@ -471,16 +460,14 @@ BUCHEDEG_fnc_manejarEliminacion = {
         } forEach _ids;
         
         BUCHEDEG_muebles_casas = BUCHEDEG_muebles_casas - [_edificio];
-        ["Edificio eliminado por Zeus: muebles limpiados"] call BUCHEDEG_fnc_log;
+        ["Edificio eliminado por Zeus"] call BUCHEDEG_fnc_log;
     };
 };
 
-// ═════════════════════════════════════════
-// 🔄 BUCLE PRINCIPAL
-// ═════════════════════════════════════════
+// ════ BUCLE PRINCIPAL ════
 sleep 5;
 
-// Evento para jugadores que se unen tarde
+// JIP
 if (!isServer && hasInterface) then {
     [] spawn {
         sleep 8;
@@ -488,12 +475,15 @@ if (!isServer && hasInterface) then {
     };
 };
 
-// Bucle principal del sistema
+// BUCLE PRINCIPAL
 [] spawn {
     private ["_edificios", "_edificio"];
     
     while {true} do {
-        if (BUCHEDEG_muebles_activo && {player == vehicle player} && {player distance BUCHEDEG_muebles_ultimapos > (BUCHEDEG_muebles_radio / 2)}) then {
+        if (BUCHEDEG_muebles_activo && 
+            {player == vehicle player} && 
+            {player distance BUCHEDEG_muebles_ultimapos > (BUCHEDEG_muebles_radio / 2)}) then {
+            
             BUCHEDEG_muebles_ultimapos = position player;
             _edificios = player nearObjects ["House", BUCHEDEG_muebles_radio];
             
@@ -517,7 +507,7 @@ if (!isServer && hasInterface) then {
     };
 };
 
-// Detector periódico de edificios eliminados
+// DETECTOR DE CASAS ELIMINADAS
 if (isServer) then {
     [] spawn {
         while {true} do {
@@ -536,7 +526,6 @@ if (isServer) then {
                         } forEach _ids;
                         
                         BUCHEDEG_muebles_casas set [_i, objNull];
-                        ["Detector periódico: edificio eliminado detectado"] call BUCHEDEG_fnc_log;
                     };
                 };
             };
@@ -547,4 +536,4 @@ if (isServer) then {
     };
 };
 
-["Sistema de amueblado iniciado correctamente"] call BUCHEDEG_fnc_log;
+["Sistema de amueblado iniciado"] call BUCHEDEG_fnc_log;
