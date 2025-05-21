@@ -1,4 +1,1067 @@
-// ===== SISTEMA A3PE INTEGRADO OPTIMIZADO EXTENDIDO =====
+/*
+    🚀 OPTIMIZACIÓN DE RENDIMIENTO AVANZADA PARA ARMA 3 🚀
+    Versión: 3.3 - Límite Estricto + Optimización Completa (Simplificado)
+
+    🌟 Script: Mejoras VFX 
+    👨‍💻 Autor: Vianna & Enkeli
+    📅 Creación: 2025-05-20
+*/
+
+// ===== DEFINICIÓN DE PARÁMETROS Y VARIABLES GLOBALES =====
+if (isNil "_this") then {_this = [300, 2000, true, true, true, true]};
+params [
+    ["_radioSimulacionParam", 300, [0]],         // Radio de simulación completa
+    ["_distanciaMaximaParam", 2000, [0]],        // Distancia máxima para optimización
+    ["_optimizarIAParam", true, [true]],         // Activar optimización de IA
+    ["_optimizarVehiculosParam", true, [true]],  // Activar optimización de vehículos
+    ["_optimizarObjetosParam", true, [true]],    // Activar optimización de objetos
+    ["_optimizarDecoracionesParam", true, [true]] // Activar optimización de decoraciones
+];
+
+// 🔍 Comprobación de CBA y ACE
+OPT_tieneCBA = isClass (configFile >> "CfgPatches" >> "cba_main");
+OPT_tieneACE = isClass (configFile >> "CfgPatches" >> "ace_main");
+
+// 🛠️ Función auxiliar para compatibilidad
+OPT_fnc_pushBackUnique = {
+    params ["_array", "_elemento"];
+    if !(_elemento in _array) then {
+        _array pushBack _elemento;
+    };
+    _array
+};
+
+// 📝 Variables globales para mantener los parámetros accesibles
+OPT_radioSimulacion = _radioSimulacionParam;
+OPT_distanciaMaxima = _distanciaMaximaParam;
+OPT_optimizarIA = _optimizarIAParam;
+OPT_optimizarVehiculos = _optimizarVehiculosParam;
+OPT_optimizarObjetos = _optimizarObjetosParam;
+OPT_optimizarDecoraciones = _optimizarDecoracionesParam;
+
+// 📌 Otras variables globales necesarias
+OPT_activo = true;
+OPT_entidadesGestionadas = [];
+OPT_cacheTiempo = time;
+OPT_intervaloCacheado = 5;
+OPT_ultimaPosJugador = [0,0,0];
+OPT_distanciaMovimiento = 50;
+OPT_sectores = [];
+OPT_sectorActual = "";
+OPT_marcoSectores = 1000;
+OPT_nivelLog = 0;
+OPT_vehiculoActual = objNull;
+OPT_radioSimulacionOriginal = OPT_radioSimulacion;
+OPT_cadaveresPendientes = [];
+OPT_tiempoRagdoll = 5; // Tiempo para permitir la física ragdoll (segundos)
+OPT_enHeadless = !hasInterface && !isDedicated;
+OPT_eventosImportantes = [];
+OPT_ultimoEvento = time;
+OPT_objetosPequenos = [];
+OPT_clasesDecorativas = ["Furniture_base_F", "Items_base_F", "House_Small_F", "HouseDecorations_base_F", "Tableware_base_F"];
+OPT_ultimaLimpieza = time;
+OPT_radioDecoraciones = 50; // Radio para optimización de decoraciones (más agresivo)
+OPT_version = "3.3";
+OPT_radioJugadores = 1000; // Radio para detectar jugadores cercanos
+OPT_todosJugadores = []; // Array para almacenar todos los jugadores
+
+// === VARIABLES PARA LÍMITE DE VISIBILIDAD ===
+OPT_limiteVisibilidad = 1100; // Límite en metros para hacer objetos invisibles
+OPT_distanciaVisionForzada = 1000; // Distancia de visión forzada
+OPT_altitudVuelo = 30; // Metros sobre el terreno para considerar que está volando
+OPT_estaVolando = false; // Estado actual de vuelo del jugador
+OPT_viewDistanciaOriginal = viewDistance; // Guardar vista original
+OPT_objectViewDistanciaOriginal = []; // Guardaremos el array completo aquí
+OPT_ultimaComprobacionVuelo = time; // Última vez que comprobamos si está volando
+OPT_intervaloComprobacionVuelo = 1; // Comprobar cada segundo si está volando
+OPT_procesarLimiteVisibilidad = true; // Si se debe procesar el límite de visibilidad
+OPT_ultimaForzadoVista = time; // Último tiempo que se forzó la vista
+OPT_intervaloForzadoVista = 1; // Intervalo para forzar la vista (cada segundo)
+OPT_objetosLejanos = []; // Objetos fuera del límite de visibilidad
+OPT_ultimoEscaneoObjetos = time; // Último escaneo de objetos lejanos
+OPT_intervaloEscaneoObjetos = 30; // Intervalo para escanear objetos lejanos
+OPT_clasesTerrenoExcluidas = ["Land_VR_Shape_01_cube_1m_F"]; // Objetos que no se deben ocultar
+OPT_displayListo = false; // Indica si el display ya está listo
+
+// ===== SISTEMA DE LOG VACÍO =====
+OPT_fnc_log = {
+    // Función vacía para eliminar todos los mensajes de debug
+};
+
+// ===== FUNCIÓN PARA COMPROBAR SI EL JUGADOR ESTÁ VOLANDO =====
+OPT_fnc_estaVolando = {
+    if (isNull player) then {
+        false
+    } else {
+        // Si está en un vehículo aéreo
+        if (vehicle player != player) then {
+            private _veh = vehicle player;
+            // Usar varias comprobaciones para mayor compatibilidad
+            if (_veh isKindOf "Air" || _veh isKindOf "Helicopter" || _veh isKindOf "Plane") then {
+                true
+            } else {
+                // O si está muy por encima del terreno
+                private _altitud = (getPosASL player) select 2;
+                private _altitudTerreno = getTerrainHeightASL (getPos player);
+                private _diferencia = _altitud - _altitudTerreno;
+                (_diferencia > OPT_altitudVuelo)
+            };
+        } else {
+            // O si está muy por encima del terreno
+            private _altitud = (getPosASL player) select 2;
+            private _altitudTerreno = getTerrainHeightASL (getPos player);
+            private _diferencia = _altitud - _altitudTerreno;
+            (_diferencia > OPT_altitudVuelo)
+        };
+    };
+};
+
+// ===== FUNCIÓN PARA FORZAR DISTANCIA DE VISIÓN (SIMPLIFICADA) =====
+OPT_fnc_forzarDistanciaVision = {
+    // Versión super simplificada para evitar errores
+    setViewDistance OPT_distanciaVisionForzada;
+    setObjectViewDistance OPT_distanciaVisionForzada;
+    
+    // Intentar establecer la configuración de terreno si está disponible
+    if (!isNil "setTerrainGrid") then {
+        setTerrainGrid 25;
+    };
+};
+
+
+// 🧹 Función para realizar limpieza profunda del sistema
+OPT_fnc_limpiezaProfunda = {
+    // Limpiar entidades no válidas
+    OPT_entidadesGestionadas = OPT_entidadesGestionadas select {!isNull _x};
+    OPT_cadaveresPendientes = OPT_cadaveresPendientes select {!isNull _x};
+    OPT_objetosPequenos = OPT_objetosPequenos select {!isNull _x};
+    
+    // Limpiar eventos caducados
+    OPT_eventosImportantes = OPT_eventosImportantes select {(_x select 2) > time};
+    
+    // Eliminar objetos lejanos que ya no sean relevantes
+    OPT_objetosLejanos = OPT_objetosLejanos select {!isNull _x};
+    
+    // Comprobar y limpiar cadáveres muy antiguos (opcional)
+    {
+        if (_x isKindOf "CAManBase" && 
+            {!isPlayer _x} && 
+            {!alive _x} && 
+            {time - (_x getVariable ["OPT_tiempoMuerte", 0]) > 300}) then {
+            
+            // Si nadie está cerca, ocultarlo completamente
+            if (!([_x] call OPT_fnc_hayJugadoresCercanos)) then {
+                _x hideObjectGlobal true;
+                _x enableSimulationGlobal false;
+            };
+        };
+    } forEach OPT_entidadesGestionadas;
+    
+    // Limpiar objetos decorativos muy lejanos
+    if (OPT_optimizarDecoraciones) then {
+        {
+            if (!isNull _x) then {
+                private _esDecoracion = _x getVariable ["OPT_EsDecoracion", false];
+                if (_esDecoracion) then {
+                    // Si es decoración muy lejana, ocultar completamente
+                    private _distancia = _x distance player;
+                    if (_distancia > OPT_radioDecoraciones * 4) then {
+                        _x enableSimulationGlobal false;
+                        _x hideObjectGlobal true;
+                    };
+                };
+            };
+        } forEach OPT_objetosPequenos;
+    };
+    
+    // Opcional: ejecutar recolector de basura si CBA está disponible
+    if (OPT_tieneCBA) then {
+        if (!isNil "CBA_fnc_cleanupEmpty") then {
+            call CBA_fnc_cleanupEmpty;
+        };
+    };
+};
+
+
+
+// ===== FUNCIÓN PARA OCULTAR OBJETOS FUERA DEL LÍMITE (SIMPLIFICADA) =====
+OPT_fnc_ocultarObjetosLejanos = {
+    // Solo ejecutar si tenemos interfaz y el jugador existe
+    if (!hasInterface) then {
+        // Nada que hacer en servidor sin interfaz
+    } else {
+        if (isNull player) then {
+            // Nada que hacer si el jugador no existe
+        } else {
+            private _posJugador = getPosATL player;
+            
+            // Restaurar visibilidad si está volando
+            if (OPT_estaVolando) then {
+                {
+                    if (!isNull _x) then {
+                        _x hideObjectGlobal false;
+                        _x enableSimulationGlobal true;
+                    };
+                } forEach OPT_objetosLejanos;
+                
+                // Limpiar la lista
+                OPT_objetosLejanos = [];
+            } else {
+                // No está volando, procesar ocultar objetos
+                if (time > OPT_ultimoEscaneoObjetos + OPT_intervaloEscaneoObjetos) then {
+                    OPT_ultimoEscaneoObjetos = time;
+                    
+                    // Categorías a escanear
+                    private _categorias = ["Building", "House", "Static"];
+                    private _objetosEncontrados = [];
+                    
+                    // Escanear objetos
+                    {
+                        private _categoria = _x;
+                        private _objetos = nearestObjects [_posJugador, [_categoria], OPT_limiteVisibilidad * 2];
+                        
+                        {
+                            if (!isNull _x && {!(_x isKindOf "Logic")} && {_x != player}) then {
+                                _objetosEncontrados pushBack _x;
+                            };
+                        } forEach _objetos;
+                    } forEach _categorias;
+                    
+                    // Restaurar visibilidad de objetos anteriores
+                    {
+                        if (!isNull _x) then {
+                            _x hideObjectGlobal false;
+                            _x enableSimulationGlobal true;
+                        };
+                    } forEach OPT_objetosLejanos;
+                    
+                    // Reiniciar lista
+                    OPT_objetosLejanos = [];
+                    
+                    // Procesar nuevos objetos encontrados
+                    {
+                        private _distancia = _x distance _posJugador;
+                        
+                        // Si está fuera del límite, ocultar
+                        if (_distancia > OPT_limiteVisibilidad) then {
+                            OPT_objetosLejanos pushBack _x;
+                            _x hideObjectGlobal true;
+                            _x enableSimulationGlobal false;
+                        };
+                    } forEach _objetosEncontrados;
+                } else {
+                    // Si no es tiempo de escanear, solo reforzar ocultación
+                    {
+                        if (!isNull _x) then {
+                            _x hideObjectGlobal true;
+                            _x enableSimulationGlobal false;
+                        };
+                    } forEach OPT_objetosLejanos;
+                };
+            };
+        };
+    };
+};
+
+// 🗺️ Generar sectores del mapa
+OPT_fnc_generarSectores = {
+    private _mapSize = worldSize;
+    private _numSectores = ceil (_mapSize / OPT_marcoSectores);
+    
+    for "_x" from 0 to (_numSectores - 1) do {
+        for "_y" from 0 to (_numSectores - 1) do {
+            private _sectorID = format ["sector_%1_%2", _x, _y];
+            private _centro = [
+                (_x * OPT_marcoSectores) + (OPT_marcoSectores / 2),
+                (_y * OPT_marcoSectores) + (OPT_marcoSectores / 2),
+                0
+            ];
+            OPT_sectores pushBack [_sectorID, _centro];
+        };
+    };
+};
+
+// 📍 Obtener sector actual del jugador
+OPT_fnc_obtenerSectorJugador = {
+    private _posJugador = if (OPT_enHeadless) then {
+        missionNamespace getVariable ["OPT_posicionJugadorGlobal", [0,0,0]]
+    } else {
+        if (!isNull player) then {
+            getPosATL player
+        } else {
+            [0,0,0]
+        };
+    };
+    
+    private _x = floor ((_posJugador select 0) / OPT_marcoSectores);
+    private _y = floor ((_posJugador select 1) / OPT_marcoSectores);
+    private _sectorID = format ["sector_%1_%2", _x, _y];
+    
+    if (_sectorID != OPT_sectorActual) then {
+        OPT_sectorActual = _sectorID;
+    };
+    
+    _sectorID
+};
+
+// 👥 Verificar si hay jugadores cercanos a la entidad
+OPT_fnc_hayJugadoresCercanos = {
+    params ["_entidad"];
+    
+    private _result = false;
+    
+    {
+        if (_x distance _entidad < OPT_radioJugadores) exitWith {
+            _result = true;
+        };
+    } forEach OPT_todosJugadores;
+    
+    _result
+};
+
+// 📊 Calcular prioridad basada en distancia, jugadores cercanos y sector
+OPT_fnc_calcularPrioridad = {
+    params ["_entidad"];
+    
+    // Comprobar si hay jugadores cercanos (dentro de 1000m)
+    private _hayJugadoresCercanos = [_entidad] call OPT_fnc_hayJugadoresCercanos;
+    
+    // Si no hay jugadores cercanos, poner prioridad más baja (para ocultar)
+    if (!_hayJugadoresCercanos) then {
+        99 // Sin prioridad - será ocultado
+    } else {
+        // Obtener posición del jugador local para cálculos
+        private _posJugador = if (OPT_enHeadless) then {
+            missionNamespace getVariable ["OPT_posicionJugadorGlobal", [0,0,0]]
+        } else {
+            if (!isNull player) then {
+                getPosATL player
+            } else {
+                [0,0,0]
+            };
+        };
+        
+        private _distancia = _posJugador distance _entidad;
+        
+        // Si se aplica límite de visibilidad y el jugador no está volando
+        if (!OPT_estaVolando && hasInterface && OPT_procesarLimiteVisibilidad) then {
+            if (_distancia > OPT_limiteVisibilidad) then {
+                99 // Fuera del límite, ocultar
+            } else {
+                // Dentro del límite, calcular prioridad normal
+                private _prioridad = 3; // Por defecto: baja prioridad
+                
+                // Verificar si es un objeto decorativo
+                private _esDecoracion = false;
+                if (OPT_optimizarDecoraciones) then {
+                    {
+                        if (_entidad isKindOf _x) exitWith {
+                            _esDecoracion = true;
+                        };
+                    } forEach OPT_clasesDecorativas;
+                    
+                    // Si es decoración, usar un radio más pequeño
+                    if (_esDecoracion) then {
+                        if (_distancia < OPT_radioDecoraciones) then {
+                            _prioridad = 1;
+                        } else {
+                            _prioridad = 3; // Baja prioridad para decoraciones
+                        };
+                    };
+                };
+                
+                // Si no es decoración, usar lógica normal
+                if (!_esDecoracion) then {
+                    // Prioridad basada en distancia al jugador
+                    if (_distancia < OPT_radioSimulacion) then {
+                        _prioridad = 1; // Alta prioridad: simulación completa
+                    } else {
+                        if (_distancia < OPT_radioSimulacion * 2) then {
+                            _prioridad = 2; // Media prioridad
+                        };
+                    };
+                };
+                
+                // Comprobar si está cerca de un evento importante
+                {
+                    _x params ["_pos", "_radio", "_tiempoFin"];
+                    
+                    if (time <= _tiempoFin) then {
+                        private _distEvento = _pos distance _entidad;
+                        if (_distEvento < _radio) then {
+                            // Cerca de un evento importante, aumentar prioridad
+                            _prioridad = _prioridad - 1;
+                            _prioridad = _prioridad max 1;
+                        };
+                    };
+                } forEach OPT_eventosImportantes;
+                
+                // Ajustes por tipo de entidad
+                if (_entidad isKindOf "CAManBase") then {
+                    // Prioridad adicional para unidades en combate
+                    if (behaviour _entidad == "COMBAT") then {
+                        _prioridad = _prioridad max 2;
+                    };
+                    
+                    // Prioridad adicional para líderes de grupo
+                    if (leader group _entidad == _entidad) then {
+                        _prioridad = _prioridad max 2;
+                    };
+                } else {
+                    if (_entidad isKindOf "AllVehicles") then {
+                        // Vehículos con tripulación siempre tienen mayor prioridad
+                        if (count crew _entidad > 0) then {
+                            _prioridad = _prioridad max 2;
+                        };
+                    };
+                };
+                
+                _prioridad
+            };
+        } else {
+            // No aplicamos límite de visibilidad, calcular prioridad normal
+            private _prioridad = 3; // Por defecto: baja prioridad
+            
+            if (_distancia < OPT_radioSimulacion) then {
+                _prioridad = 1; // Alta prioridad: simulación completa
+            } else {
+                if (_distancia < OPT_radioSimulacion * 2) then {
+                    _prioridad = 2; // Media prioridad
+                };
+            };
+            
+            _prioridad
+        };
+    };
+};
+
+// 🎮 Aplicar optimización basada en prioridad
+OPT_fnc_aplicarOptimizacion = {
+    params ["_entidad", "_prioridad"];
+    
+    // Si ya está muerto, aplicar otra lógica
+    if (!alive _entidad && _entidad isKindOf "CAManBase") then {
+        // Verificar si aún está en periodo de ragdoll
+        private _tiempoMuerte = _entidad getVariable ["OPT_tiempoMuerte", 0];
+        private _hayJugadoresCercanos = [_entidad] call OPT_fnc_hayJugadoresCercanos;
+        
+        if (_tiempoMuerte > 0 && (time - _tiempoMuerte < OPT_tiempoRagdoll)) then {
+            // Aún en periodo de ragdoll, dejar la simulación activa
+            _entidad enableSimulationGlobal true;
+            _entidad hideObjectGlobal false;
+        } else {
+            // Si no hay jugadores cercanos, ocultar cadáveres
+            if (!_hayJugadoresCercanos) then {
+                _entidad enableSimulationGlobal false;
+                _entidad hideObjectGlobal true;
+            } else {
+                // Para cadáveres, simplificamos la simulación pero no los ocultamos
+                _entidad enableSimulationGlobal false;
+                _entidad hideObjectGlobal false;
+            };
+        };
+    } else {
+        // Para objetos normales
+        switch (_prioridad) do {
+            // ⭐ Alta prioridad: simulación completa
+            case 1: {
+                _entidad enableSimulationGlobal true;
+                _entidad hideObjectGlobal false;
+                
+                // Para IA, restauramos comportamiento completo
+                if (_entidad isKindOf "CAManBase" && {!isPlayer _entidad}) then {
+                    // Restaurar FSM de IA si fue simplificado
+                    if (_entidad getVariable ["OPT_IASimplificada", false]) then {
+                        _entidad setVariable ["OPT_IASimplificada", false];
+                        // Restaurar comportamiento normal
+                        _entidad allowFleeing 0.1;
+                        _entidad enableAI "PATH";
+                        _entidad enableAI "FSM";
+                        _entidad enableAI "TARGET";
+                    };
+                };
+                
+                // Para efectos, restaurar si estaban desactivados
+                if (_entidad isKindOf "WeaponHolder") then {
+                    _entidad enableSimulationGlobal true;
+                };
+            };
+            
+            // ✅ Media prioridad: simulación reducida, visible
+            case 2: {
+                _entidad enableSimulationGlobal true;
+                _entidad hideObjectGlobal false;
+                
+                // Para IA, simplificamos comportamiento
+                if (_entidad isKindOf "CAManBase" && {!isPlayer _entidad}) then {
+                    if !(_entidad getVariable ["OPT_IASimplificada", false]) then {
+                        _entidad setVariable ["OPT_IASimplificada", true];
+                        // Simplificar comportamiento
+                        _entidad allowFleeing 1;
+                        
+                        // Si no está en combate, reducir aún más
+                        if (behaviour _entidad != "COMBAT") then {
+                            _entidad disableAI "FSM";
+                        };
+                    };
+                };
+            };
+            
+            // 🟡 Baja prioridad: simulación mínima, visible a distancia
+            case 3: {
+                _entidad enableSimulationGlobal false;
+                _entidad hideObjectGlobal false;
+                
+                // Para IA, guardar estado si hace falta
+                if (_entidad isKindOf "CAManBase" && {!isPlayer _entidad}) then {
+                    if !(_entidad getVariable ["OPT_IASimplificada", true]) then {
+                        _entidad setVariable ["OPT_IASimplificada", true];
+                    };
+                    
+                    // Desactivar IA compleja
+                    _entidad disableAI "FSM";
+                    _entidad disableAI "TARGET";
+                };
+            };
+            
+            // Sin prioridad: desactivar y ocultar (solo cuando NO hay jugadores cerca o fuera de límite de visibilidad)
+            default {
+                _entidad enableSimulationGlobal false;
+                _entidad hideObjectGlobal true;
+            };
+        };
+    };
+};
+
+// 🔍 Función para procesar entidad individual
+OPT_fnc_procesarEntidad = {
+    params ["_entidad"];
+    
+    // Ignorar jugadores y objetos no gestionables
+    if (isPlayer _entidad) then {
+        // Nada que hacer con jugadores
+    } else {
+        if !(_entidad in OPT_entidadesGestionadas) then {
+            // Nada que hacer con objetos no gestionados
+        } else {
+            // Calcular prioridad
+            private _prioridad = [_entidad] call OPT_fnc_calcularPrioridad;
+            
+            // Aplicar optimización
+            [_entidad, _prioridad] call OPT_fnc_aplicarOptimizacion;
+        };
+    };
+};
+
+// 💀 Función para procesar ragdoll de cadáveres
+OPT_fnc_procesarCadaveres = {
+    // Procesar cada cadáver pendiente
+    {
+        private _cadaver = _x;
+        private _tiempoMuerte = _cadaver getVariable ["OPT_tiempoMuerte", 0];
+        
+        // Si ya pasó el tiempo de ragdoll
+        if (time - _tiempoMuerte >= OPT_tiempoRagdoll) then {
+            // Procesar el cadáver normalmente
+            [_cadaver] call OPT_fnc_procesarEntidad;
+            OPT_cadaveresPendientes = OPT_cadaveresPendientes - [_cadaver];
+        };
+    } forEach OPT_cadaveresPendientes;
+    
+    // Limpiar cadáveres nulos
+    OPT_cadaveresPendientes = OPT_cadaveresPendientes select {!isNull _x};
+};
+
+// ➕ Registrar entidad para gestión
+OPT_fnc_registrarEntidad = {
+    params ["_entidad"];
+    
+    // No registrar jugadores, entidades nulas o ya registradas
+    if (isNull _entidad) then {
+        // No hacer nada con entidades nulas
+    } else {
+        if (isPlayer _entidad) then {
+            // No hacer nada con jugadores
+        } else {
+            if (_entidad in OPT_entidadesGestionadas) then {
+                // Ya está registrada
+            } else {
+                // Para decoraciones, filtrar y registrar si corresponde
+                if (OPT_optimizarDecoraciones) then {
+                    {
+                        if (_entidad isKindOf _x) exitWith {
+                            if (OPT_tieneCBA) then {
+                                OPT_objetosPequenos pushBackUnique _entidad;
+                                OPT_entidadesGestionadas pushBackUnique _entidad;
+                            } else {
+                                [OPT_objetosPequenos, _entidad] call OPT_fnc_pushBackUnique;
+                                [OPT_entidadesGestionadas, _entidad] call OPT_fnc_pushBackUnique;
+                            };
+                            _entidad setVariable ["OPT_EsDecoracion", true];
+                        };
+                    } forEach OPT_clasesDecorativas;
+                };
+                
+                // Si no era decoración o ya fue registrada como tal
+                if !(_entidad in OPT_entidadesGestionadas) then {
+                    // Registrar y guardar estado original
+                    OPT_entidadesGestionadas pushBack _entidad;
+                };
+                
+                // Variables iniciales para seguimiento
+                _entidad setVariable ["OPT_IASimplificada", false];
+                _entidad setVariable ["OPT_ultimoProcesado", time];
+                _entidad setVariable ["OPT_Muerto", false];
+                _entidad setVariable ["OPT_tiempoMuerte", 0];
+                
+                // Procesar inicialmente
+                [_entidad] call OPT_fnc_procesarEntidad;
+                
+                // Agregar controlador para muerte
+                if (_entidad isKindOf "CAManBase") then {
+                    _entidad addEventHandler ["Killed", {
+                        params ["_unit"];
+                        _unit setVariable ["OPT_Muerto", true];
+                        _unit setVariable ["OPT_tiempoMuerte", time];
+                        
+                        // Añadir a la lista de cadáveres pendientes para permitir ragdoll
+                        if (OPT_tieneCBA) then {
+                            OPT_cadaveresPendientes pushBackUnique _unit;
+                        } else {
+                            [OPT_cadaveresPendientes, _unit] call OPT_fnc_pushBackUnique;
+                        };
+                        
+                        // Asegurarse que la simulación está activada durante el tiempo de ragdoll
+                        _unit enableSimulationGlobal true;
+                        
+                        // Registrar como evento importante
+                        [getPosATL _unit, 30, 15] call OPT_fnc_registrarEvento;
+                    }];
+                };
+            };
+        };
+    };
+};
+
+// 🎯 Sistema de eventos importantes
+OPT_fnc_registrarEvento = {
+    params ["_posicion", "_radio", "_duracion"];
+    
+    OPT_eventosImportantes pushBack [_posicion, _radio, time + _duracion];
+    OPT_ultimoEvento = time;
+    
+    // Forzar actualización de entidades cercanas
+    {
+        if (_x distance _posicion < _radio * 1.5) then {
+            [_x] call OPT_fnc_procesarEntidad;
+        };
+    } forEach OPT_entidadesGestionadas;
+};
+
+// 🔄 Actualizar cachés
+OPT_fnc_actualizarCache = {
+    if (time < OPT_cacheTiempo + OPT_intervaloCacheado) then {
+        // Nada que hacer todavía
+    } else {
+        OPT_cacheTiempo = time;
+        
+        // Compartir posición del jugador con headless clients
+        if (!OPT_enHeadless && hasInterface && !isNull player) then {
+            missionNamespace setVariable ["OPT_posicionJugadorGlobal", getPosATL player, true];
+        };
+        
+        // Forzar distancia de visión si tiene interfaz
+        if (hasInterface && !isNull player) then {
+            if (time > OPT_ultimaForzadoVista + OPT_intervaloForzadoVista) then {
+                OPT_ultimaForzadoVista = time;
+                call OPT_fnc_forzarDistanciaVision;
+            };
+            
+            // Actualizar estado de vuelo cada cierto tiempo
+            if (time > OPT_ultimaComprobacionVuelo + OPT_intervaloComprobacionVuelo) then {
+                OPT_ultimaComprobacionVuelo = time;
+                private _nuevoEstadoVuelo = call OPT_fnc_estaVolando;
+                
+                // Si el estado cambió, procesar todas las entidades
+                if (_nuevoEstadoVuelo != OPT_estaVolando) then {
+                    OPT_estaVolando = _nuevoEstadoVuelo;
+                    
+                    // Reprocesar todas las entidades para actualizar visibilidad
+                    {
+                        if (!isNull _x && !isPlayer _x) then {
+                            [_x] call OPT_fnc_procesarEntidad;
+                        };
+                    } forEach OPT_entidadesGestionadas;
+                };
+            };
+            
+            // Ocultar objetos lejanos
+            call OPT_fnc_ocultarObjetosLejanos;
+        };
+        
+        // Actualizar sector
+        call OPT_fnc_obtenerSectorJugador;
+        
+        // Actualizar lista de jugadores (para comprobaciones de proximidad)
+        OPT_todosJugadores = allPlayers - entities "HeadlessClient_F";
+        
+        // Gestionar nuevas entidades
+        {
+            if !(_x in OPT_entidadesGestionadas) then {
+                if (!isPlayer _x) then {
+                    [_x] call OPT_fnc_registrarEntidad;
+                };
+            };
+        } forEach (allUnits + vehicles);
+        
+        // Eliminar entidades eliminadas de la lista
+        OPT_entidadesGestionadas = OPT_entidadesGestionadas select {!isNull _x};
+        
+        // Limpiar eventos caducados
+        if (time - OPT_ultimoEvento > 10) then {
+            OPT_eventosImportantes = OPT_eventosImportantes select {(_x select 2) > time};
+        };
+        
+        // Verificar si es momento de limpieza profunda
+        if (time - OPT_ultimaLimpieza > 900) then { // Cada 15 minutos
+            [] spawn OPT_fnc_limpiezaProfunda;
+            OPT_ultimaLimpieza = time;
+        };
+    };
+};
+
+// 🔄 Bucle principal de optimización
+OPT_fnc_bucleOptimizacion = {
+    while {OPT_activo} do {
+        // Comprobamos si hay que actualizar cachés
+        call OPT_fnc_actualizarCache;
+        
+        // Procesar cadáveres pendientes
+        call OPT_fnc_procesarCadaveres;
+        
+        // Comprobar si el jugador se ha movido lo suficiente
+        private _posJugador = if (OPT_enHeadless) then {
+            missionNamespace getVariable ["OPT_posicionJugadorGlobal", [0,0,0]]
+        } else {
+            if (!isNull player) then {
+                getPosATL player
+            } else {
+                [0,0,0]
+            };
+        };
+        
+        if (OPT_ultimaPosJugador distance _posJugador > OPT_distanciaMovimiento) then {
+            OPT_ultimaPosJugador = _posJugador;
+            
+            // Forzar distancia de visión al moverse
+            if (hasInterface && !isNull player) then {
+                call OPT_fnc_forzarDistanciaVision;
+            };
+            
+            // Procesar entidades prioritarias
+            {
+                if (_x distance _posJugador < OPT_radioSimulacion * 2) then {
+                    [_x] call OPT_fnc_procesarEntidad;
+                };
+            } forEach OPT_entidadesGestionadas;
+            
+            // Procesar objetos decorativos cercanos con más frecuencia
+            if (OPT_optimizarDecoraciones) then {
+                {
+                    if (_x distance _posJugador < OPT_radioDecoraciones * 2) then {
+                        [_x] call OPT_fnc_procesarEntidad;
+                    };
+                } forEach OPT_objetosPequenos;
+            };
+        };
+        
+        // Procesar un lote de entidades cada iteración
+        private _lote = floor(5 + (count OPT_entidadesGestionadas / 20)); // Cantidad adaptativa
+        _lote = _lote min 25 max 5; // Entre 5 y 25 por ciclo
+        
+        private _procesados = 0;
+        {
+            // Entidades que han sido procesadas hace más de 5 segundos
+            if (time > (_x getVariable ["OPT_ultimoProcesado", 0]) + 5) then {
+                // No procesar cadáveres en periodo de ragdoll
+                if !(_x in OPT_cadaveresPendientes) then {
+                    [_x] call OPT_fnc_procesarEntidad;
+                    _x setVariable ["OPT_ultimoProcesado", time];
+                    _procesados = _procesados + 1;
+                };
+                
+                // Limitar la cantidad por ciclo
+                if (_procesados >= _lote) then {
+                    // Salir del bucle
+                };
+            };
+        } forEach OPT_entidadesGestionadas;
+        
+        sleep 0.1; // Ejecutar 10 veces por segundo es suficiente y menos costoso
+    };
+};
+
+// 🚗 Función para agregar evento de entrada/salida de vehículo
+OPT_fnc_agregarEventosVehiculo = {
+    if (!hasInterface || isNull player) then {
+        // Nada que hacer sin interfaz o jugador
+    } else {
+        player addEventHandler ["GetInMan", {
+            params ["_unit", "_position", "_vehicle"];
+            OPT_vehiculoActual = _vehicle;
+            
+            // Al entrar en vehículo, aumentamos radio de simulación
+            OPT_radioSimulacion = OPT_radioSimulacionOriginal * 1.5;
+        }];
+        
+        player addEventHandler ["GetOutMan", {
+            params ["_unit", "_position", "_vehicle"];
+            OPT_vehiculoActual = objNull;
+            
+            // Al salir del vehículo, restauramos radio de simulación original
+            OPT_radioSimulacion = OPT_radioSimulacionOriginal;
+        }];
+        
+        // Evento para armas, registra el evento importante
+        player addEventHandler ["Fired", {
+            params ["_unit", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_gunner"];
+            
+            // Solo para armas significativas
+            if (_weapon != "Throw" && _weapon != "Put") then {
+                // Radio y duración proporcionales al calibre
+                private _calibre = getNumber (configFile >> "CfgAmmo" >> _ammo >> "caliber");
+                private _radio = 50 + (_calibre * 5);
+                private _duracion = 5 + (_calibre * 0.5);
+                
+                // Registrar el evento
+                [getPosATL _unit, _radio, _duracion] call OPT_fnc_registrarEvento;
+            } else {
+                // Para granadas y explosivos
+                if (_ammo isKindOf "GrenadeBase" || _ammo isKindOf "TimeBombCore") then {
+                    // Registrar evento con un retardo para la detonación
+                    [_projectile, _unit] spawn {
+                        params ["_proyectil", "_unidad"];
+                        private _posInicial = getPosATL _proyectil;
+                        sleep 3; // Tiempo aproximado para detonación
+                        if (!isNull _proyectil) then {
+                            [getPosATL _proyectil, 75, 15] call OPT_fnc_registrarEvento;
+                        } else {
+                            [_posInicial, 75, 15] call OPT_fnc_registrarEvento;
+                        };
+                    };
+                };
+            };
+        }];
+        
+        // Registrar eventos de explosiones mediante el sistema de armas
+        if (OPT_tieneACE) then {
+            // Si usa ACE
+            ["ace_explosives_detonated", {
+                params ["_explosive"];
+                private _position = getPosATL _explosive;
+                [_position, 100, 20] call OPT_fnc_registrarEvento;
+            }] call CBA_fnc_addEventHandler;
+        };
+        
+        // Añadir manejador de eventos para resistir intentos del jugador de cambiar la distancia
+        (findDisplay 46) displayAddEventHandler ["KeyDown", {
+            // Forzar vista cada vez que se presiona una tecla
+            call OPT_fnc_forzarDistanciaVision;
+            false
+        }];
+    };
+};
+
+// 🔍 Función para detectar y registrar objetos decorativos
+OPT_fnc_detectarDecoraciones = {
+    if (!OPT_optimizarDecoraciones) then {
+        // No hacer nada si no está activada la optimización
+    } else {
+        // Buscar decoraciones en el radio relevante
+        private _posJugador = if (OPT_enHeadless) then {
+            missionNamespace getVariable ["OPT_posicionJugadorGlobal", [0,0,0]]
+        } else {
+            if (!isNull player) then {
+                getPosATL player
+            } else {
+                [0,0,0]
+            };
+        };
+        
+        private _objetosEncontrados = 0;
+        {
+            private _clase = _x;
+            private _objetos = nearestObjects [_posJugador, [_clase], OPT_distanciaMaxima];
+            
+            {
+                if !(_x in OPT_entidadesGestionadas) then {
+                    if (!isPlayer _x) then {
+                        [_x] call OPT_fnc_registrarEntidad;
+                        _objetosEncontrados = _objetosEncontrados + 1;
+                    };
+                };
+            } forEach _objetos;
+        } forEach OPT_clasesDecorativas;
+        
+        // Programar próxima búsqueda
+        if (OPT_tieneCBA) then {
+            [OPT_fnc_detectarDecoraciones, [], 60] call CBA_fnc_waitAndExecute;
+        } else {
+            [] spawn {
+                sleep 60;
+                call OPT_fnc_detectarDecoraciones;
+            };
+        };
+    };
+};
+
+// ===== INICIALIZACIÓN AUTOMÁTICA =====
+OPT_fnc_inicializar = {
+    // Guardar valor original del radio de simulación
+    OPT_radioSimulacionOriginal = OPT_radioSimulacion;
+    
+    // Si es un headless client, comportamiento especial
+    if (OPT_enHeadless) then {
+        OPT_radioSimulacion = OPT_radioSimulacion * 0.8;
+        OPT_intervaloCacheado = 8;
+        
+        // Sincronizar posición del jugador desde el servidor
+        OPT_ultimaPosJugador = [0,0,0];
+    };
+    
+    // Guardar configuración original de vista
+    if (hasInterface) then {
+        // Guardar valores originales
+        OPT_viewDistanciaOriginal = viewDistance;
+        OPT_objectViewDistanciaOriginal = getObjectViewDistance;
+    };
+    
+    // Forzar configuración de visión de inmediato si es posible
+    if (hasInterface && !isNull player) then {
+        // Forzar la distancia inmediatamente
+        setViewDistance OPT_distanciaVisionForzada;
+        setObjectViewDistance OPT_distanciaVisionForzada;
+        
+        // Notificar al jugador
+        systemChat "";
+        
+        // Iniciar bucle para garantizar que se mantiene
+        [] spawn {
+            while {OPT_activo} do {
+                setViewDistance OPT_distanciaVisionForzada;
+                setObjectViewDistance OPT_distanciaVisionForzada;
+                sleep 1;
+            };
+        };
+    };
+    
+    // Activar el procesamiento del límite de visibilidad
+    OPT_procesarLimiteVisibilidad = true;
+    
+    // Generar sectores del mapa
+    call OPT_fnc_generarSectores;
+    
+    // Inicializar variables
+    OPT_ultimaPosJugador = if (OPT_enHeadless) then {
+        [0,0,0]
+    } else {
+        if (!isNull player) then {
+            getPosATL player
+        } else {
+            [0,0,0]
+        };
+    };
+    
+    // Inicializar estado de vuelo
+    if (hasInterface && !isNull player) then {
+        OPT_estaVolando = call OPT_fnc_estaVolando;
+    };
+    
+    // Inicializar lista de jugadores
+    OPT_todosJugadores = allPlayers - entities "HeadlessClient_F";
+    
+    // Inicializar otras variables
+    OPT_vehiculoActual = objNull;
+    OPT_cadaveresPendientes = [];
+    OPT_objetosPequenos = [];
+    OPT_objetosLejanos = [];
+    
+    // Registrar eventos de vehículo y otros eventos
+    call OPT_fnc_agregarEventosVehiculo;
+    
+    // Registrar unidades iniciales
+    {
+        if (OPT_optimizarIA && {_x isKindOf "CAManBase"} && {!isPlayer _x}) then {
+            [_x] call OPT_fnc_registrarEntidad;
+        };
+    } forEach allUnits;
+    
+    // Registrar vehículos iniciales
+    if (OPT_optimizarVehiculos) then {
+        {
+            if (_x isKindOf "AllVehicles" && {!(_x isKindOf "CAManBase")}) then {
+                [_x] call OPT_fnc_registrarEntidad;
+            };
+        } forEach vehicles;
+    };
+    
+    // Registrar objetos estáticos si está activado
+    if (OPT_optimizarObjetos) then {
+        {
+            if (_x isKindOf "Static" && {!(_x in OPT_entidadesGestionadas)}) then {
+                [_x] call OPT_fnc_registrarEntidad;
+            };
+        } forEach (allMissionObjects "Static");
+    };
+    
+    // Registrar objetos decorativos
+    if (OPT_optimizarDecoraciones) then {
+        call OPT_fnc_detectarDecoraciones;
+    };
+    
+    // Iniciar bucle de optimización
+    [] spawn OPT_fnc_bucleOptimizacion;
+};
+
+// ===== EVENTO TERMINAR MISION =====
+addMissionEventHandler ["Ended", {
+    if (OPT_activo) then {
+        // Restaurar todas las entidades
+        {
+            if (!isNull _x) then {
+                _x enableSimulationGlobal true;
+                _x hideObjectGlobal false;
+                
+                if (_x isKindOf "CAManBase" && {!isPlayer _x}) then {
+                    _x enableAI "PATH";
+                    _x enableAI "FSM";
+                    _x enableAI "TARGET";
+                };
+            };
+        } forEach OPT_entidadesGestionadas;
+        
+        // Restaurar vista original si es necesario
+        if (hasInterface && !isNull player) then {
+            // Restaurar vista completa correctamente
+            setViewDistance OPT_viewDistanciaOriginal;
+            // Restaurar el array completo correctamente
+            setObjectViewDistance (OPT_objectViewDistanciaOriginal select 0);
+        };
+        
+        // Limpiar arrays
+        OPT_entidadesGestionadas = [];
+        OPT_cadaveresPendientes = [];
+        OPT_objetosPequenos = [];
+        OPT_eventosImportantes = [];
+        OPT_objetosLejanos = [];
+        
+        // Desactivar script
+        OPT_activo = false;
+    };
+}];
+
+
+// ===== SISTEMA A3PE INTEGRADO OPTIMIZADO =====
 
 // === Definición de funciones A3PE ===
 A3PE_fnc_loop = {
@@ -7,7 +1070,7 @@ A3PE_fnc_loop = {
     
     // Procesamiento prioritario para unidades cercanas que podrían ser enemigos
     {
-        if (!isPlayer _x && {side _x != side _player} && {_player distance _x < 100}) then {
+        if (!isPlayer _x && {side _x != side _player} && {_player distance _x < 80}) then {
             // Siempre mostrar unidades enemigas cercanas
             [{ _this hideObject false; }, _x] remoteExecCall ["call", _player];
         };
@@ -20,8 +1083,8 @@ A3PE_fnc_loop = {
     _IsInUAV = missionNamespace getVariable ["A3PE_IsInUAV", [0,""]];
     _ShownUAV = missionNamespace getVariable ["A3PE_ShownUAV", false];
     _UAV = getConnectedUAV _player;
-    _ForceRenderDistance = missionNamespace getVariable ["A3PE_ForceRenderDistance", 10];
-    _ForceRenderDistanceZeus = missionNamespace getVariable ["A3PE_ForceRenderDistanceZeus", 10];
+    _ForceRenderDistance = missionNamespace getVariable ["A3PE_ForceRenderDistance", 80]; // Aumentado a 80m
+    _ForceRenderDistanceZeus = missionNamespace getVariable ["A3PE_ForceRenderDistanceZeus", 80]; // Aumentado a 80m
 
     _allObjsHide = [];
     _allObjsShow = [];
@@ -66,8 +1129,8 @@ A3PE_fnc_loop = {
     };
 };
 
-// Función optimizada para objetos genéricos (vehículos, muebles, etc.)
-A3PE_fnc_loopObjectsOptimized = {
+// Función simplificada para objetos genéricos (vehículos, muebles, etc.) usando LineIntersects
+A3PE_fnc_loopObjectsFast = {
     params ["_objarray", "_player", "_forceRenderDist"];
     private ["_ViewDistance"];
     
@@ -75,50 +1138,31 @@ A3PE_fnc_loopObjectsOptimized = {
     _allObjsHide = [];
     _allObjsShow = [];
     
-    // 1. Primer filtro rápido por distancia (cálculo ligero)
-    _objToCheck = _objarray select {_ViewDistance > _player distance2D _x && {_player distance2D _x > _forceRenderDist}};
+    _startPos = eyePos _player;
     
-    // 2. Limitar cantidad
-    if (count _objToCheck > 20) then {
-        _objToCheck resize 20;
-    };
-    
-    // 3. Comprobar visibilidad solo para objetos preseleccionados
     {
-        _obj = _x;
-        
-        // Usar comprobación de intersección en lugar de checkVisibility cuando sea posible
-        // lineIntersects es más rápido que checkVisibility
-        _startPos = eyePos _player;
-        _endPos = AGLToASL (_obj modelToWorld [0,0,0]);
-        _intersects = lineIntersects [_startPos, _endPos, _player, _obj];
-        
-        if (_intersects) then {
-            _allObjsHide pushBack _obj;
+        // Todo dentro del radio de fuerza es siempre visible
+        if (_player distance2D _x <= _forceRenderDist) then {
+            _allObjsShow pushBack _x;
         } else {
-            // Verificación secundaria solo si la primera falla
-            if (terrainIntersect [ASLToAGL _startPos, ASLToAGL _endPos]) then {
-                _allObjsHide pushBack _obj;
+            if (_ViewDistance > _player distance2D _x) then {
+                _obj = _x;
+                // Usar lineIntersects que es más rápido que checkVisibility
+                _endPos = _obj modelToWorldWorld [0,0,0];
+                _endPosASL = AGLToASL _endPos;
+                
+                // Si está dentro del alcance de visión pero fuera de la distancia de fuerza
+                if (terrainIntersect [ASLToAGL _startPos, _endPos] || lineIntersects [_startPos, _endPosASL, _player, _obj]) then {
+                    _allObjsHide pushBack _obj;
+                } else {
+                    _allObjsShow pushBack _obj;
+                };
             } else {
-                _allObjsShow pushBack _obj;
+                _allObjsHide pushBack _x;
             };
         };
-    } forEach _objToCheck;
-    
-    // Objetos cercanos siempre visibles
-    {
-        if (_player distance2D _x <= _forceRenderDist && !(_x in _allObjsShow)) then {
-            _allObjsShow pushBack _x;
-        };
     } forEach _objarray;
-    
-    // Objetos muy lejanos siempre ocultos
-    {
-        if (_ViewDistance <= _player distance2D _x && !(_x in _allObjsHide) && !(_x in _allObjsShow)) then {
-            _allObjsHide pushBack _x;
-        };
-    } forEach _objarray;
-    
+
     // Aplicar visibilidad
     if (count _allObjsHide > 0) then {
         [{_x hideObject true;}, _allObjsHide] remoteExecCall ["forEach", _player];
@@ -143,9 +1187,9 @@ A3PE_fnc_hide = {
     _IsInUAV = UAVControl (getConnectedUAV _player);
     _ShownUAV = shownUAVFeed;
     _UAV = getConnectedUAV _player;
-    _ForceRenderDistance = missionNamespace getVariable ["A3PE_ForceRenderDistance", 10];
+    _ForceRenderDistance = missionNamespace getVariable ["A3PE_ForceRenderDistance", 80]; // Aumentado a 80m
     _HideWeapons = missionNamespace getVariable ["A3PE_HideWeapons", true];
-    _ForceRenderDistanceZeus = missionNamespace getVariable ["A3PE_ForceRenderDistanceZeus", 10];
+    _ForceRenderDistanceZeus = missionNamespace getVariable ["A3PE_ForceRenderDistanceZeus", 80]; // Aumentado a 80m
     
     // Nuevas variables de configuración
     _HideVehicles = missionNamespace getVariable ["A3PE_HideVehicles", true];
@@ -201,45 +1245,9 @@ A3PE_fnc_hide = {
         [_alldeadmen2, _player] call A3PE_fnc_loop;
     };
     
-    // ===== VEHÍCULOS EXTENDIDOS =====
+    // NUEVO: Procesar vehículos cada 3 frames - OPTIMIZADO
     if (_HideVehicles && (_frameCounter % 3 == 0)) then {
-        _allVehicles = [];
-        
-        // Lista completa de clases de vehículos vanilla
-        _vehicleClasses = [
-            "Car", "Tank", "Air", "Ship", // Categorías principales
-            "Car_F", "Truck_F", "Wheeled_APC_F", // Terrestres básicos
-            "Tank_F", "APC_Tracked_F", // Blindados
-            "Helicopter", "Plane", "VTOL_Base_F", // Aeronaves
-            "Ship_F", "Boat_F", "Boat_Armed_01_base_F", // Navales
-            "Motorcycle", "Quadbike_01_base_F", // Vehículos pequeños
-            "UGV_01_base_F", "UAV_01_base_F", "UAV_02_base_F", "UAV_03_base_F", // Drones
-            "B_LSV_01_armed_F", "B_LSV_01_unarmed_F", // Offroads militares
-            "B_MRAP_01_F", "B_MRAP_01_gmg_F", "B_MRAP_01_hmg_F", // MRAP NATO
-            "O_MRAP_02_F", "O_MRAP_02_gmg_F", "O_MRAP_02_hmg_F", // MRAP CSAT
-            "I_MRAP_03_F", "I_MRAP_03_gmg_F", "I_MRAP_03_hmg_F", // MRAP AAF
-            "B_APC_Wheeled_01_cannon_F", "O_APC_Wheeled_02_rcws_F", "I_APC_Wheeled_03_cannon_F", // APCs con ruedas
-            "B_APC_Tracked_01_rcws_F", "O_APC_Tracked_02_cannon_F", "I_APC_tracked_03_cannon_F", // APCs con orugas
-            "B_MBT_01_cannon_F", "O_MBT_02_cannon_F", "I_MBT_03_cannon_F", // Tanques principales
-            "B_Heli_Light_01_F", "O_Heli_Light_02_F", "I_Heli_light_03_F", // Helicópteros ligeros
-            "B_Heli_Transport_01_F", "B_Heli_Transport_03_F", "O_Heli_Transport_04_F", // Helicópteros de transporte
-            "B_Heli_Attack_01_F", "O_Heli_Attack_02_F", // Helicópteros de ataque
-            "B_Plane_CAS_01_F", "O_Plane_CAS_02_F", "I_Plane_Fighter_03_CAS_F", // Aviones CAS
-            "B_Boat_Transport_01_F", "O_Boat_Transport_01_F", "I_Boat_Transport_01_F", // Botes de transporte
-            "B_Boat_Armed_01_minigun_F", "O_Boat_Armed_01_hmg_F", "I_Boat_Armed_01_minigun_F", // Botes armados
-            "C_Hatchback_01_F", "C_Hatchback_01_sport_F", "C_Offroad_01_F", // Vehículos civiles
-            "C_Van_01_transport_F", "C_Van_01_box_F", "C_Van_02_vehicle_F", // Furgonetas civiles
-            "C_Quadbike_01_F", "C_Kart_01_F", // Pequeños civiles
-            "C_Scooter_Transport_01_F", "C_Boat_Civil_01_F" // Civiles acuáticos
-        ];
-        
-        {
-            _vehicles = vehicles select {_x isKindOf _x && !(_x isKindOf "WeaponHolderSimulated") && !(_x isKindOf "GroundWeaponHolder")};
-            if (count _vehicles > 5) then {
-                _vehicles resize 5;
-            };
-            _allVehicles append _vehicles;
-        } forEach _vehicleClasses;
+        _allVehicles = vehicles select {!(_x isKindOf "WeaponHolderSimulated") && !(_x isKindOf "GroundWeaponHolder")};
         
         // Limitar cantidad de vehículos
         if (count _allVehicles > 30) then {
@@ -250,28 +1258,28 @@ A3PE_fnc_hide = {
         _allVehicles deleteRange [((count _allVehicles) / 2), count _allVehicles];
         _allVehicles2 = _allVehicles;
         
-        // Distancia de renderizado mayor para vehículos
-        [_allVehicles1, _player, 20] call A3PE_fnc_loopObjectsOptimized;
-        [_allVehicles2, _player, 20] call A3PE_fnc_loopObjectsOptimized;
+        // Usar método rápido para vehículos
+        [_allVehicles1, _player, 80] call A3PE_fnc_loopObjectsFast;
+        [_allVehicles2, _player, 80] call A3PE_fnc_loopObjectsFast;
     };
     
-    // ===== ANIMALES EXTENDIDOS =====
+    // NUEVO: Procesar animales cada 5 frames - OPTIMIZADO
     if (_HideAnimals && (_frameCounter % 5 == 0)) then {
         _allAnimals = [];
         
-        // Lista completa de clases de animales vanilla
+        // Lista amplia de clases de animales vanilla
         _animalClasses = [
-            "Animal", "Animal_Base_F", 
-            "Sheep_base_F", "Sheep_random_F", 
-            "Goat_Base_F", "Goat_random_F", 
-            "Fowl_Base_F", "Hen_random_F", "Cock_random_F", "Cock_white_F",
+            "Animal_Base_F", 
+            "Sheep_base_F", 
+            "Goat_Base_F", 
+            "Fowl_Base_F", 
             "Rabbit_F",
             "Turtle_F",
-            "Snake_random_F", "Snake_vipera_F",
-            "Fin_Base_F", "Fin_random_F", "Fin_sand_F", "Fin_blackwhite_F", "Fin_ocherwhite_F", "Fin_tricolour_F",
-            "Alsatian_Base_F", "Alsatian_Random_F", "Alsatian_Sand_F", "Alsatian_Black_F", "Alsatian_Sandblack_F",
-            "Cow_Base_F", "Cow_random_F", "Cow_01_F", "Cow_02_F", "Cow_03_F", "Cow_04_F", 
-            "Deer_Base_F", "Deer_random_F"
+            "Snake_random_F",
+            "Fin_Base_F",
+            "Alsatian_Base_F",
+            "Cow_Base_F",
+            "Deer_Base_F"
         ];
         
         {
@@ -287,39 +1295,39 @@ A3PE_fnc_hide = {
             _allAnimals resize 20;
         };
         
-        [_allAnimals, _player, 15] call A3PE_fnc_loopObjectsOptimized;
+        [_allAnimals, _player, 80] call A3PE_fnc_loopObjectsFast;
     };
     
     // Solo procesamos un tipo de objeto adicional por ciclo para distribuir la carga
     // Y solo si tenemos pocos frames acumulados (indica buen rendimiento)
     if (_frameCounter < 10) then {
         switch (_frameCounter % 9) do {
-            // ===== MUEBLES EXTENDIDOS =====
+            // NUEVO: Procesar muebles
             case 0: {
                 if (_HideFurniture) then {
                     _allFurniture = [];
                     
-                    // Lista completa de clases de muebles vanilla
+                    // Lista amplia de clases de muebles vanilla
                     _furnitureClasses = [
-                        "Furniture_base_F", 
-                        "Land_CampingChair_V1_F", "Land_CampingChair_V2_F", "Land_CampingTable_F", "Land_CampingTable_small_F",
-                        "Land_ChairPlastic_F", "Land_ChairWood_F", 
-                        "Land_TableDesk_F", "Land_TablePlastic_01_F", "Land_WoodenTable_large_F", "Land_WoodenTable_small_F",
-                        "Land_Bench_01_F", "Land_Bench_02_F", "Land_Bench_03_F", "Land_Bench_04_F", "Land_Bench_05_F",
-                        "Land_Sofa_01_F", "Land_Sofa_02_F", "Land_ArmChair_01_F",
-                        "Land_RattanChair_01_F", "Land_RattanTable_01_F",
-                        "Land_OfficeChair_01_F", "Land_OfficeTable_01_F", 
+                        "Furniture_base_F",
+                        "Land_CampingChair_V1_F",
+                        "Land_CampingChair_V2_F",
+                        "Land_CampingTable_F",
+                        "Land_CampingTable_small_F",
+                        "Land_ChairWood_F",
+                        "Land_TableDesk_F",
+                        "Land_TablePlastic_01_F",
+                        "Land_OfficeChair_01_F",
+                        "Land_RattanChair_01_F",
+                        "Land_RattanTable_01_F",
+                        "Land_WoodenTable_large_F",
+                        "Land_WoodenTable_small_F",
                         "Land_TableSmall_01_F",
-                        "Land_Sink_F", "Land_Sink_counter_F",
-                        "Land_ShelvesWooden_F", "Land_ShelvesWooden_blue_F", "Land_ShelvesWooden_khaki_F",
-                        "Land_OfficeCabinet_01_F", "Land_OfficeCabinet_02_F", 
-                        "Land_Fridge_01_F", "Land_Fridge_01_closed_F", "Land_Fridge_01_open_F",
-                        "Land_Metal_rack_Tall_F", "Land_Metal_rack_F", "Land_Metal_wooden_rack_F", "Land_Rack_F", 
-                        "Land_ShelvesMetal_F", "Land_ShelvesWooden_F",
-                        "Land_TableBig_01_F", "Land_DeskChair_01_F", "Land_WoodenCounter_01_F",
-                        "Land_ToolTrolley_01_F", "Land_ToolTrolley_02_F",
-                        "Land_Workbench_01_F", "Workbench_01_base_F",
-                        "Land_ConnectorStructure_01_F"
+                        "Land_Bench_01_F",
+                        "Land_Bench_02_F",
+                        "Land_Bench_03_F",
+                        "Land_ChairPlastic_F",
+                        "Land_Sofa_01_F"
                     ];
                     
                     {
@@ -335,26 +1343,35 @@ A3PE_fnc_hide = {
                         _allFurniture resize 15;
                     };
                     
-                    [_allFurniture, _player, 10] call A3PE_fnc_loopObjectsOptimized;
+                    [_allFurniture, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== ROCAS EXTENDIDAS =====
+            // NUEVO: Procesar rocas
             case 1: {
                 if (_HideRocks) then {
                     _allRocks = [];
                     
-                    // Lista completa de clases de rocas vanilla
+                    // Lista amplia de clases de rocas vanilla
                     _rockClasses = [
-                        "Land_Small_Stone_01_F", "Land_Small_Stone_02_F", 
-                        "Land_BluntRock_apart", "Land_BluntRock_monolith", "Land_BluntRock_spike", "Land_BluntRock_wallH", "Land_BluntRock_wallV",
-                        "Land_BluntStone_01", "Land_BluntStone_02", "Land_BluntStone_03",
-                        "Land_W_sharpRock_apart", "Land_W_sharpRock_monolith", "Land_W_sharpRock_spike", "Land_W_sharpRock_wallH", "Land_W_sharpRock_wallV",
-                        "Land_W_sharpStone_01", "Land_W_sharpStone_02", "Land_W_sharpStone_03",
-                        "Land_Limestone_01_01_F", "Land_Limestone_01_02_F", "Land_Limestone_01_03_F", "Land_Limestone_01_04_F", "Land_Limestone_01_05_F",
-                        "Land_Limestone_01_epilog_F", "Land_Limestone_01_monolith_F", "Land_Limestone_01_spike_F", "Land_Limestone_01_wall_F",
-                        "Land_Stone_01_F", "Land_Stone_02_F", "Land_Stone_03_F", "Land_Stone_04_F", "Land_Stone_05_F",
-                        "Land_StoneCluster_01_F", "Land_StoneCluster_02_F"
+                        "Land_Small_Stone_01_F",
+                        "Land_Small_Stone_02_F",
+                        "Land_BluntRock_apart",
+                        "Land_BluntRock_monolith",
+                        "Land_BluntRock_spike",
+                        "Land_BluntRock_wallH",
+                        "Land_BluntRock_wallV",
+                        "Land_BluntStone_01",
+                        "Land_BluntStone_02",
+                        "Land_BluntStone_03",
+                        "Land_W_sharpRock_apart",
+                        "Land_W_sharpRock_monolith",
+                        "Land_W_sharpRock_spike",
+                        "Land_W_sharpRock_wallH",
+                        "Land_W_sharpRock_wallV",
+                        "Land_W_sharpStone_01",
+                        "Land_W_sharpStone_02",
+                        "Land_Limestone_01_01_F"
                     ];
                     
                     {
@@ -370,35 +1387,44 @@ A3PE_fnc_hide = {
                         _allRocks resize 10;
                     };
                     
-                    [_allRocks, _player, 8] call A3PE_fnc_loopObjectsOptimized;
+                    [_allRocks, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== PLANTAS EXTENDIDAS =====
+            // NUEVO: Procesar plantas
             case 2: {
                 if (_HidePlants) then {
                     _allPlants = [];
                     
-                    // Lista completa de clases de plantas vanilla
+                    // Lista amplia de clases de plantas vanilla
                     _plantClasses = [
-                        "PlantBase_F", 
-                        "Land_Bush_01_F", "Land_Bush_02_F", "Land_Bush_03_F", 
-                        "Land_Fern_01_F", "Land_Fern_02_F",
-                        "Land_Grass_1_F", "Land_Grass_2_F", "Land_Grass_3_F", "Land_Grass_4_F", "Land_Grass_5_F", "Land_Grass_6_F", "Land_Grass_7_F", "Land_Grass_8_F",
-                        "Land_Plant_1_F", "Land_Plant_2_F", "Land_Plant_3_F", "Land_Plant_4_F", "Land_Plant_5_F", "Land_Plant_6_F", "Land_Plant_7_F", "Land_Plant_8_F",
-                        "Land_Flower_1_F", "Land_Flower_2_F", "Land_Flower_3_F", "Land_Flower_4_F", "Land_Flower_5_F", "Land_Flower_6_F",
-                        "Land_GrassLong_F", "Land_GrassTall_F", "Land_SmallBush_F", 
-                        "Land_TBush_01_F", "Land_TBush_02_F",
-                        "Land_nettle_1_F", "Land_nettle_2_F", "Land_nettle_3_F", "Land_nettle_4_F",
-                        "Land_Weat_1_F", "Land_Weat_2_F", "Land_Weat_3_F", "Land_Weat_Bunch_F",
-                        "Land_b_thistle_thorn_green_F", "Land_b_thistle_thorn_grey_F", "Land_c_thistle_thorn_grey_F", "Land_d_thistle_thorn_grey_F",
-                        "Land_Cress_Patch_F", "Land_Clutter_Grass_Dry_F", "Land_Clutter_Grass_Fern_F", "Land_Clutter_Grass_Green_F"
+                        "Land_Bush_01_F",
+                        "Land_Bush_02_F",
+                        "Land_Bush_03_F",
+                        "Land_Grass_1_F", 
+                        "Land_Grass_2_F",
+                        "Land_Grass_3_F",
+                        "Land_Grass_4_F",
+                        "Land_Grass_5_F",
+                        "Land_Grass_6_F",
+                        "Land_Grass_7_F",
+                        "Land_Grass_8_F",
+                        "Land_Plant_1_F",
+                        "Land_Plant_2_F",
+                        "Land_Plant_3_F",
+                        "Land_Plant_4_F",
+                        "Land_Flower_1_F",
+                        "Land_Flower_2_F",
+                        "Land_GrassLong_F",
+                        "Land_GrassTall_F",
+                        "Land_SmallBush_F",
+                        "Land_TBush_01_F"
                     ];
                     
                     {
                         _plants = allMissionObjects _x;
-                        if (count _plants > 3) then {
-                            _plants resize 3;
+                        if (count _plants > 2) then {
+                            _plants resize 2;
                         };
                         _allPlants append _plants;
                     } forEach _plantClasses;
@@ -408,37 +1434,35 @@ A3PE_fnc_hide = {
                         _allPlants resize 10;
                     };
                     
-                    [_allPlants, _player, 5] call A3PE_fnc_loopObjectsOptimized;
+                    [_allPlants, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== ESCOMBROS/BASURA EXTENDIDOS =====
+            // NUEVO: Procesar escombros/basura
             case 3: {
                 if (_HideDebris) then {
                     _allDebris = [];
                     
-                    // Lista completa de clases de escombros vanilla
+                    // Lista amplia de clases de escombros vanilla
                     _debrisClasses = [
-                        "Garbage_base_F", 
-                        "Land_Garbage_square3_F", "Land_Garbage_square5_F", "Land_Garbage_line_F", "Land_Garbage_square_F",
-                        "Land_GarbageBags_F", "Land_GarbageWashingMachine_F", "Land_GarbagePallet_F", 
-                        "Land_GarbageHeap_01_F", "Land_GarbageHeap_02_F", "Land_GarbageHeap_03_F", "Land_GarbageHeap_04_F",
+                        "Garbage_base_F",
+                        "Land_Garbage_square3_F",
+                        "Land_Garbage_square5_F",
+                        "Land_Garbage_line_F",
+                        "Land_Garbage_square_F",
+                        "Land_GarbageBags_F",
+                        "Land_GarbageHeap_01_F",
+                        "Land_GarbageHeap_02_F",
                         "Land_JunkPile_F",
-                        "Land_Pallets_F", "Land_Pallets_stack_F",
-                        "Land_ConcretePipe_F", "Land_ConcretePipe_01_F",
-                        "Land_CinderBlocks_F", "Land_CinderBlocks_01_F",
-                        "Land_Tyre_F", "Land_Tyres_F",
-                        "Land_Wreck_Car_F", "Land_Wreck_Car2_F", "Land_Wreck_Car3_F", "Land_Wreck_CarDismantled_F", 
-                        "Land_Wreck_BRDM2_F", "Land_Wreck_BMP2_F", "Land_Wreck_Truck_dropside_F", "Land_Wreck_Truck_F", "Land_Wreck_UAZ_F", "Land_Wreck_Ural_F", 
-                        "Land_Wreck_Offroad_F", "Land_Wreck_Offroad2_F", "Land_Wreck_Van_F",
-                        "Land_Wreck_Slammer_F", "Land_Wreck_Slammer_hull_F", 
-                        "Land_Wreck_Heli_Attack_01_F", "Land_Wreck_Heli_Attack_02_F"
+                        "Land_Tyres_F",
+                        "Land_Wreck_Car_F",
+                        "Land_Wreck_Car2_F"
                     ];
                     
                     {
                         _debris = allMissionObjects _x;
-                        if (count _debris > 3) then {
-                            _debris resize 3;
+                        if (count _debris > 2) then {
+                            _debris resize 2;
                         };
                         _allDebris append _debris;
                     } forEach _debrisClasses;
@@ -448,33 +1472,38 @@ A3PE_fnc_hide = {
                         _allDebris resize 10;
                     };
                     
-                    [_allDebris, _player, 7] call A3PE_fnc_loopObjectsOptimized;
+                    [_allDebris, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== SEÑALES EXTENDIDAS =====
+            // NUEVO: Procesar señales
             case 4: {
                 if (_HideSigns) then {
                     _allSigns = [];
                     
-                    // Lista completa de clases de señales vanilla
+                    // Lista amplia de clases de señales vanilla
                     _signClasses = [
-                        "Land_Sign_F", "SignAd_Sponsor_F", "Sign_Arrow_F", "Sign_Arrow_Green_F", "Sign_Arrow_Blue_F", "Sign_Arrow_Yellow_F",
-                        "SignAd_SponsorS_F", "RoadCone_F", "RoadCone_L_F", 
-                        "Land_Sign_WarningMilitaryArea_F", "Land_Sign_WarningMilAreaSmall_F", "Land_Sign_WarningMilitaryVehicles_F", 
-                        "Land_Sign_WarningUnexplodedAmmo_F", "Land_Sign_MinesDanger_F", "Land_Sign_Mines_F",
-                        "Land_Sign_Checkpoint_US_EP1", "Land_Sign_Checkpoint_CZ_EP1", "Land_Sign_Checkpoint_TK_EP1",
-                        "Land_SignB_Pub_F", "Land_SignB_Hotel_F", "Land_SignB_Bar_F",
-                        "Land_Billboard_01_F", "Land_Billboard_02_F", "Land_Billboard_03_F", "Land_Billboard_04_F", "Land_Billboard_05_F", 
-                        "Land_Billboards_01_F", "Land_Billboards_02_F",
-                        "RoadBarrier_F", "RoadBarrier_small_F", "Land_BarGate_F", "Land_RoadBarrier_01_F",
-                        "PlasticBarrier_01_F", "PlasticBarrier_02_F", "PlasticBarrier_03_F"
+                        "Land_Sign_F",
+                        "SignAd_Sponsor_F",
+                        "Sign_Arrow_F",
+                        "Sign_Arrow_Green_F",
+                        "Sign_Arrow_Blue_F",
+                        "Sign_Arrow_Yellow_F",
+                        "SignAd_SponsorS_F",
+                        "Land_Sign_WarningMilitaryArea_F",
+                        "Land_Sign_WarningMilAreaSmall_F",
+                        "Land_Sign_WarningMilitaryVehicles_F",
+                        "Land_Sign_MinesDanger_F",
+                        "RoadCone_F",
+                        "RoadCone_L_F",
+                        "RoadBarrier_F",
+                        "RoadBarrier_small_F"
                     ];
                     
                     {
                         _signs = allMissionObjects _x;
-                        if (count _signs > 3) then {
-                            _signs resize 3;
+                        if (count _signs > 2) then {
+                            _signs resize 2;
                         };
                         _allSigns append _signs;
                     } forEach _signClasses;
@@ -484,35 +1513,37 @@ A3PE_fnc_hide = {
                         _allSigns resize 10;
                     };
                     
-                    [_allSigns, _player, 8] call A3PE_fnc_loopObjectsOptimized;
+                    [_allSigns, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== OBJETOS PEQUEÑOS E ITEMS EXTENDIDOS =====
+            // NUEVO: Procesar objetos pequeños e items
             case 5: {
                 if (_HideItems) then {
                     _allItems = [];
                     
-                    // Lista completa de clases de items vanilla
+                    // Lista amplia de clases de items vanilla
                     _itemClasses = [
-                        "Thing", "Items_base_F", 
-                        "Land_Money_F", "Land_Suitcase_F",
-                        "Land_BakedBeans_F", "Land_TacticalBacon_F", "Land_CerealsBox_F", "Land_CeresBox_F", "Land_PowderedMilk_F", "Land_BottlePlastic_V1_F", "Land_BottlePlastic_V2_F",
-                        "Land_Can_V1_F", "Land_Can_V2_F", "Land_Can_V3_F", "Land_CanisterFuel_F", "Land_CanisterPlastic_F",
-                        "Land_CanOpener_F", "Land_DuctTape_F", "Land_File_F", "Land_FilePhotos_F",
-                        "Land_Matches_F", "Land_MobilePhone_old_F", "Land_MobilePhone_smart_F",
-                        "Land_Antibiotic_F", "Land_Bandage_F", "Land_DisinfectantSpray_F", "Land_PainKillers_F", "Land_VitaminBottle_F", "Land_WaterBottle_F", "Land_WaterPurificationTablets_F",
-                        "Land_Map_blank_F", "Land_Map_F", "Land_Notepad_F",
-                        "Land_Knife_F", "Land_MultiMeter_F",
-                        "Land_RiceBox_F", "Land_SardinesCan_F",
-                        "Land_BottlePlastic_V1_F", "Land_BottlePlastic_V2_F",
-                        "WeaponHolder", "WeaponHolderSimulated"
+                        "Land_Money_F",
+                        "Land_Suitcase_F",
+                        "Land_BakedBeans_F",
+                        "Land_BottlePlastic_V1_F",
+                        "Land_BottlePlastic_V2_F",
+                        "Land_CanOpener_F",
+                        "Land_CerealsBox_F",
+                        "Land_DuctTape_F",
+                        "Land_Matches_F",
+                        "Land_MobilePhone_smart_F",
+                        "Land_TacticalBacon_F",
+                        "Land_Can_V1_F",
+                        "Land_Can_V2_F",
+                        "Land_Can_V3_F"
                     ];
                     
                     {
                         _items = allMissionObjects _x;
-                        if (count _items > 3) then {
-                            _items resize 3;
+                        if (count _items > 2) then {
+                            _items resize 2;
                         };
                         _allItems append _items;
                     } forEach _itemClasses;
@@ -522,33 +1553,31 @@ A3PE_fnc_hide = {
                         _allItems resize 10;
                     };
                     
-                    [_allItems, _player, 6] call A3PE_fnc_loopObjectsOptimized;
+                    [_allItems, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== PUERTAS EXTENDIDAS =====
+            // NUEVO: Procesar puertas
             case 6: {
                 if (_HideDoors) then {
                     _allDoors = [];
                     
-                    // Lista completa de clases de puertas vanilla
+                    // Lista amplia de clases de puertas vanilla
                     _doorClasses = [
-                        "Land_Door_01_F", "Land_Door_02_F",
-                        "Land_DoorLocked_01_F", "Land_DoorLocked_02_F",
-                        "Land_House_Door_01_F", "Land_House_Door_02_F",
-                        "Land_GarageRow_01_door_F", "Land_CarService_door_F",
-                        "Land_ConcreteWall_01_gate_F", "Land_ConcreteWall_01_l_gate_F",
-                        "Land_BackAlley_01_door_F", "Land_BackAlley_01_gate_F",
-                        "Land_SCF_01_door_01_F", "Land_SCF_01_door_02_F",
-                        "Land_BasaltWall_01_gate_F", "Land_IronFence_gate_F",
-                        "Land_MetalGate_01_F", "Land_MetalGate_02_F", "Land_MetalGate_03_F",
-                        "Land_NetFence_Gate_F"
+                        "Land_Door_01_F",
+                        "Land_Door_02_F",
+                        "Land_DoorLocked_01_F",
+                        "Land_DoorLocked_02_F",
+                        "Land_House_Door_01_F",
+                        "Land_House_Door_02_F",
+                        "Land_GarageRow_01_door_F",
+                        "Land_CarService_door_F"
                     ];
                     
                     {
                         _doors = allMissionObjects _x;
-                        if (count _doors > 3) then {
-                            _doors resize 3;
+                        if (count _doors > 2) then {
+                            _doors resize 2;
                         };
                         _allDoors append _doors;
                     } forEach _doorClasses;
@@ -558,30 +1587,29 @@ A3PE_fnc_hide = {
                         _allDoors resize 10;
                     };
                     
-                    [_allDoors, _player, 8] call A3PE_fnc_loopObjectsOptimized;
+                    [_allDoors, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== VENTANAS EXTENDIDAS =====
+            // NUEVO: Procesar ventanas
             case 7: {
                 if (_HideWindows) then {
                     _allWindows = [];
                     
-                    // Lista completa de clases de ventanas vanilla
+                    // Lista amplia de clases de ventanas vanilla
                     _windowClasses = [
-                        "Land_Window_01_F", "Land_Window_02_F",
-                        "Land_WindowBig_01_F", "Land_WindowBig_02_F",
-                        "Land_WindowSmall_01_F", "Land_WindowSmall_02_F",
-                        "Land_i_House_Small_01_V1_F", "Land_i_House_Small_01_V2_F", "Land_i_House_Small_01_V3_F",
-                        "Land_i_House_Small_02_V1_F", "Land_i_House_Small_02_V2_F", "Land_i_House_Small_02_V3_F",
-                        "Land_i_House_Big_01_V1_F", "Land_i_House_Big_01_V2_F", "Land_i_House_Big_01_V3_F",
-                        "Land_i_House_Big_02_V1_F", "Land_i_House_Big_02_V2_F", "Land_i_House_Big_02_V3_F"
+                        "Land_Window_01_F",
+                        "Land_Window_02_F",
+                        "Land_WindowBig_01_F",
+                        "Land_WindowBig_02_F",
+                        "Land_WindowSmall_01_F",
+                        "Land_WindowSmall_02_F"
                     ];
                     
                     {
                         _windows = allMissionObjects _x;
-                        if (count _windows > 3) then {
-                            _windows resize 3;
+                        if (count _windows > 2) then {
+                            _windows resize 2;
                         };
                         _allWindows append _windows;
                     } forEach _windowClasses;
@@ -591,36 +1619,33 @@ A3PE_fnc_hide = {
                         _allWindows resize 10;
                     };
                     
-                    [_allWindows, _player, 8] call A3PE_fnc_loopObjectsOptimized;
+                    [_allWindows, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
             
-            // ===== CONTENEDORES EXTENDIDOS =====
+            // NUEVO: Procesar contenedores
             case 8: {
                 if (_HideContainers) then {
                     _allContainers = [];
                     
-                    // Lista completa de clases de contenedores vanilla
+                    // Lista amplia de clases de contenedores vanilla
                     _containerClasses = [
-                        "ReammoBox_F", "Land_Ammobox_F", "Box_NATO_Ammo_F", "Box_East_Ammo_F", "Box_IND_Ammo_F",
-                        "Land_PaperBox_01_F", "Land_PaperBox_01_small_F", "Land_PaperBox_01_open_boxes_F", "Land_PaperBox_01_open_empty_F",
-                        "Land_PaperBox_closed_F", "Land_PaperBox_open_empty_F", "Land_PaperBox_open_full_F",
-                        "Land_Cargo10_blue_F", "Land_Cargo10_brick_red_F", "Land_Cargo10_cyan_F", "Land_Cargo10_grey_F", "Land_Cargo10_light_blue_F", "Land_Cargo10_light_green_F", "Land_Cargo10_military_green_F", "Land_Cargo10_orange_F", "Land_Cargo10_red_F", "Land_Cargo10_sand_F", "Land_Cargo10_white_F", "Land_Cargo10_yellow_F",
-                        "Land_Cargo20_blue_F", "Land_Cargo20_brick_red_F", "Land_Cargo20_cyan_F", "Land_Cargo20_grey_F", "Land_Cargo20_light_blue_F", "Land_Cargo20_light_green_F", "Land_Cargo20_military_green_F", "Land_Cargo20_orange_F", "Land_Cargo20_red_F", "Land_Cargo20_sand_F", "Land_Cargo20_white_F", "Land_Cargo20_yellow_F",
-                        "Land_Cargo40_blue_F", "Land_Cargo40_brick_red_F", "Land_Cargo40_cyan_F", "Land_Cargo40_grey_F", "Land_Cargo40_light_blue_F", "Land_Cargo40_light_green_F", "Land_Cargo40_military_green_F", "Land_Cargo40_orange_F", "Land_Cargo40_red_F", "Land_Cargo40_sand_F", "Land_Cargo40_white_F", "Land_Cargo40_yellow_F",
-                        "Land_CargoBox_V1_F", "Land_Cargo_House_V1_F", "Land_Cargo_House_V2_F", "Land_Cargo_House_V3_F",
-                        "Land_Cargo_HQ_V1_F", "Land_Cargo_HQ_V2_F", "Land_Cargo_HQ_V3_F",
-                        "Land_Cargo_Patrol_V1_F", "Land_Cargo_Patrol_V2_F", "Land_Cargo_Patrol_V3_F",
-                        "Land_Cargo_Tower_V1_F", "Land_Cargo_Tower_V2_F", "Land_Cargo_Tower_V3_F",
-                        "Land_Cargo_addon01_F", "Land_Cargo_addon02_F", "Land_Cargo_addon03_F",
-                        "Land_PlasticCase_01_large_F", "Land_PlasticCase_01_medium_F", "Land_PlasticCase_01_small_F",
-                        "Land_MetalCase_01_large_F", "Land_MetalCase_01_medium_F", "Land_MetalCase_01_small_F"
+                        "Land_Ammobox_F",
+                        "Box_NATO_Ammo_F",
+                        "Box_East_Ammo_F", 
+                        "Box_IND_Ammo_F",
+                        "Land_PaperBox_01_F",
+                        "Land_PaperBox_closed_F",
+                        "Land_PaperBox_open_empty_F",
+                        "Land_Cargo10_blue_F",
+                        "Land_Cargo20_blue_F",
+                        "Land_Cargo40_blue_F"
                     ];
                     
                     {
                         _containers = allMissionObjects _x;
-                        if (count _containers > 3) then {
-                            _containers resize 3;
+                        if (count _containers > 2) then {
+                            _containers resize 2;
                         };
                         _allContainers append _containers;
                     } forEach _containerClasses;
@@ -630,50 +1655,20 @@ A3PE_fnc_hide = {
                         _allContainers resize 10;
                     };
                     
-                    [_allContainers, _player, 9] call A3PE_fnc_loopObjectsOptimized;
+                    [_allContainers, _player, 80] call A3PE_fnc_loopObjectsFast;
                 };
             };
         };
     };
 
-    // Procesar armas si está configurado
+    // Procesar armas si está configurado - OPTIMIZADO
     if (_HideWeapons && (_frameCounter % 4 == 0)) then {
-        _allObjsHide = [];
-        _allObjsShow = [];
-        
         _weapons = allMissionObjects "GroundWeaponHolder";
         if (count _weapons > 20) then {
             _weapons resize 20;
         };
         
-        {
-            if (_ViewDistance > _player distance2D _x) then {
-                if (_player distance2D _x > _ForceRenderDistance) then {
-                    _obj = _x;
-                    _vis = 0;
-                    
-                    if (isNull objectParent _player) then {
-                        _vis = [_player, "VIEW", _obj] checkVisibility [eyePos _player, AGLToASL (position _x)];
-                    } else {
-                        _vis = [vehicle _player, "VIEW", _obj] checkVisibility [eyePos _player, AGLToASL (position _x)];
-                    };
-
-                    if (_vis == 0) then {
-                        _allObjsHide pushBack _obj;
-                    } else {
-                        _allObjsShow pushBack _obj;
-                    };
-                } else {_allObjsShow pushBack _x;};
-            } else {_allObjsHide pushBack _x;};
-        } forEach _weapons;
-
-        // Aplicar visibilidad de armas
-        if (count _allObjsHide > 0) then {
-            [{_x hideObject true;}, _allObjsHide] remoteExecCall ["forEach", _player];
-        };
-        if (count _allObjsShow > 0) then {
-            [{_x hideObject false;}, _allObjsShow] remoteExecCall ["forEach", _player];
-        };
+        [_weapons, _player, 80] call A3PE_fnc_loopObjectsFast;
     };
 };
 
@@ -683,8 +1678,8 @@ A3PE_fnc_mainLoop = {
     
     // Establecer valores iniciales
     missionNamespace setVariable ["A3PE_active", true];
-    missionNamespace setVariable ["A3PE_ForceRenderDistance", 10];
-    missionNamespace setVariable ["A3PE_ForceRenderDistanceZeus", 10];
+    missionNamespace setVariable ["A3PE_ForceRenderDistance", 80]; // Aumentado a 80m
+    missionNamespace setVariable ["A3PE_ForceRenderDistanceZeus", 80]; // Aumentado a 80m
     missionNamespace setVariable ["A3PE_HideWeapons", true];
     missionNamespace setVariable ["A3PE_frameCounter", 0];
     
@@ -706,14 +1701,14 @@ A3PE_fnc_mainLoop = {
         // Intentar añadir configuraciones CBA si no existen
         if (!isNil "cba_settings_fnc_init") then {
             ["A3PE_ForceRenderDistance", "SLIDER", ["Force Render Range", 
-             "Distancia a la que se fuerza el renderizado de unidades"], 
-             "Arma 3 Performance Settings", [0, 100, 10, 0], nil, {
+             "Distancia a la que se fuerza el renderizado de objetos"], 
+             "Arma 3 Performance Settings", [0, 200, 80, 0], nil, {
                 missionNamespace setVariable ["A3PE_ForceRenderDistance", _this];
              }, false] call CBA_fnc_addSetting;
             
             ["A3PE_ForceRenderDistanceZeus", "SLIDER", ["Zeus Force Render Range", 
              "Distancia de renderizado forzado en Zeus"], 
-             "Arma 3 Performance Settings", [0, 100, 10, 0], nil, {
+             "Arma 3 Performance Settings", [0, 200, 80, 0], nil, {
                 missionNamespace setVariable ["A3PE_ForceRenderDistanceZeus", _this];
              }, false] call CBA_fnc_addSetting;
             
@@ -737,55 +1732,55 @@ A3PE_fnc_mainLoop = {
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideFurniture", "CHECKBOX", ["Ocultar Muebles", 
-             "Ocultar muebles fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar muebles fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideFurniture", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideRocks", "CHECKBOX", ["Ocultar Rocas", 
-             "Ocultar rocas fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar rocas fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideRocks", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HidePlants", "CHECKBOX", ["Ocultar Plantas", 
-             "Ocultar plantas fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar plantas fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HidePlants", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideDebris", "CHECKBOX", ["Ocultar Escombros", 
-             "Ocultar escombros fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar escombros fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideDebris", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideSigns", "CHECKBOX", ["Ocultar Señales", 
-             "Ocultar señales fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar señales fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideSigns", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideItems", "CHECKBOX", ["Ocultar Objetos Pequeños", 
-             "Ocultar objetos pequeños fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar objetos pequeños fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideItems", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideDoors", "CHECKBOX", ["Ocultar Puertas", 
-             "Ocultar puertas fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar puertas fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideDoors", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideWindows", "CHECKBOX", ["Ocultar Ventanas", 
-             "Ocultar ventanas fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar ventanas fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideWindows", _this];
              }, false] call CBA_fnc_addSetting;
              
             ["A3PE_HideContainers", "CHECKBOX", ["Ocultar Contenedores", 
-             "Ocultar contenedores fuera de vista (puede afectar rendimiento)"], 
+             "Ocultar contenedores fuera de vista"], 
              "Arma 3 Performance Settings", false, nil, {
                 missionNamespace setVariable ["A3PE_HideContainers", _this];
              }, false] call CBA_fnc_addSetting;
@@ -793,21 +1788,21 @@ A3PE_fnc_mainLoop = {
     };
     
     // Mensaje informativo
-    systemChat "A3PE activado automáticamente (versión optimizada extendida)";
+    systemChat "A3PE activado automáticamente (versión optimizada)";
     
     // Bucle principal con intervalo dinámico
     while {true} do {
         if (missionNamespace getVariable ["A3PE_active", true]) then {
             // Ajuste dinámico del intervalo basado en la velocidad del jugador
             _playerSpeed = speed (vehicle player);
-            _sleepTime = 0.25; // valor predeterminado
+            _sleepTime = 0.2; // valor predeterminado mejorado
             
             // Si el jugador se mueve rápido, reducir el tiempo de espera
             if (_playerSpeed > 30) then {
-                _sleepTime = 0.12;
+                _sleepTime = 0.1;
             } else {
                 if (_playerSpeed > 15) then {
-                    _sleepTime = 0.18;
+                    _sleepTime = 0.15;
                 };
             };
             
