@@ -1,610 +1,3 @@
-BloodLust_BloodSplatters = [];
-
-//Returns: [3D position of splatter, 3D surface normal, is the splatter on a surface (true = surface, false = ground), intersecting object]
-BloodLust_GetCalculatedSplatterPlacement =
-{
-    _sourcePositionASL = param [0];
-    _directionVector = param [1];
-    _maxSurfaceIntersectionDistance = param [2];
-    _maxGroundIntersectionDistance = param [3, _maxSurfaceIntersectionDistance];
-
-    _placementPosition = [0, 0, 0];
-    _placementNormal = [0, 0, 0];
-    _placementIsOnSurface = false;
-    _placementObject = objNull;
-
-    _endPosition = _sourcePositionASL vectorAdd (_directionVector vectorMultiply _maxSurfaceIntersectionDistance);
-
-    _surfaceIntersections = lineIntersectsSurfaces
-    [
-        _sourcePositionASL,
-        _endPosition,
-        objNull,
-        objNull,
-        true,
-        10,
-        "VIEW",
-        "NONE"
-    ] select {
-        _intersectingObject  = _x select 2;
-        _isObjectInIntersectionBlackList = [typeOf _intersectingObject, (getModelInfo _intersectingObject) select 0] call BloodLust_IsClassInIntersectionBlackList;
-        _return = !_isObjectInIntersectionBlackList;
-        _return;
-    };
-
-    if(count _surfaceIntersections > 0) then
-    {
-        _surfaceIntersection = _surfaceIntersections select 0;
-        _placementPosition = _surfaceIntersection select 0;
-        _placementNormal = _surfaceIntersection select 1;
-        _placementObject = _surfaceIntersection select 2;
-        _placementIsOnSurface = true;
-    }
-    else
-    {
-        _endPosition = _sourcePositionASL vectorAdd (_directionVector vectorMultiply _maxGroundIntersectionDistance);
-        _surfaceIntersection = [_endPosition, objNull, objNull] call BloodLust_GetSurfaceIntersection;
-        _placementPosition = _surfaceIntersection select 2;
-        _placementNormal = _surfaceIntersection select 1;
-        _placementObject = _surfaceIntersection select 4;
-        _placementIsOnSurface = !(isNull _placementObject);
-    };
-
-    _placementPosition = _placementPosition vectorAdd (_placementNormal vectorMultiply (random 0.01));
-
-    [_placementPosition, _placementNormal, _placementIsOnSurface, _placementObject];
-};
-
-BloodLust_AssignSplatterToBuilding =
-{
-    _splatter = param [0, objNull];
-    _surfaceObject = param [1, objNull];
-
-    if(_surfaceObject isKindOf "Building") then
-    {
-        _surfaceObjectSplatters = _surfaceObject getVariable ["BloodLust_BloodSplatters", []];
-        _surfaceObject setVariable ["BloodLust_BloodSplatters", _surfaceObjectSplatters + [_splatter]];
-        _isKilledEventHandlerAssignedToSurfaceObject = _surfaceObject getVariable ["BloodLust_IsKilledEventHandlerAssigned", false];
-        if(!_isKilledEventHandlerAssignedToSurfaceObject) then
-        {
-            _surfaceObject setVariable ["BloodLust_IsKilledEventHandlerAssigned", true];
-            _surfaceObject addEventHandler ["Killed",
-            {
-                _object = _this select 0;
-                _attachedSplatters = _object getVariable ["BloodLust_BloodSplatters", []];
-                {
-                    BloodLust_BloodSplatters = BloodLust_BloodSplatters - [_x];
-                    deleteVehicle _x;
-                } foreach _attachedSplatters;
-            }];
-        };
-    };
-};
-
-BloodLust_CreateBloodSplatter =
-{
-    _object = _this select 0;
-    _positionASL = _this select 1;
-    _normalDirection = _this select 2;
-    _intersectionDistance = _this select 3;
-    _splatterAngle = _this select 4;
-    _splatterTexture = _this select 5;
-    _splatter = _this select 6;
-
-    if (isNil "_splatter") then
-    {
-        _splatter = call BloodLust_CreateBloodSplatterObject;
-    };
-
-    _splatterPosition = [0, 0, 0];
-    _splatterNormal = [0, 0, 0];
-    _intersectionEndPositionASL = _positionASL vectorAdd (_normalDirection vectorMultiply _intersectionDistance);
-    _surfaceIntersections = lineIntersectsSurfaces
-    [
-        _positionASL,
-        _intersectionEndPositionASL,
-        _object,
-        vehicle _object,
-        true,
-        10,
-        "VIEW",
-        "NONE"
-    ] select {
-        _intersectingObject  = _x select 2;
-        _isObjectInIntersectionBlackList = [typeOf _intersectingObject, (getModelInfo _intersectingObject) select 0] call BloodLust_IsClassInIntersectionBlackList;
-        _return = !_isObjectInIntersectionBlackList;
-        _return;
-    };
-
-    if(count _surfaceIntersections > 0) then
-    {
-        _surfaceIntersection = _surfaceIntersections select 0;
-        _splatterPosition = _surfaceIntersection select 0;
-        _splatterNormal = _surfaceIntersection select 1;
-        _surfaceObject = _surfaceIntersection select 2;
-        _surfaceIntersectionGround = [_positionASL vectorAdd (_normalDirection vectorMultiply BloodLust_BloodSplatterGroundMaxDistance), _object, vehicle _object] call BloodLust_GetSurfaceIntersection;
-        _surfaceDistance = _surfaceIntersectionGround select 0;
-        if(_surfaceDistance > 0.1) then
-        {
-            [_splatter, _surfaceObject] call BloodLust_AssignSplatterToBuilding;
-        };
-    }
-    else
-    {
-        _surfaceIntersection = [_positionASL vectorAdd (_normalDirection vectorMultiply BloodLust_BloodSplatterGroundMaxDistance), _object, vehicle _object] call BloodLust_GetSurfaceIntersection;
-        _splatterNormal = _surfaceIntersection select 1;
-        _splatterPosition = _surfaceIntersection select 2;
-    };
-
-    _splatter setObjectTexture [0, _splatterTexture];
-    _splatter setPosASL (_splatterPosition vectorAdd (_splatterNormal vectorMultiply 0.01));
-    [_splatter, _splatterNormal, _splatterAngle] call BloodLust_RotateObjectAroundNormal;
-
-    {
-        [_splatter] call _x;
-    } foreach BloodLust_OnBloodSplatterCreatedEventHandlers;
-
-    _splatter;
-};
-
-BloodLust_CreateBloodSplatterObject =
-{
-    if(call BloodLust_IsMaxBloodSplattersReached) then
-    {
-        call BloodLust_RemoveOldBloodSplatter;
-    };
-
-    _splatter = objNull;
-    if(isMultiplayer) then
-    {
-        _splatter = "BloodSplatter_Plane" createVehicleLocal [0, 0, 0];
-    }
-    else
-    {
-        _splatter = createSimpleObject ["BloodSplatter_Plane", [0, 0, 0]];
-    };
-
-    BloodLust_BloodSplatters pushBack _splatter;
-    _splatter;
-};
-
-BloodLust_CreateMediumBloodSplatterObject =
-{
-    if(call BloodLust_IsMaxBloodSplattersReached) then
-    {
-        call BloodLust_RemoveOldBloodSplatter;
-    };
-
-    _splatter = objNull;
-    if(isMultiplayer) then
-    {
-        _splatter = "BloodSplatter_MediumPlane" createVehicleLocal [0, 0, 0];
-    }
-    else
-    {
-        _splatter = createSimpleObject ["BloodSplatter_MediumPlane", [0, 0, 0]];
-    };
-
-    BloodLust_BloodSplatters pushBack _splatter;
-    _splatter;
-};
-
-BloodLust_CreateLargeBloodSplatterObject =
-{
-    if(call BloodLust_IsMaxBloodSplattersReached) then
-    {
-        call BloodLust_RemoveOldBloodSplatter;
-    };
-
-    _splatter = objNull;
-    if(isMultiplayer) then
-    {
-        _splatter = "BloodSplatter_LargePlane" createVehicleLocal [0, 0, 0];
-    }
-    else
-    {
-        _splatter = createSimpleObject ["BloodSplatter_LargePlane", [0, 0, 0]];
-    };
-
-    BloodLust_BloodSplatters pushBack _splatter;
-    _splatter;
-};
-
-BloodLust_GetSplatterTextures =
-{
-    _unit             = _this select 0;
-    _selections       = _this select 1;
-    _splatterTextures = [];
-
-    if("head" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 2) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_HeadSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("spine1" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 4) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_Spine1SplatterTextures select _textureSetIndex);
-        };
-    };
-    if("spine2" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 5) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_Spine2SplatterTextures select _textureSetIndex);
-        };
-    };
-    if("spine3" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 6) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_Spine3SplatterTextures select _textureSetIndex);
-        };
-    };
-    if("body" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 7) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_BodySplatterTextures select _textureSetIndex);
-        };
-    };
-    if("leftarm" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 9) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_ArmSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("leftforearm" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 9) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_ArmSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("rightarm" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 9) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_ArmSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("rightforearm" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 9) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_ArmSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("leftleg" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("leftupleg" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("rightleg" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("rightupleg" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("leftfoot" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-    if("rightfoot" in _selections) then
-    {
-        _textureSetIndex = (_unit getHitIndex 10) call BloodLust_GetSplatterTextureSetIndexFromDamage;
-        if(_textureSetIndex != -1) then
-        {
-            _splatterTextures = _splatterTextures + (BloodLust_LegSplatterTextures select _textureSetIndex);
-        };
-    };
-
-    _splatterTextures;
-};
-
-//Returns the index of the splatter texture set (small, medium, large) depending on the damage of a body part.
-BloodLust_GetSplatterTextureSetIndexFromDamage =
-{
-    _damage = _this;
-    _textureSetIndex = -1;
-
-    if(_damage <= 0.33) then
-    {
-       _textureSetIndex = 2;
-    }
-    else
-    {
-        if(_damage <= 0.66) then
-        {
-            _textureSetIndex = 1;
-        }
-        else
-        {
-            if(_damage <= 1) then
-            {
-                _textureSetIndex = 0;
-            };
-        };
-    };
-
-    _textureSetIndex;
-};
-
-BloodLust_IsClassInIntersectionBlackList =
-{
-    _class = _this select 0;
-    _model = _this select 1;
-    _return = false;
-    if(isNil "_model") then
-    {
-        _model = "lolnope.exe";
-    };
-
-    if(_model in BloodLust_BloodSplatterIntersectionBlackList || _class in BloodLust_BloodSplatterIntersectionBlackList) then
-    {
-        _return = true;
-    }
-    else
-    {
-        {
-            if(_class isKindOf _x) exitWith
-            {
-                _return = true;
-            };
-        } foreach BloodLust_BloodSplatterIntersectionBlackList;
-    };
-
-    _return;
-};
-
-BloodLust_IsMaxBloodSplattersReached =
-{
-    _return = false;
-    if(count BloodLust_BloodSplatters >= BloodLust_MaxBloodSplatters) then
-    {
-        _return = true;
-    };
-    _return;
-};
-
-BloodLust_RemoveOldBloodSplatter =
-{
-    if(count BloodLust_BloodSplatters > 0) then
-    {
-        _splatter = BloodLust_BloodSplatters select 0;
-        deleteVehicle _splatter;
-        BloodLust_BloodSplatters deleteAt 0;
-    };
-
-
-
-BloodLust_StartBloodTrail =
-{
-    params
-    [
-        "_unit",
-        "_selection",
-        "_duration"
-    ];
-
-    if (!isNil { _unit getVariable "BloodLust_PreviousBloodTrailPosition" }) exitWith {}; // blood trail already exists for unit + selection.
-    _unit setVariable [format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection], [_unit, _selection] call BloodLust_GetSelectionWorldPositionASL];
-
-    [
-        {
-            _args = _this select 0;
-            _handle = _this select 1;
-            _unit = _args select 0;
-            _selection = _args select 1;
-            _startTime = _args select 2;
-            _duration = _args select 3;
-            _previousSelectionPosition = _unit getVariable format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection];
-            _currentSelectionPosition = [_unit, _selection] call BloodLust_GetSelectionWorldPositionASL;
-            _trailLength = _currentSelectionPosition distance _previousSelectionPosition;
-            _endTime = _startTime + _duration;
-
-            if (time >= _endTime || _trailLength >= BloodLust_BloodTrailCancelDistance) exitWith
-            {
-                [_handle] call CBA_fnc_removePerFrameHandler;
-            };
-
-            if (alive _unit) exitWith {}; // Wait until unit is dead.
-
-            // Create blood trails between previous and current selection position
-            _previousPosition = _previousSelectionPosition;
-            _iterations = floor (_trailLength / BloodLust_BloodTrailSpacing);
-            if (_iterations > 0) then
-            {
-                for "_iteration" from 0 to _iterations do
-                {
-                    _currentPosition = [_previousSelectionPosition, _currentSelectionPosition, _iteration / _iterations] call BIS_fnc_lerpVector;
-                    if (!(_currentPosition isEqualTo _previousPosition)) then
-                    {
-                        _splatterAngle = ([_currentPosition, _previousPosition] call BIS_fnc_dirTo) + 90;
-                        _splatter =
-                        [
-                            _unit,
-                            _currentPosition,
-                            [0, 0, -1],
-                            BloodLust_BloodSplatterIntersectionMaxDistance,
-                            _splatterAngle,
-                            selectRandom BloodLust_BloodTrailTextures,
-                            call BloodLust_CreateBleedSplatterObject
-                        ] call BloodLust_CreateBloodSplatter;
-                        _previousPosition = _currentPosition;
-                    };
-                };
-            };
-
-            _unit setVariable [format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection], _currentSelectionPosition];
-        },
-        0.1,
-        [
-            _unit,
-            _selection,
-            time,
-            _duration
-        ]
-    ] call CBA_fnc_addPerFrameHandler;
-};
-
-
-
-BloodLust_ArterialBloodSprays = [];
-BloodLust_BloodSprays = [];
-
-BloodLust_CreateArterialBloodSpray =
-{
-    _positionASL = _this select 0;
-    _vectorDir = _this select 1;
-    _vectorUp = _this select 2;
-    if(call BloodLust_IsMaxArterialBloodSpraysReached) exitWith {};
-
-    _spray = objNull;
-    if(isMultiplayer) then
-    {
-        _spray = "BloodSplatter_SmallSprayPlane" createVehicleLocal [0, 0, 0];
-    }
-    else
-    {
-        _spray = createSimpleObject ["BloodSplatter_SmallSprayPlane", [0, 0, 0]];
-    };
-
-    BloodLust_ArterialBloodSprays pushBack _spray;
-    _spray setPosASL _positionASL;
-    _spray setVectorDirAndUp [_vectorDir, _vectorUp];
-    _spray setPosASL (AGLToASL(_spray modelToWorld [0, 0.3, 0]));
-    [selectRandom BloodLust_SprayTextures, BloodLust_ArterialBloodSprayFramerate, false, true, _spray, BloodLust_OnArterialBloodSprayAnimationEnd] call BloodLust_AnimateObjectTexture;
-    if(BloodLust_IsBloodSpraySoundEnabled) then
-    {
-        [selectRandom BloodLust_BloodSpraySounds, _spray, false, getPosASL _spray, BloodLust_BloodSpraySoundAudibleVolume, 1.2 - (random 0.4), BloodLust_BloodSpraySoundAudibleDistance * 0.5] call BloodLust_PlaySound;
-    };
-
-    _spray;
-};
-
-BloodLust_CreateBloodSpray =
-{
-    _positionASL = _this select 0;
-    _vectorDir = _this select 1;
-    _vectorUp = _this select 2;
-    if(isNil "_positionASL" || isNil "_vectorDir" || isNil "_vectorUp") exitWith {};
-    if(call BloodLust_IsMaxBloodSpraysReached) exitWith {};
-
-    _spray = objNull;
-    if(isMultiplayer) then
-    {
-        _spray = "BloodSplatter_SprayPlane" createVehicleLocal [0, 0, 0];
-    }
-    else
-    {
-        _spray = createSimpleObject ["BloodSplatter_SprayPlane", [0, 0, 0]];
-    };
-
-    BloodLust_BloodSprays pushBack _spray;
-    _spray setPosASL _positionASL;
-    _spray setVectorDirAndUp [_vectorDir, _vectorUp];
-    _spray setPosASL (AGLToASL(_spray modelToWorld [0, 0.9, 0]));
-    [selectRandom BloodLust_SprayTextures, BloodLust_BloodSprayFramerate, false, true, _spray, BloodLust_OnBloodSprayAnimationEnd] call BloodLust_AnimateObjectTexture;
-    if(BloodLust_IsBloodSpraySoundEnabled) then
-    {
-        [selectRandom BloodLust_BloodSpraySounds, _spray, false, getPosASL _spray, BloodLust_BloodSpraySoundAudibleVolume, 1.2 - (random 0.4), BloodLust_BloodSpraySoundAudibleDistance] call BloodLust_PlaySound;
-    };
-
-    _spray;
-};
-
-BloodLust_OnBloodSprayAnimationEnd =
-{
-    _bloodSprayObject = param [0];
-    BloodLust_BloodSprays = BloodLust_BloodSprays - [_bloodSprayObject];
-};
-
-BloodLust_OnArterialBloodSprayAnimationEnd =
-{
-    _bloodSprayObject = param [0];
-    BloodLust_ArterialBloodSprays = BloodLust_ArterialBloodSprays - [_bloodSprayObject];
-};
-
-BloodLust_IsMaxArterialBloodSpraysReached =
-{
-    _return = false;
-    if(count BloodLust_ArterialBloodSprays >= BloodLust_MaxArterialBloodSprays) then
-    {
-        _return = true;
-    };
-    _return;
-};
-
-BloodLust_RemoveOldArterialBloodSpray =
-{
-    if(count BloodLust_ArterialBloodSprays > 0) then
-    {
-        _spray = BloodLust_ArterialBloodSprays select 0;
-        deleteVehicle _spray;
-        BloodLust_ArterialBloodSprays deleteAt 0;
-    };
-};
-
-BloodLust_IsMaxBloodSpraysReached =
-{
-    _return = false;
-    if(count BloodLust_BloodSprays >= BloodLust_MaxBloodSprays) then
-    {
-        _return = true;
-    };
-    _return;
-};
-
-BloodLust_RemoveOldBloodSpray =
-{
-    if(count BloodLust_BloodSprays > 0) then
-    {
-        _spray = BloodLust_BloodSprays select 0;
-        deleteVehicle _spray;
-        BloodLust_BloodSprays deleteAt 0;
-    };
-};
-
-
 BloodLust_BleedSplatters = [];
 
 BloodLust_MakeUnitBleed =
@@ -1030,6 +423,538 @@ BloodLust_RemoveOldBleedSplatter =
     };
 };
 
+//Blood Lust -- Blood splatter mod.
+//Copyright (C) 2016  Gavin N. Alvesteffer
+
+_HighDamageVaporization =
+{
+	_selection = _this select 0;
+	_target = _selection select 0;
+	_ammo = _selection select 6;
+	_hitValue = _ammo select 0;
+
+	if(_hitValue >= 50) then
+	{
+		[_unit, _damage] call BloodLust_VaporizeUnit;
+	};
+};
+
+BloodLust_OnUnitHitPartPostEventHandlers pushBack _HighDamageVaporization;
+
+
+//Original Author: BadBenson.
+//Modified by Gavin N. Alvesteffer with permission from BadBenson.
+//Copyright (C) 2016  BadBenson & Gavin N. Alvesteffer
+
+//Usage: _unit call BloodLust_GoreMist;
+BloodLust_GoreMistEffect =
+{
+    _source = "#particlesource" createVehicleLocal [0, 0, 0];
+    _source setPosASL (getPosASL _this);
+    _source setParticleParams
+    [
+        ["\a3\data_f\particleEffects\universal\universal.p3d",16,8,48,0],"",
+        "billboard",
+        0,
+        0.5,
+        [0,0,0.5],
+        [0,0,2],
+        0,10.30,1,-0.1,
+        [0,6],
+        [[0.5,0,0,0.8],[0.3,0,0,0.8],[0.25,0,0,0.5],[0.15,0,0,0]],
+        [0.01],
+        0.01,
+        0.08,
+        "",
+        "",
+        _this,
+        0,
+        true,
+        0.5,
+        [[0.5,0,0,1]]
+    ];
+     _source setDropInterval 1;
+     _endTime = time + 1;
+    [{
+        _args = _this select 0;
+        _source = _args select 0;
+        _endTime = _args select 1;
+        if(time >= _endTime) then
+        {
+            deleteVehicle _source;
+            [_this select 1] call CBA_fnc_removePerFrameHandler;
+        };
+    }, 0, [_source, _endTime]] call CBA_fnc_addPerFrameHandler;
+};
+
+
+BloodLust_Gibs = [];
+
+BloodLust_CreateGibObject =
+{
+    _classname = _this;
+    if(call BloodLust_IsMaxGibsReached) then
+    {
+        call BloodLust_RemoveOldGib;
+    };
+    _gib = _classname createVehicleLocal [0,0,0];
+    BloodLust_Gibs pushBack _gib;
+    _gib;
+};
+
+BloodLust_IsMaxGibsReached =
+{
+    _return = false;
+    if(count BloodLust_Gibs >= BloodLust_MaxGibs) then
+    {
+        _return = true;
+    };
+    _return;
+};
+
+BloodLust_RemoveOldGib =
+{
+    if(count BloodLust_Gibs > 0) then
+    {
+        _gib = BloodLust_Gibs select 0;
+        deleteVehicle _gib;
+        BloodLust_Gibs deleteAt 0;
+    };
+};
+
+
+BloodLust_StartBloodTrail =
+{
+    params
+    [
+        "_unit",
+        "_selection",
+        "_duration"
+    ];
+
+    if (!isNil { _unit getVariable "BloodLust_PreviousBloodTrailPosition" }) exitWith {}; // blood trail already exists for unit + selection.
+    _unit setVariable [format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection], [_unit, _selection] call BloodLust_GetSelectionWorldPositionASL];
+
+    [
+        {
+            _args = _this select 0;
+            _handle = _this select 1;
+            _unit = _args select 0;
+            _selection = _args select 1;
+            _startTime = _args select 2;
+            _duration = _args select 3;
+            _previousSelectionPosition = _unit getVariable format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection];
+            _currentSelectionPosition = [_unit, _selection] call BloodLust_GetSelectionWorldPositionASL;
+            _trailLength = _currentSelectionPosition distance _previousSelectionPosition;
+            _endTime = _startTime + _duration;
+
+            if (time >= _endTime || _trailLength >= BloodLust_BloodTrailCancelDistance) exitWith
+            {
+                [_handle] call CBA_fnc_removePerFrameHandler;
+            };
+
+            if (alive _unit) exitWith {}; // Wait until unit is dead.
+
+            // Create blood trails between previous and current selection position
+            _previousPosition = _previousSelectionPosition;
+            _iterations = floor (_trailLength / BloodLust_BloodTrailSpacing);
+            if (_iterations > 0) then
+            {
+                for "_iteration" from 0 to _iterations do
+                {
+                    _currentPosition = [_previousSelectionPosition, _currentSelectionPosition, _iteration / _iterations] call BIS_fnc_lerpVector;
+                    if (!(_currentPosition isEqualTo _previousPosition)) then
+                    {
+                        _splatterAngle = ([_currentPosition, _previousPosition] call BIS_fnc_dirTo) + 90;
+                        _splatter =
+                        [
+                            _unit,
+                            _currentPosition,
+                            [0, 0, -1],
+                            BloodLust_BloodSplatterIntersectionMaxDistance,
+                            _splatterAngle,
+                            selectRandom BloodLust_BloodTrailTextures,
+                            call BloodLust_CreateBleedSplatterObject
+                        ] call BloodLust_CreateBloodSplatter;
+                        _previousPosition = _currentPosition;
+                    };
+                };
+            };
+
+            _unit setVariable [format ["BloodLust_PreviousBloodTrailSelectionPosition-%1", _selection], _currentSelectionPosition];
+        },
+        0.1,
+        [
+            _unit,
+            _selection,
+            time,
+            _duration
+        ]
+    ] call CBA_fnc_addPerFrameHandler;
+};
+
+
+BloodLust_ArterialBloodSprays = [];
+BloodLust_BloodSprays = [];
+
+BloodLust_CreateArterialBloodSpray =
+{
+    _positionASL = _this select 0;
+    _vectorDir = _this select 1;
+    _vectorUp = _this select 2;
+    if(call BloodLust_IsMaxArterialBloodSpraysReached) exitWith {};
+
+    _spray = objNull;
+    if(isMultiplayer) then
+    {
+        _spray = "BloodSplatter_SmallSprayPlane" createVehicleLocal [0, 0, 0];
+    }
+    else
+    {
+        _spray = createSimpleObject ["BloodSplatter_SmallSprayPlane", [0, 0, 0]];
+    };
+
+    BloodLust_ArterialBloodSprays pushBack _spray;
+    _spray setPosASL _positionASL;
+    _spray setVectorDirAndUp [_vectorDir, _vectorUp];
+    _spray setPosASL (AGLToASL(_spray modelToWorld [0, 0.3, 0]));
+    [selectRandom BloodLust_SprayTextures, BloodLust_ArterialBloodSprayFramerate, false, true, _spray, BloodLust_OnArterialBloodSprayAnimationEnd] call BloodLust_AnimateObjectTexture;
+    if(BloodLust_IsBloodSpraySoundEnabled) then
+    {
+        [selectRandom BloodLust_BloodSpraySounds, _spray, false, getPosASL _spray, BloodLust_BloodSpraySoundAudibleVolume, 1.2 - (random 0.4), BloodLust_BloodSpraySoundAudibleDistance * 0.5] call BloodLust_PlaySound;
+    };
+
+    _spray;
+};
+
+BloodLust_CreateBloodSpray =
+{
+    _positionASL = _this select 0;
+    _vectorDir = _this select 1;
+    _vectorUp = _this select 2;
+    if(isNil "_positionASL" || isNil "_vectorDir" || isNil "_vectorUp") exitWith {};
+    if(call BloodLust_IsMaxBloodSpraysReached) exitWith {};
+
+    _spray = objNull;
+    if(isMultiplayer) then
+    {
+        _spray = "BloodSplatter_SprayPlane" createVehicleLocal [0, 0, 0];
+    }
+    else
+    {
+        _spray = createSimpleObject ["BloodSplatter_SprayPlane", [0, 0, 0]];
+    };
+
+    BloodLust_BloodSprays pushBack _spray;
+    _spray setPosASL _positionASL;
+    _spray setVectorDirAndUp [_vectorDir, _vectorUp];
+    _spray setPosASL (AGLToASL(_spray modelToWorld [0, 0.9, 0]));
+    [selectRandom BloodLust_SprayTextures, BloodLust_BloodSprayFramerate, false, true, _spray, BloodLust_OnBloodSprayAnimationEnd] call BloodLust_AnimateObjectTexture;
+    if(BloodLust_IsBloodSpraySoundEnabled) then
+    {
+        [selectRandom BloodLust_BloodSpraySounds, _spray, false, getPosASL _spray, BloodLust_BloodSpraySoundAudibleVolume, 1.2 - (random 0.4), BloodLust_BloodSpraySoundAudibleDistance] call BloodLust_PlaySound;
+    };
+
+    _spray;
+};
+
+BloodLust_OnBloodSprayAnimationEnd =
+{
+    _bloodSprayObject = param [0];
+    BloodLust_BloodSprays = BloodLust_BloodSprays - [_bloodSprayObject];
+};
+
+BloodLust_OnArterialBloodSprayAnimationEnd =
+{
+    _bloodSprayObject = param [0];
+    BloodLust_ArterialBloodSprays = BloodLust_ArterialBloodSprays - [_bloodSprayObject];
+};
+
+BloodLust_IsMaxArterialBloodSpraysReached =
+{
+    _return = false;
+    if(count BloodLust_ArterialBloodSprays >= BloodLust_MaxArterialBloodSprays) then
+    {
+        _return = true;
+    };
+    _return;
+};
+
+BloodLust_RemoveOldArterialBloodSpray =
+{
+    if(count BloodLust_ArterialBloodSprays > 0) then
+    {
+        _spray = BloodLust_ArterialBloodSprays select 0;
+        deleteVehicle _spray;
+        BloodLust_ArterialBloodSprays deleteAt 0;
+    };
+};
+
+BloodLust_IsMaxBloodSpraysReached =
+{
+    _return = false;
+    if(count BloodLust_BloodSprays >= BloodLust_MaxBloodSprays) then
+    {
+        _return = true;
+    };
+    _return;
+};
+
+BloodLust_RemoveOldBloodSpray =
+{
+    if(count BloodLust_BloodSprays > 0) then
+    {
+        _spray = BloodLust_BloodSprays select 0;
+        deleteVehicle _spray;
+        BloodLust_BloodSprays deleteAt 0;
+    };
+};
+
+
+BloodLust_CreateBloodPoolObject =
+{
+    if(call BloodLust_IsMaxBloodSplattersReached) then
+    {
+        call BloodLust_RemoveOldBloodSplatter;
+    };
+
+    _pool = call BloodLust_CreateMediumBloodSplatterObject;
+
+    BloodLust_BloodSplatters pushBack _pool;
+    [selectRandom BloodLust_BloodPoolTextures, BloodLust_BloodPoolFramerate, false, false, _pool, {}] call BloodLust_AnimateObjectTexture;
+    _pool;
+};
+
+BloodLust_InitVehicle =
+{
+    _vehicle = _this select 0;
+    _vehicle addEventHandler ["Killed",
+    {
+        if(!BloodLust_IsBloodLustEnabled) exitWith {};
+        {
+            _this call _x;
+        } foreach BloodLust_OnVehicleKilledPreEventHandlers;
+
+        _this call BloodLust_OnVehicleKilled;
+
+        {
+            _this call _x;
+        } foreach BloodLust_OnVehicleKilledPostEventHandlers;
+    }];
+};
+
+BloodLust_OnVehicleKilled =
+{
+    _vehicle   = _this select 0;
+    _killer = _this select 1;
+
+    if(BloodLust_IsVehicleCrewVaporizationEnabled) then
+    {
+        [_vehicle] call BloodLust_VehicleCrewVaporization;
+    };
+};
+
+BloodLust_VehicleCrewVaporization =
+{
+    _vehicle = _this select 0;
+    _fuelExplosionPower = getNumber (configfile >> "CfgVehicles" >> (typeOf _vehicle) >> "fuelExplosionPower");
+    if(_fuelExplosionPower >= 1) then
+    {
+        _crew = crew _vehicle;
+        {
+            [_x, _fuelExplosionPower] call BloodLust_VaporizeUnit;
+        } foreach _crew;
+    };
+};
+
+//Blood Lust -- Blood splatter mod.
+//Copyright (C) 2016  Gavin N. Alvesteffer
+
+_VaporizedUnitMessage =
+{
+	_unit = _this select 0;
+	_damage = _this select 1;
+	_isUnitVaporized = _unit getVariable ["BloodLust_IsVaporized", false];
+    if(_isUnitVaporized) then
+    {
+       player globalChat (format ["Oh dear, %1 exploded :O", name _unit]);
+    };
+};
+
+BloodLust_OnUnitExplosionPostEventHandlers pushBack _VaporizedUnitMessage;
+
+
+BloodLust_VaporizeUnit =
+{
+    _unit = _this select 0;
+    _gibForce = _this select 1;
+
+    if(_unit getVariable ["BloodLust_IsVaporized", false]) exitWith {};
+
+    _unit setVariable ["BloodLust_IsVaporized", true];
+    _unit removeEventHandler ["HitPart", _unit getVariable ["BloodLust_HitPartEventHandlerIndex", -1]];
+    _unit removeEventHandler ["Hit", _unit getVariable ["BloodLust_HitEventHandlerIndex", -1]];
+    _unit removeEventHandler ["Explosion", _unit getVariable ["BloodLust_ExplosionEventHandlerIndex", -1]];
+    _unit setDamage 1;
+    _unit call BloodLust_GoreMistEffect;
+    hideObject _unit;
+    [selectRandom BloodLust_VaporizationSounds, _unit, false, getPosASL _unit, 30, 1.2 - (random 0.4), 100] call BloodLust_PlaySound;
+
+    if(BloodLust_IsVaporizedHeatWaveEnabled) then
+    {
+        [_unit, 5] call BloodLust_RefractionEffect;
+    };
+
+    _gibSets = +BloodLust_VaporizationGibClassnames;
+    _GetRandomGib =
+    {
+        _spawnableGibs = [];
+        {
+            _gibSetIndex = _x select 0;
+            _spawnCount = _x select 2;
+            _spawnLimit = _x select 3;
+            if(_spawnCount < _spawnLimit) then
+            {
+                _spawnableGibs pushBack _x;
+            };
+        } foreach _gibSets;
+
+        if(count _spawnableGibs == 0) exitWith
+        {
+            nil;
+        };
+
+        _gibSet = selectRandom _spawnableGibs;
+        _gibSetIndex = _gibSet select 0;
+        _className = _gibSet select 1;
+        _spawnCount = _gibSet select 2;
+        _spawnLimit = _gibSet select 3;
+
+        (_gibSets select _gibSetIndex) set [2, _spawnCount + 1];
+        _className;
+    };
+
+    _gibs = [];
+    if (BloodLust_MaxGibs > 0) then
+    {
+        for "_i" from 1 to BloodLust_VaporizationGibIterations do
+        {
+            _gibClassname = call _GetRandomGib;
+            if(isNil "_gibClassname") exitWith {};
+
+            _jitter =
+            [
+                BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2)),
+                BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2)),
+                BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2))
+            ];
+            _gib = _gibClassname call BloodLust_CreateGibObject;
+            _gibs pushBack _gib;
+            _gib setVariable ["BloodLust_SourceUnit", _unit];
+            _gib setDir (random 360);
+            _gib setPosASL (getPosASL _unit);
+            _gib setVelocity (_jitter vectorMultiply _gibForce);
+            [_gib, BloodLust_GibBleedDuration, 0.1] call BloodLust_AttachSmearBleeding;
+
+            if(_unit == player && BloodLust_IsVaporizedGibCamSwitchEnabled) then
+            {
+                (selectRandom _gibs) switchCamera "External";
+            };
+
+            if(BloodLust_IsVaporizedHeatWaveEnabled) then
+            {
+                [_gib, 30] call BloodLust_RefractionEffect;
+            };
+
+            {
+                [_gib] call _x;
+            } foreach BloodLust_OnGibCreatedEventHandlers;
+        };
+    };
+
+    _bloodSplatters = [];
+    _unitSurfaceIntersection = [getPosASL _unit, _unit, vehicle _unit] call BloodLust_GetSurfaceIntersection;
+    _unitSurfaceDistance = _unitSurfaceIntersection select 0;
+    _unitSurfaceNormal = _unitSurfaceIntersection select 1;
+    _unitSurfacePosition = _unitSurfaceIntersection select 2;
+    _unitIsIntersecting = _unitSurfaceIntersection select 3;
+    _unitSurfaceIntersectingObject = _unitSurfaceIntersection select 4;
+    if(_unitIsIntersecting) then
+    {
+        _largeSplatter = call BloodLust_CreateLargeBloodSplatterObject;
+        _largeSplatter setObjectTexture [0, selectRandom BloodLust_LargeVaporizationBloodSplatters];
+        _largeSplatter setDir (random 360);
+        _largeSplatter setVectorUp _unitSurfaceNormal;
+        _largeSplatter setPosASL (_unitSurfacePosition vectorAdd (_unitSurfaceNormal vectorMultiply 0.05));
+        _bloodSplatters pushBack _largeSplatter;
+        [_largeSplatter, _unitSurfaceIntersectingObject] call BloodLust_AssignSplatterToBuilding;
+    };
+    for "_i" from 1 to BloodLust_VaporizedBloodSplatterIterations do
+    {
+        _jitter =
+        [
+            BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2)),
+            BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2)),
+            BloodLust_VaporizedBloodSplatterJitterAmount - (random (BloodLust_VaporizedBloodSplatterJitterAmount * 2))
+        ];
+        _splatter =
+        [
+            _unit,
+            getPosASL _unit,
+            vectorNormalized _jitter,
+            BloodLust_BloodSplatterIntersectionMaxDistance,
+            random 360,
+            selectRandom BloodLust_VaporizationBloodSplatters
+        ] call BloodLust_CreateBloodSplatter;
+        _bloodSplatters pushBack _splatter;
+        if(BloodLust_IsVaporizedHeatWaveEnabled) then
+        {
+            [_splatter, 15] call BloodLust_RefractionEffect;
+        };
+    };
+
+    {
+        [_unit, _gibForce, _gibs, _bloodSplatters] call _x;
+    } foreach BloodLust_OnUnitVaporizedEventHandlers;
+};
+
+BloodLust_IsAmmoInVaporizationWhitelist =
+{
+    _ammoClass = _this;
+    _return    = false;
+
+    {
+        if(_ammoClass == _x || _ammoClass isKindOf _x) exitWith
+        {
+            _return = true;
+        };
+    } foreach BloodLust_VaporizationAmmoClassnames;
+
+    _return;
+};
+
+
+//Blood Lust -- Blood splatter mod.
+//Copyright (C) 2016  Gavin N. Alvesteffer
+
+_UnitVehicleExplosion =
+{
+    _unit = _this select 0;
+    _vehicle = vehicle _unit;
+    _isUnitInVehicle = _vehicle != _unit;
+    if(_isUnitInVehicle && damage _vehicle == 1) then
+    {
+        _fuelExplosionPower = getNumber (configfile >> "CfgVehicles" >> (typeOf _vehicle) >> "fuelExplosionPower");
+        if(_fuelExplosionPower >= 1) then
+        {
+            [_unit, _fuelExplosionPower] call BloodLust_VaporizeUnit;
+        };
+    };
+};
+
+BloodLust_OnUnitKilledPostEventHandlers pushBack _UnitVehicleExplosion;
+
+
 //Adds BloodLust effects to unit.
 BloodLust_InitUnit =
 {
@@ -1340,5 +1265,22 @@ BloodLust_UnitHitByVehicle =
     else
     {
         [_unit, BloodLust_UnitVehicleCollisionBleedDuration, 0.1] call BloodLust_AttachBleeding;
+    };
+};
+
+//Blood Lust -- Blood splatter mod.
+//Copyright (C) 2016  Gavin N. Alvesteffer
+
+//Make units go splat when they hit the ground at high speed.
+BloodLust_OnUnitKilledPostEventHandlers pushBack
+{
+    _unit = _this select 0;
+    _killer = _this select 1;
+    _isUnitOnFoot = vehicle _unit == _unit;
+    _unitVelocity = velocity _unit;
+    _unitVelocityMagnitude = vectorMagnitude _unitVelocity;
+    if(_unit == _killer && _isUnitOnFoot && _unitVelocityMagnitude >= 20) then
+    {
+        [_unit, _unitVelocityMagnitude * 0.2] call BloodLust_VaporizeUnit;
     };
 };
