@@ -1,166 +1,125 @@
-// AI Progression Elite - Sistema de progresión completo para IAs
-// Creado por Buchedegatito & Copilot
-// Fecha: 2025-05-21 21:39:13
+// 🌟 AI Progression Elite - Sistema avanzado de progresión para IAs 🌟
+// Autor: Buchedegatito
+// Fecha: 2025-05-21 22:20:27
 
-
-// Cargar sistema de idiomas
-call compile preprocessFileLineNumbers "AI_Progression_Language_Auto.sqf";
-
-// Configuración del sistema
+// 🎛️ Configuración del sistema
 AIP_Config = [
-    // Nivel inicial general de habilidad (0.0 a 1.0)
-    0.2,  
+    0.2,  // Nivel inicial de habilidad (0.0 a 1.0)
     
-    // Rangos (de menor a mayor)
+    // 📊 Rangos (de menor a mayor) y kills necesarias
     [
         "PRIVATE",   // Recluta - 0 kills
         "CORPORAL",  // Cabo - 3 kills
-        "SERGEANT",  // Sargento - 9 kills (3+6)
-        "LIEUTENANT",// Teniente - 21 kills (3+6+12)
-        "CAPTAIN",   // Capitán - 45 kills (3+6+12+24)
-        "MAJOR",     // Mayor - 93 kills (3+6+12+24+48)
-        "COLONEL"    // Coronel - 189 kills (3+6+12+24+48+96)
+        "SERGEANT",  // Sargento - 9 kills
+        "LIEUTENANT",// Teniente - 21 kills
+        "CAPTAIN",   // Capitán - 45 kills
+        "MAJOR",     // Mayor - 93 kills
+        "COLONEL"    // Coronel - 189 kills
     ],
     
-    // Multiplicadores de experiencia
-    [
-        1.0,    // Infantry kills
-        2.0,    // Land vehicle kills
-        3.0     // Air vehicle kills
-    ],
+    // 🎯 Multiplicadores de experiencia por tipo de kill
+    [1.0, 2.0, 3.0], // Infantería, Vehículos, Aéreos
     
-    // Configuración de especialidades
+    // 🧠 Configuración de especialidades [Velocidad inicial, Mejora por acción, Acciones para mejorar]
     [
-        // Médico
-        [
-            0.2,    // Velocidad de curación inicial
-            0.01,   // Mejora por cada curación
-            10      // Número de curaciones para mejorar
-        ],
-        
-        // Ingeniero
-        [
-            0.2,    // Velocidad de reparación inicial
-            0.01,   // Mejora por cada reparación
-            5       // Número de reparaciones para mejorar
-        ],
-        
-        // EOD
-        [
-            0.2,    // Velocidad de desactivación inicial
-            0.02,   // Mejora por cada desactivación
-            3       // Número de desactivaciones para mejorar
-        ]
+        [0.2, 0.01, 10], // Médico: velocidad curación, mejora, número curaciones
+        [0.2, 0.01, 5],  // Ingeniero: velocidad reparación, mejora, número reparaciones
+        [0.2, 0.02, 3]   // EOD: velocidad desactivación, mejora, número desactivaciones
     ]
 ];
 
-// Variables globales
-AIP_UnitsTracked = [];    // Array para seguir las unidades
-AIP_Debug = true;         // Activar mensajes de depuración
-AIP_BonusPerRank = 0.5;   // Bonus de resistencia al daño por rango
+// 📝 Variables globales
+AIP_UnitsTracked = [];    // Array para seguir unidades
+AIP_Debug = false;        // Mensajes de depuración desactivados
+AIP_BonusPerRank = 0.5;   // Bonus de resistencia por rango (%)
 AIP_EnableMorale = true;  // Sistema de moral habilitado
-AIP_EnableSpecialties = true; // Sistema de especialidades habilitado
-AIP_EnableSharedXP = true;    // Experiencia compartida habilitada
+AIP_EnableSharedXP = true;// Experiencia compartida
 
-// Inicializar una unidad nueva al sistema
+// 🚀 Inicializar una unidad
 AIP_InitUnit = {
     params ["_unit"];
-    
-    // Si ya está inicializada, salir
     if (_unit getVariable ["AIP_Initialized", false]) exitWith {};
     
-    // Marcar como inicializada
+    // Variables básicas
     _unit setVariable ["AIP_Initialized", true, true];
+    _unit setVariable ["AIP_Kills", 0, true];
+    _unit setVariable ["AIP_RankIndex", 0, true];
+    _unit setVariable ["AIP_VehicleKills", 0, true];
+    _unit setVariable ["AIP_AirKills", 0, true];
+    _unit setVariable ["AIP_TimeAiming", 0, true];
+    _unit setVariable ["AIP_DistanceRun", 0, true];
+    _unit setVariable ["AIP_TimeInCombat", 0, true];
+    _unit setVariable ["AIP_ReloadsPerformed", 0, true];
+    _unit setVariable ["AIP_ShotsFired", 0, true];
+    _unit setVariable ["AIP_HitsLanded", 0, true];
+    _unit setVariable ["AIP_LastPosition", getPosATL _unit, true];
+    _unit setVariable ["AIP_IsInCombat", false, true];
+    _unit setVariable ["AIP_DamageReduction", 0, true];
+    _unit setVariable ["AIP_Morale", 50, true];
+    _unit setVariable ["AIP_Specialties", [], true];
+    _unit setVariable ["AIP_FavoriteTerrain", [], true];
+    _unit setVariable ["AIP_InPanic", false, true]; // Para controlar el estado de pánico
     
-    // Configurar valores iniciales de combate
-    _unit setVariable ["AIP_Kills", 0, true];               // Contador de kills
-    _unit setVariable ["AIP_RankIndex", 0, true];           // Nivel de rango (índice)
-    _unit setVariable ["AIP_VehicleKills", 0, true];        // Vehículos destruidos
-    _unit setVariable ["AIP_AirKills", 0, true];            // Aeronaves destruidas
-    _unit setVariable ["AIP_ShotsFired", 0, true];          // Disparos realizados
-    _unit setVariable ["AIP_HitsLanded", 0, true];          // Impactos efectivos
-    _unit setVariable ["AIP_InPanic", false, true];         // Para controlar el estado de pánico
-
-    // Contadores de acciones para habilidades específicas
-    _unit setVariable ["AIP_TimeAiming", 0, true];          // Tiempo apuntando en combate (segundos)
-    _unit setVariable ["AIP_DistanceRun", 0, true];         // Distancia corrida (metros)
-    _unit setVariable ["AIP_TimeInCombat", 0, true];        // Tiempo en combate (segundos)
-    _unit setVariable ["AIP_ReloadsPerformed", 0, true];    // Número de recargas reales
-    _unit setVariable ["AIP_LastPosition", getPosATL _unit, true]; // Última posición (para calcular distancia)
-    _unit setVariable ["AIP_IsInCombat", false, true];      // Si está en combate
-    _unit setVariable ["AIP_CurrentMagazine", currentMagazine _unit, true]; // Magazín actual
-    _unit setVariable ["AIP_DamageReduction", 0, true];     // Reducción de daño adicional
-    _unit setVariable ["AIP_Morale", 50, true];             // Moral (0-100)
-    _unit setVariable ["AIP_FavoriteTerrain", [], true];    // Terrenos favoritos
-    _unit setVariable ["AIP_TimeInTerrain", createHashMap, true]; // Tiempo en cada terreno
-    
-    // Especialidades desarrolladas
-    _unit setVariable ["AIP_Specialties", [], true];        // Especialidades emergentes
-    
-    // Sistemas de rol especializado
+    // Preservar roles especiales
     if (_unit getUnitTrait "Medic") then {
         _unit setVariable ["AIP_IsMedic", true, true];
-        _unit setVariable ["AIP_HealingSpeed", (AIP_Config select 3) select 0 select 0, true]; // Velocidad de curación
-        _unit setVariable ["AIP_HealingPerformed", 0, true]; // Conteo de curaciones
+        _unit setVariable ["AIP_HealingSpeed", (AIP_Config select 3) select 0 select 0, true];
+        _unit setVariable ["AIP_HealingPerformed", 0, true];
     };
-    
     if (_unit getUnitTrait "Engineer") then {
         _unit setVariable ["AIP_IsEngineer", true, true];
-        _unit setVariable ["AIP_RepairSpeed", (AIP_Config select 3) select 1 select 0, true]; // Velocidad de reparación
-        _unit setVariable ["AIP_RepairsPerformed", 0, true]; // Conteo de reparaciones
+        _unit setVariable ["AIP_RepairSpeed", (AIP_Config select 3) select 1 select 0, true];
+        _unit setVariable ["AIP_RepairsPerformed", 0, true];
     };
-    
     if (_unit getUnitTrait "ExplosiveSpecialist") then {
         _unit setVariable ["AIP_IsEOD", true, true];
-        _unit setVariable ["AIP_DefuseSpeed", (AIP_Config select 3) select 2 select 0, true]; // Velocidad de desactivación
-        _unit setVariable ["AIP_DefusalsPerformed", 0, true]; // Conteo de desactivaciones
+        _unit setVariable ["AIP_DefuseSpeed", (AIP_Config select 3) select 2 select 0, true];
+        _unit setVariable ["AIP_DefusalsPerformed", 0, true];
     };
     
-    // Establecer habilidades iniciales
+    // Inicializar habilidades y rango
     [_unit] call AIP_SetInitialSkills;
-    
-    // Establecer rango inicial
     _unit setRank ((AIP_Config select 1) select 0);
-    
-    // Añadir a la lista de seguimiento
     AIP_UnitsTracked pushBackUnique _unit;
     
-    // Evento para detectar kills de infantería
-    _unit addEventHandler ["Killed", {
-        params ["_unit", "_killer"];
-        
-        if (isPlayer _killer) exitWith {}; // Ignorar si el killer es un jugador
-        if (!(_killer getVariable ["AIP_Initialized", false])) exitWith {}; // Ignorar si no está en el sistema
-        
-        // Incrementar contadores para kill de infantería
-        [_killer, 1] call AIP_AddKill;
-        
-        // Moral: Incrementar para el asesino, reducir para aliados cercanos
-        [_killer, 5] call AIP_AdjustMorale; // +5 moral por matar enemigo
-        
-        // Unidades cercanas del mismo lado que la víctima pierden moral
-        {
-            if (_x != _killer && {side _x == side _unit} && {_x getVariable ["AIP_Initialized", false]}) then {
-                [_x, -2] call AIP_AdjustMorale; // -2 moral por ver morir a un aliado
-            };
-        } forEach (_unit nearEntities ["Man", 30]);
-        
-        // Experiencia compartida: unidades cercanas del lado del asesino ganan algo de experiencia
-        if (AIP_EnableSharedXP) then {
-            {
-                if (_x != _killer && {side _x == side _killer} && {_x getVariable ["AIP_Initialized", false]}) then {
-                    // 10% de la experiencia compartida por proximidad
-                    [_x, 0.1] call AIP_AddKill;
-                    
-                    if (AIP_Debug) then {
-                        systemChat format ["%1 ganó experiencia compartida por kill de %2", name _x, name _killer];
-                    };
-                };
-            } forEach (_killer nearEntities ["Man", 50]);
-        };
-    }];
+    // Event handlers
+    _unit addEventHandler ["Killed", AIP_EH_Killed];
+    _unit addEventHandler ["FiredMan", AIP_EH_FiredMan];
+    _unit addEventHandler ["Hit", AIP_EH_Hit];
+    _unit addEventHandler ["Reloaded", AIP_EH_Reloaded];
+    _unit addEventHandler ["HandleDamage", AIP_EH_HandleDamage];
+};
+
+// 💀 Event Handler: Killed
+AIP_EH_Killed = {
+    params ["_unit", "_killer"];
     
-    // Evento para detectar disparos y calcular precisión 
+    if (isPlayer _killer || !(_killer getVariable ["AIP_Initialized", false])) exitWith {};
+    
+    // Incrementar contadores
+    [_killer, 1] call AIP_AddKill;
+    
+    // Moral
+    [_killer, 5] call AIP_AdjustMorale;
+    
+    // Aliados cercanos pierden moral
+    {
+        if (_x != _killer && {side _x == side _unit} && {_x getVariable ["AIP_Initialized", false]}) then {
+            [_x, -2] call AIP_AdjustMorale;
+        };
+    } forEach (_unit nearEntities ["Man", 30]);
+    
+    // Experiencia compartida
+    if (AIP_EnableSharedXP) then {
+        {
+            if (_x != _killer && {side _x == side _killer} && {_x getVariable ["AIP_Initialized", false]}) then {
+                [_x, 0.1] call AIP_AddKill;
+            };
+        } forEach (_killer nearEntities ["Man", 50]);
+    };
+};
+
+// 🔫 Event Handler: FiredMan (Disparo)
 AIP_EH_FiredMan = {
     params ["_unit", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
     
@@ -186,20 +145,12 @@ AIP_EH_FiredMan = {
                         _airKills = (_unit getVariable ["AIP_AirKills", 0]) + 1;
                         _unit setVariable ["AIP_AirKills", _airKills, true];
                         [_unit, 15] call AIP_AdjustMorale;
-                        
-                        if (AIP_Debug) then {
-                            systemChat format ["%1 destruyó una aeronave! (x3 exp)", name _unit];
-                        };
                     } else {
                         if (_x isKindOf "LandVehicle") then {
                             [_unit, 2] call AIP_AddKill;
                             _vehKills = (_unit getVariable ["AIP_VehicleKills", 0]) + 1;
                             _unit setVariable ["AIP_VehicleKills", _vehKills, true];
                             [_unit, 10] call AIP_AdjustMorale;
-                            
-                            if (AIP_Debug) then {
-                                systemChat format ["%1 destruyó un vehículo! (x2 exp)", name _unit];
-                            };
                         };
                     };
                 };
@@ -219,88 +170,71 @@ AIP_EH_FiredMan = {
         } forEach nearestObjects [getPos _unit, ["Man", "LandVehicle", "Air"], 150];
     };
 };
+
+// 🎯 Event Handler: Hit (Impacto recibido)
+AIP_EH_Hit = {
+    params ["_unit", "_source", "_damage", "_instigator"];
     
-    // Evento para marcar impactos en unidades o vehículos
-    _unit addEventHandler ["Hit", {
-        params ["_unit", "_source", "_damage", "_instigator"];
+    if (!isNull _instigator && !isPlayer _instigator && (_instigator getVariable ["AIP_Initialized", false])) then {
+        _unit setVariable ["AIP_HitBy", _instigator, true];
         
-        if (!isNull _instigator && !isPlayer _instigator && (_instigator getVariable ["AIP_Initialized", false])) then {
-            _unit setVariable ["AIP_HitBy", _instigator, true];
-            
-            // Reducir moral cuando son impactados
-            if (_unit getVariable ["AIP_Initialized", false]) then {
-                [_unit, -1] call AIP_AdjustMorale; // -1 moral por ser impactado
-            };
-        };
-    }];
-    
-    // Evento para detectar recargas 
-    _unit addEventHandler ["Reloaded", {
-        params ["_unit", "_weapon", "_muzzle", "_newMagazine", "_oldMagazine"];
-        
-        if (_weapon == primaryWeapon _unit || _weapon == secondaryWeapon _unit || _weapon == handgunWeapon _unit) then {
-            // Incrementar contador de recargas
-            _reloads = (_unit getVariable ["AIP_ReloadsPerformed", 0]) + 1;
-            _unit setVariable ["AIP_ReloadsPerformed", _reloads, true];
-            
-            // Cada 5 recargas, mejorar velocidad
-            if (_reloads % 5 == 0) then {
-                [_unit, "reloadSpeed", 0.01] call AIP_ImproveSkill;
-                
-                if (AIP_Debug) then {
-                    systemChat format ["%1 mejoró velocidad de recarga tras %2 recargas", name _unit, _reloads];
-                };
-            };
-        };
-    }];
-    
-    // Evento para reducción de daño basada en rango
-    _unit addEventHandler ["HandleDamage", {
-        params ["_unit", "_selection", "_damage", "_source", "_projectile", "_hitIndex", "_instigator", "_hitPoint"];
-        
-        // Solo procesar si está inicializado en el sistema
         if (_unit getVariable ["AIP_Initialized", false]) then {
-            // Obtener nivel actual de reducción de daño
-            _damageReduction = _unit getVariable ["AIP_DamageReduction", 0];
-            
-            // Factor de moral: baja moral = más daño recibido
-            _moraleFactor = 1.0;
-            if (AIP_EnableMorale) then {
-                _morale = _unit getVariable ["AIP_Morale", 50];
-                if (_morale < 25) then {
-                    _moraleFactor = 1.15; // 15% más daño con moral muy baja
-                } else {
-                    if (_morale > 75) then {
-                        _moraleFactor = 0.9; // 10% menos daño con moral alta
-                    };
-                };
-            };
-            
-            // Aplicar reducción de daño y factor de moral
-            if (_damageReduction > 0 || _moraleFactor != 1.0) then {
-                _reducedDamage = _damage * (1 - (_damageReduction min 0.75)) * _moraleFactor;
-                _reducedDamage
-            } else {
-                _damage // Sin cambios
-            };
-        } else {
-            _damage // Sin cambios
+            [_unit, -1] call AIP_AdjustMorale;
         };
-    }];
-    
-    // Debug
-    if (AIP_Debug) then {
-        systemChat format ["%1 inicializado con habilidad base %2", name _unit, AIP_Config select 0];
     };
 };
 
-// Establecer habilidades iniciales
+// 🔄 Event Handler: Reloaded (Recarga)
+AIP_EH_Reloaded = {
+    params ["_unit", "_weapon", "_muzzle", "_newMagazine", "_oldMagazine"];
+    
+    if (_weapon == primaryWeapon _unit || _weapon == secondaryWeapon _unit || _weapon == handgunWeapon _unit) then {
+        _reloads = (_unit getVariable ["AIP_ReloadsPerformed", 0]) + 1;
+        _unit setVariable ["AIP_ReloadsPerformed", _reloads, true];
+        
+        if (_reloads % 5 == 0) then {
+            [_unit, "reloadSpeed", 0.01] call AIP_ImproveSkill;
+        };
+    };
+};
+
+// 🛡️ Event Handler: HandleDamage (Recibir daño)
+AIP_EH_HandleDamage = {
+    params ["_unit", "_selection", "_damage", "_source", "_projectile", "_hitIndex", "_instigator", "_hitPoint"];
+    
+    if (_unit getVariable ["AIP_Initialized", false]) then {
+        _damageReduction = _unit getVariable ["AIP_DamageReduction", 0];
+        _moraleFactor = 1.0;
+        
+        if (AIP_EnableMorale) then {
+            _morale = _unit getVariable ["AIP_Morale", 50];
+            if (_morale < 25) then {
+                _moraleFactor = 1.15;
+            } else {
+                if (_morale > 75) then {
+                    _moraleFactor = 0.9;
+                };
+            };
+        };
+        
+        if (_damageReduction > 0 || _moraleFactor != 1.0) then {
+            _reducedDamage = _damage * (1 - (_damageReduction min 0.75)) * _moraleFactor;
+            _reducedDamage
+        } else {
+            _damage
+        };
+    } else {
+        _damage
+    };
+};
+
+// 🏁 Establecer habilidades iniciales
 AIP_SetInitialSkills = {
     params ["_unit"];
     
     _baseSkill = AIP_Config select 0;
     
-    // Aplicar a todas las sub-habilidades importantes
+    // Aplicar a todas las sub-habilidades
     _unit setSkill ["general", _baseSkill];
     _unit setSkill ["aimingAccuracy", _baseSkill];
     _unit setSkill ["aimingShake", _baseSkill];
@@ -313,46 +247,33 @@ AIP_SetInitialSkills = {
     _unit setSkill ["commanding", _baseSkill];
     
     // Restaurar habilidades especializadas
-    if (_unit getVariable ["AIP_IsMedic", false]) then {
-        _unit setUnitTrait ["Medic", true];
-    };
-    if (_unit getVariable ["AIP_IsEngineer", false]) then {
-        _unit setUnitTrait ["Engineer", true];
-    };
-    if (_unit getVariable ["AIP_IsEOD", false]) then {
-        _unit setUnitTrait ["ExplosiveSpecialist", true];
-    };
+    if (_unit getVariable ["AIP_IsMedic", false]) then { _unit setUnitTrait ["Medic", true]; };
+    if (_unit getVariable ["AIP_IsEngineer", false]) then { _unit setUnitTrait ["Engineer", true]; };
+    if (_unit getVariable ["AIP_IsEOD", false]) then { _unit setUnitTrait ["ExplosiveSpecialist", true]; };
 };
 
-// Añadir una kill a una unidad (con multiplicador)
+// ⬆️ Añadir una kill (con multiplicador)
 AIP_AddKill = {
     params ["_unit", ["_multiplier", 1]];
     
     if (!alive _unit) exitWith {};
     
-    // Incrementar contador básico de kills
+    // Incrementar contador de kills
     _kills = (_unit getVariable ["AIP_Kills", 0]) + 1;
     _unit setVariable ["AIP_Kills", _kills, true];
     
-    // Mejorar habilidades relacionadas con kills (aplicando multiplicador)
+    // Mejorar habilidades con multiplicador
     [_unit, "aimingAccuracy", 0.01 * _multiplier] call AIP_ImproveSkill;
     [_unit, "aimingSpeed", 0.01 * _multiplier] call AIP_ImproveSkill;
     [_unit, "spotDistance", 0.01 * _multiplier] call AIP_ImproveSkill;
     [_unit, "spotTime", 0.01 * _multiplier] call AIP_ImproveSkill;
     
-    // Verificar promoción
+    // Verificar promoción y especialidades
     [_unit] call AIP_CheckPromotion;
-    
-    // Comprobar especialidades emergentes
     [_unit] call AIP_CheckEmergingSpecialties;
-    
-    // Debug
-    if (AIP_Debug && _multiplier == 1) then {
-        systemChat format ["%1 consiguió una kill (%2)", name _unit, _kills];
-    };
 };
 
-// Ajustar nivel de moral
+// 😀 Ajustar nivel de moral
 AIP_AdjustMorale = {
     params ["_unit", "_change"];
     
@@ -449,7 +370,372 @@ AIP_AdjustMorale = {
     };
 };
 
-// Inicializar monitoreo de moral
+// 🧩 Verificar especialidades emergentes
+AIP_CheckEmergingSpecialties = {
+    params ["_unit"];
+    
+    _currentSpecs = _unit getVariable ["AIP_Specialties", []];
+    _newSpecs = [];
+    
+    // 🔭 Francotirador
+    if ((_unit skill "aimingAccuracy") > 0.7 && (_unit getVariable ["AIP_Kills", 0]) > 15) then {
+        if (!("sniper" in _currentSpecs)) then {
+            _newSpecs pushBack "sniper";
+            [_unit, "aimingAccuracy", 0.05] call AIP_ImproveSkill;
+            [_unit, "aimingShake", 0.05] call AIP_ImproveSkill;
+        };
+    };
+    
+    // 👁️ Explorador
+    if ((_unit skill "spotDistance") > 0.65 && (_unit getVariable ["AIP_DistanceRun", 0]) > 5000) then {
+        if (!("scout" in _currentSpecs)) then {
+            _newSpecs pushBack "scout";
+            [_unit, "spotDistance", 0.07] call AIP_ImproveSkill;
+            [_unit, "spotTime", 0.07] call AIP_ImproveSkill;
+        };
+    };
+    
+    // 💥 Cazador de tanques
+    if ((_unit getVariable ["AIP_VehicleKills", 0]) >= 3) then {
+        if (!("AT" in _currentSpecs)) then {
+            _newSpecs pushBack "AT";
+            [_unit, "aimingAccuracy", 0.03] call AIP_ImproveSkill;
+            [_unit, "courage", 0.05] call AIP_ImproveSkill;
+        };
+    };
+    
+    // Actualizar lista
+    _unit setVariable ["AIP_Specialties", (_currentSpecs + _newSpecs), true];
+};
+
+// 📈 Mejorar habilidad
+AIP_ImproveSkill = {
+    params ["_unit", "_skillName", "_increment"];
+    _currentValue = _unit skill _skillName;
+    _newValue = (_currentValue + _increment) min 1.0;
+    _unit setSkill [_skillName, _newValue];
+};
+
+// ⭐ Verificar promoción
+AIP_CheckPromotion = {
+    params ["_unit"];
+    
+    _kills = _unit getVariable ["AIP_Kills", 0];
+    _currentRankIndex = _unit getVariable ["AIP_RankIndex", 0];
+    _newRankIndex = 0;
+    
+    // Calcular nuevo rango (3, 9, 21, 45, 93, 189)
+    _thresholds = [0, 3, 9, 21, 45, 93, 189];
+    for "_i" from 0 to (count _thresholds - 1) do {
+        if (_kills >= _thresholds select _i) then { _newRankIndex = _i; };
+    };
+    
+    if (_newRankIndex <= _currentRankIndex) exitWith {};
+    
+    // Actualizar rango
+    _unit setVariable ["AIP_RankIndex", _newRankIndex, true];
+    _rankName = (AIP_Config select 1) select _newRankIndex;
+    _unit setRank _rankName;
+    
+    // Aumentar resistencia al daño
+    _currentDamageReduction = _unit getVariable ["AIP_DamageReduction", 0];
+    _newDamageReduction = _currentDamageReduction + (AIP_BonusPerRank * 0.01);
+    _unit setVariable ["AIP_DamageReduction", _newDamageReduction, true];
+    
+    // Boost de moral y restaurar roles
+    [_unit, 10] call AIP_AdjustMorale;
+    if (_unit getVariable ["AIP_IsMedic", false]) then { _unit setUnitTrait ["Medic", true]; };
+    if (_unit getVariable ["AIP_IsEngineer", false]) then { _unit setUnitTrait ["Engineer", true]; };
+    if (_unit getVariable ["AIP_IsEOD", false]) then { _unit setUnitTrait ["ExplosiveSpecialist", true]; };
+};
+
+// 🩹 Sistema de curaciones médicas
+AIP_CheckAndHealNearby = {
+    {
+        _medic = _x;
+        if (alive _medic && {_medic getVariable ["AIP_IsMedic", false]}) then {
+            if (!(_medic getVariable ["AIP_IsHealing", false])) then {
+                _nearUnits = _medic nearEntities ["Man", 30];
+                _wounded = [];
+                
+                {
+                    if (damage _x > 0.1 && {side _x == side _medic}) then {
+                        _wounded pushBack _x;
+                    };
+                } forEach _nearUnits;
+                
+                if (count _wounded > 0) then {
+                    _targetToHeal = _wounded select 0;
+                    _medic setVariable ["AIP_IsHealing", true, true];
+                    _medic doMove (position _targetToHeal);
+                    
+                    [_medic, _targetToHeal] spawn {
+                        params ["_medic", "_target"];
+                        
+                        waitUntil {_medic distance _target < 3 || !alive _medic || !alive _target};
+                        
+                        if (!alive _medic || !alive _target) exitWith {
+                            _medic setVariable ["AIP_IsHealing", false, true];
+                        };
+                        
+                        _medic doWatch _target;
+                        _medic disableAI "MOVE";
+                        _healingSpeed = _medic getVariable ["AIP_HealingSpeed", 0.2];
+                        _healingTime = 10 * (1 - (_healingSpeed min 0.9));
+                        
+                        sleep _healingTime;
+                        
+                        if (alive _medic && alive _target) then {
+                            _target setDamage 0;
+                            _healCount = (_medic getVariable ["AIP_HealingPerformed", 0]) + 1;
+                            _medic setVariable ["AIP_HealingPerformed", _healCount, true];
+                            
+                            if (_healCount % ((AIP_Config select 3) select 0 select 2) == 0) then {
+                                _newSpeed = (_medic getVariable ["AIP_HealingSpeed", 0.2]) + ((AIP_Config select 3) select 0 select 1);
+                                _medic setVariable ["AIP_HealingSpeed", _newSpeed min 0.9, true];
+                            };
+                            
+                            [_medic, 2] call AIP_AdjustMorale;
+                            [_target, 5] call AIP_AdjustMorale;
+                        };
+                        
+                        _medic enableAI "MOVE";
+                        _medic doFollow (leader group _medic);
+                        _medic setVariable ["AIP_IsHealing", false, true];
+                    };
+                };
+            };
+        };
+    } forEach AIP_UnitsTracked;
+};
+
+// 🔧 Sistema de reparación de ingenieros
+AIP_CheckAndRepairNearby = {
+    {
+        _engineer = _x;
+        if (alive _engineer && {_engineer getVariable ["AIP_IsEngineer", false]}) then {
+            if (!(_engineer getVariable ["AIP_IsRepairing", false])) then {
+                _nearVehicles = _engineer nearEntities [["Car", "Tank", "Ship"], 50];
+                _damaged = [];
+                
+                {
+                    if ((damage _x > 0.1 || !canMove _x) && {side _x == side _engineer || side _x == civilian}) then {
+                        _damaged pushBack _x;
+                    };
+                } forEach _nearVehicles;
+                
+                if (count _damaged > 0) then {
+                    _vehicle = _damaged select 0;
+                    _engineer setVariable ["AIP_IsRepairing", true, true];
+                    _engineer doMove (position _vehicle);
+                    
+                    [_engineer, _vehicle] spawn {
+                        params ["_engineer", "_vehicle"];
+                        
+                        waitUntil {_engineer distance _vehicle < 5 || !alive _engineer || !alive _vehicle};
+                        
+                        if (!alive _engineer || !alive _vehicle) exitWith {
+                            _engineer setVariable ["AIP_IsRepairing", false, true];
+                        };
+                        
+                        _engineer doWatch _vehicle;
+                        _engineer disableAI "MOVE";
+                        _repairSpeed = _engineer getVariable ["AIP_RepairSpeed", 0.2];
+                        _repairTime = 20 * (1 - (_repairSpeed min 0.9));
+                        
+                        sleep _repairTime;
+                        
+                        if (alive _engineer && alive _vehicle) then {
+                            _vehicle setDamage 0;
+                            _vehicle setFuel 1;
+                            _repairCount = (_engineer getVariable ["AIP_RepairsPerformed", 0]) + 1;
+                            _engineer setVariable ["AIP_RepairsPerformed", _repairCount, true];
+                            
+                            if (_repairCount % ((AIP_Config select 3) select 1 select 2) == 0) then {
+                                _newSpeed = (_engineer getVariable ["AIP_RepairSpeed", 0.2]) + ((AIP_Config select 3) select 1 select 1);
+                                _engineer setVariable ["AIP_RepairSpeed", _newSpeed min 0.9, true];
+                            };
+                            
+                            [_engineer, 3] call AIP_AdjustMorale;
+                        };
+                        
+                        _engineer enableAI "MOVE";
+                        _engineer doFollow (leader group _engineer);
+                        _engineer setVariable ["AIP_IsRepairing", false, true];
+                    };
+                };
+            };
+        };
+    } forEach AIP_UnitsTracked;
+};
+
+// 🔄 Actualización periódica de habilidades basada en acciones
+AIP_UpdateSkillsBasedOnActions = {
+    [] spawn {
+        while {true} do {
+            {
+                _unit = _x;
+                if (alive _unit) then {
+                    // Estado de combate
+                    _isInCombat = (behaviour _unit == "COMBAT" || combatMode _unit == "RED");
+                    _unit setVariable ["AIP_IsInCombat", _isInCombat, true];
+                    
+                    // Distancia recorrida
+                    _currentPos = getPosATL _unit;
+                    _lastPos = _unit getVariable ["AIP_LastPosition", _currentPos];
+                    _distance = _currentPos distance _lastPos;
+                    
+                    if (_distance > 5) then {
+                        _totalDistance = (_unit getVariable ["AIP_DistanceRun", 0]) + _distance;
+                        _unit setVariable ["AIP_LastPosition", _currentPos, true];
+                        _unit setVariable ["AIP_DistanceRun", _totalDistance, true];
+                        
+                        // Mejorar resistencia con la distancia
+                        _improvementInterval = 100 * (1 + floor (_totalDistance / 1000));
+                        if (_totalDistance % _improvementInterval < _distance) then {
+                            [_unit, "endurance", 0.005] call AIP_ImproveSkill;
+                        };
+                    };
+                    
+                    // Habilidades en combate
+                    if (_isInCombat) then {
+                        _combatTime = (_unit getVariable ["AIP_TimeInCombat", 0]) + 1;
+                        _unit setVariable ["AIP_TimeInCombat", _combatTime, true];
+                        
+                        // Mejorar valor en combate
+                        if (_combatTime % 60 == 0) then {
+                            [_unit, "courage", 0.01] call AIP_ImproveSkill;
+                        };
+                        
+                        // Mejorar puntería si está apuntando
+                        if ((stance _unit == "CROUCH" || stance _unit == "PRONE") && _unit call AIP_IsAiming) then {
+                            _aimingTime = (_unit getVariable ["AIP_TimeAiming", 0]) + 1;
+                            _unit setVariable ["AIP_TimeAiming", _aimingTime, true];
+                            
+                            if (_aimingTime % 20 == 0) then {
+                                [_unit, "aimingShake", 0.005] call AIP_ImproveSkill;
+                                [_unit, "aimingAccuracy", 0.005] call AIP_ImproveSkill;
+                            };
+                        };
+                        
+                        // Comandando para líderes
+                        if (leader (group _unit) == _unit && _combatTime % 120 == 0) then {
+                            [_unit, "commanding", 0.01] call AIP_ImproveSkill;
+                        };
+                    };
+                };
+            } forEach AIP_UnitsTracked;
+            
+            // Procesar médicos e ingenieros
+            call AIP_CheckAndHealNearby;
+            call AIP_CheckAndRepairNearby;
+            
+            sleep 1;
+        };
+    };
+};
+
+// 👀 Comprobar si una unidad está apuntando
+AIP_IsAiming = {
+    private _unit = _this;
+    private _weapon = currentWeapon _unit;
+    
+    if (_weapon == "") exitWith {false};
+    
+    private _anim = animationState _unit;
+    private _isAiming = _anim find "aim" > -1 || 
+                       {_anim find "Aim" > -1} || 
+                       {_anim find "wait" > -1 && (_anim find "prone" > -1 || _anim find "crouch" > -1)};
+    
+    _isAiming
+};
+
+// 🔍 Monitoreo continuo para nuevas unidades
+AIP_StartMonitoring = {
+    [] spawn {
+        while {true} do {
+            {
+                if (!isPlayer _x && {_x isKindOf "CAManBase"} && {side _x != civilian} && {!(_x getVariable ["AIP_Initialized", false])}) then {
+                    [_x] call AIP_InitUnit;
+                };
+            } forEach allUnits;
+            sleep 5;
+        };
+    };
+};
+
+// 📋 Obtener información detallada de una unidad
+AIP_GetUnitInfo = {
+    params ["_unit"];
+    
+    if (!alive _unit) exitWith { hint "La unidad está muerta"; };
+    
+    // Obtener datos básicos
+    _kills = _unit getVariable ["AIP_Kills", 0];
+    _vehKills = _unit getVariable ["AIP_VehicleKills", 0];
+    _airKills = _unit getVariable ["AIP_AirKills", 0];
+    _rankName = rank _unit;
+    _damageReduction = (_unit getVariable ["AIP_DamageReduction", 0]) * 100;
+    _morale = _unit getVariable ["AIP_Morale", 50];
+    _specialties = _unit getVariable ["AIP_Specialties", []];
+    
+    // Habilidades
+    _acc = (_unit skill "aimingAccuracy") * 100;
+    _shake = (_unit skill "aimingShake") * 100;
+    _speed = (_unit skill "aimingSpeed") * 100;
+    _endur = (_unit skill "endurance") * 100;
+    _spotD = (_unit skill "spotDistance") * 100;
+    _spotT = (_unit skill "spotTime") * 100;
+    _cour = (_unit skill "courage") * 100;
+    _reload = (_unit skill "reloadSpeed") * 100;
+    _command = (_unit skill "commanding") * 100;
+    
+    // Contadores de acción
+    _distance = _unit getVariable ["AIP_DistanceRun", 0];
+    _combatTime = _unit getVariable ["AIP_TimeInCombat", 0];
+    _hits = _unit getVariable ["AIP_HitsLanded", 0];
+    _shots = _unit getVariable ["AIP_ShotsFired", 0];
+    _accuracy = if (_shots > 0) then {(_hits / _shots) * 100} else {0};
+    
+    // Roles especiales
+    _roleInfo = [];
+    
+    if (_unit getVariable ["AIP_IsMedic", false]) then {
+        _healSpeed = (_unit getVariable ["AIP_HealingSpeed", 0.2]) * 100;
+        _healCount = _unit getVariable ["AIP_HealingPerformed", 0];
+        _roleInfo pushBack format ["Médico (Vel: %1%2, Cur: %3)", _healSpeed toFixed 0, "%", _healCount];
+    };
+    
+    if (_unit getVariable ["AIP_IsEngineer", false]) then {
+        _repairSpeed = (_unit getVariable ["AIP_RepairSpeed", 0.2]) * 100;
+        _repairCount = _unit getVariable ["AIP_RepairsPerformed", 0];
+        _roleInfo pushBack format ["Ingeniero (Vel: %1%2, Rep: %3)", _repairSpeed toFixed 0, "%", _repairCount];
+    };
+    
+    if (_unit getVariable ["AIP_IsEOD", false]) then {
+        _defuseSpeed = (_unit getVariable ["AIP_DefuseSpeed", 0.2]) * 100;
+        _defuseCount = _unit getVariable ["AIP_DefusalsPerformed", 0];
+        _roleInfo pushBack format ["EOD (Vel: %1%2, Des: %3)", _defuseSpeed toFixed 0, "%", _defuseCount];
+    };
+    
+    // Preparar el mensaje
+    _message = format ["===== %1 (Rango: %2) =====\n", name _unit, _rankName];
+    _message = _message + format ["Kills: Infantería %1 | Vehículos %2 | Aéreos %3\n", _kills - (_vehKills + _airKills), _vehKills, _airKills];
+    _message = _message + format ["Reducción daño: %1%% | Moral: %2%%\n", _damageReduction toFixed 1, _morale toFixed 0];
+    _message = _message + format ["Precisión: %1%% | Resistencia: %2%% | Valor: %3%%\n", _acc toFixed 0, _endur toFixed 0, _cour toFixed 0];
+    
+    if (count _specialties > 0) then {
+        _message = _message + format ["Especialidades: %1\n", _specialties joinString ", "];
+    };
+    
+    {
+        _message = _message + format ["Rol especial: %1\n", _x];
+    } forEach _roleInfo;
+    
+    hint _message;
+};
+
+// 📱 Inicializar monitoreo de moral
 AIP_InitMoraleMonitoring = {
     // Monitorear muertes
     addMissionEventHandler ["EntityKilled", {
@@ -499,750 +785,91 @@ AIP_InitMoraleMonitoring = {
     }];
 };
 
-// Comprobar especialidades emergentes
-AIP_CheckEmergingSpecialties = {
-    params ["_unit"];
-    
-    if (!AIP_EnableSpecialties || !alive _unit) exitWith {};
-    
-    _currentSpecs = _unit getVariable ["AIP_Specialties", []];
-    _newSpecs = [];
-    
-    // Comprobar francotirador (alta precisión y muchas kills)
-    if ((_unit skill "aimingAccuracy") > 0.7 && (_unit getVariable ["AIP_Kills", 0]) > 15) then {
-        if (!("sniper" in _currentSpecs)) then {
-            _newSpecs pushBack "sniper";
-            
-            // Bonus de francotirador
-            [_unit, "aimingAccuracy", 0.05] call AIP_ImproveSkill;
-            [_unit, "aimingShake", 0.05] call AIP_ImproveSkill;
-            
-            if (AIP_Debug) then {
-                systemChat format ["%1 ha desarrollado la especialidad: FRANCOTIRADOR", name _unit];
-            };
-        };
-    };
-    
-    // Comprobar explorador (alta detección y distancia recorrida)
-    if ((_unit skill "spotDistance") > 0.65 && (_unit getVariable ["AIP_DistanceRun", 0]) > 5000) then {
-        if (!("scout" in _currentSpecs)) then {
-            _newSpecs pushBack "scout";
-            
-            // Bonus de explorador
-            [_unit, "spotDistance", 0.07] call AIP_ImproveSkill;
-            [_unit, "spotTime", 0.07] call AIP_ImproveSkill;
-            
-            if (AIP_Debug) then {
-                systemChat format ["%1 ha desarrollado la especialidad: EXPLORADOR", name _unit];
-            };
-        };
-    };
-    
-    // Comprobar cazador de tanques (destruyó varios vehículos)
-    if ((_unit getVariable ["AIP_VehicleKills", 0]) >= 3) then {
-        if (!("AT" in _currentSpecs)) then {
-            _newSpecs pushBack "AT";
-            
-            // Bonus de AT
-            [_unit, "aimingAccuracy", 0.03] call AIP_ImproveSkill;
-            [_unit, "courage", 0.05] call AIP_ImproveSkill;
-            
-            if (AIP_Debug) then {
-                systemChat format ["%1 ha desarrollado la especialidad: CAZADOR DE TANQUES", name _unit];
-            };
-        };
-    };
-    
-    // Comprobar CQB (muchas kills a corta distancia)
-    // Esta lógica necesitaría más trabajo para implementarse completamente
-    
-    // Actualizar lista de especialidades
-    _unit setVariable ["AIP_Specialties", (_currentSpecs + _newSpecs), true];
-};
-
-// Mejorar una habilidad específica
-AIP_ImproveSkill = {
-    params ["_unit", "_skillName", "_increment"];
-    
-    _currentValue = _unit skill _skillName;
-    _newValue = (_currentValue + _increment) min 1.0;
-    _unit setSkill [_skillName, _newValue];
-    
-    // Debug detallado (opcional)
-    if (AIP_Debug && _currentValue != _newValue) then {
-        // systemChat format ["%1 mejoró %2: %3 → %4", name _unit, _skillName, _currentValue toFixed 2, _newValue toFixed 2];
-    };
-};
-
-// Verificar si corresponde promoción
-AIP_CheckPromotion = {
-    params ["_unit"];
-    
-    _kills = _unit getVariable ["AIP_Kills", 0];
-    _currentRankIndex = _unit getVariable ["AIP_RankIndex", 0];
-    
-    // Calcular nuevo rango basado en kills (escala exponencial)
-    _requiredKills = 0;
-    _newRankIndex = 0;
-    
-    // Umbral de kills para cada rango (3, 9, 21, 45, 93, 189)
-    _thresholds = [0, 3, 9, 21, 45, 93, 189];
-    
-    for "_i" from 0 to (count _thresholds - 1) do {
-        if (_kills >= _thresholds select _i) then {
-            _newRankIndex = _i;
-        };
-    };
-    
-    // Si no hay cambio, salir
-    if (_newRankIndex <= _currentRankIndex) exitWith {};
-    
-    // Actualizar rango
-    _unit setVariable ["AIP_RankIndex", _newRankIndex, true];
-    
-    // Establecer rango en Arma 3
-    _rankName = (AIP_Config select 1) select _newRankIndex;
-    _unit setRank _rankName;
-    
-    // Aumentar la resistencia al daño por cada rango
-    _currentDamageReduction = _unit getVariable ["AIP_DamageReduction", 0];
-    _newDamageReduction = _currentDamageReduction + (AIP_BonusPerRank * 0.01); // Convertir a porcentaje
-    _unit setVariable ["AIP_DamageReduction", _newDamageReduction, true];
-    
-    // Boost de moral por promoción
-    [_unit, 10] call AIP_AdjustMorale;
-    
-    // Restaurar habilidades especializadas tras el cambio de rango
-    if (_unit getVariable ["AIP_IsMedic", false]) then {
-        _unit setUnitTrait ["Medic", true];
-    };
-    if (_unit getVariable ["AIP_IsEngineer", false]) then {
-        _unit setUnitTrait ["Engineer", true];
-    };
-    if (_unit getVariable ["AIP_IsEOD", false]) then {
-        _unit setUnitTrait ["ExplosiveSpecialist", true];
-    };
-    
-    // Debug y notificación
-    if (AIP_Debug) then {
-        systemChat format ["%1 ha sido promovido a %2 (Reducción daño: +%3%4)", 
-            name _unit, 
-            _rankName, 
-            _newDamageReduction * 100 toFixed 0,
-            "%"
-        ];
-    };
-};
-
-// Sistema de curaciones médicas
-AIP_CheckAndHealNearby = {
-    // Ejecutar para cada unidad médica
-    {
-        _medic = _x;
-        
-        if (alive _medic && {_medic getVariable ["AIP_IsMedic", false]}) then {
-            // Buscar unidades heridas cercanas (incluyendo jugadores)
-            _nearUnits = _medic nearEntities ["Man", 30];
-            _wounded = [];
-            
-            {
-                if (damage _x > 0.1 && {side _x == side _medic}) then {
-                    _wounded pushBack _x;
-                };
-            } forEach _nearUnits;
-            
-            // Si hay heridos, el médico intenta curarlos
-            if (count _wounded > 0) then {
-                _targetToHeal = _wounded select 0; // Priorizar al primer herido encontrado
-                
-                // Comprobar si no está ya curando
-                if (!(_medic getVariable ["AIP_IsHealing", false])) then {
-                    _medic setVariable ["AIP_IsHealing", true, true];
-                    
-                    // Mover al médico hacia el herido
-                    _medic doMove (position _targetToHeal);
-                    
-                    // Proceso de curación
-                    [_medic, _targetToHeal] spawn {
-                        params ["_medic", "_target"];
-                        
-                        // Esperar a que llegue cerca del herido
-                        waitUntil {_medic distance _target < 3 || !alive _medic || !alive _target};
-                        
-                        if (!alive _medic || !alive _target) exitWith {
-                            _medic setVariable ["AIP_IsHealing", false, true];
-                        };
-                        
-                        // Detener movimiento
-                        _medic doWatch _target;
-                        _medic disableAI "MOVE";
-                        
-                        // Comprobar velocidad de curación
-                        _healingSpeed = _medic getVariable ["AIP_HealingSpeed", 0.2];
-                        _healingTime = 10 * (1 - (_healingSpeed min 0.9)); // Entre 1 y 10 segundos
-                        
-                        // Curación
-                        if (AIP_Debug) then {
-                            systemChat format ["%1 está curando a %2 (tiempo: %3s)", name _medic, name _target, _healingTime toFixed 1];
-                        };
-                        
-                        sleep _healingTime;
-                        
-                        if (alive _medic && alive _target) then {
-                            // Curar
-                            _target setDamage 0;
-                            
-                            // Incrementar contador
-                            _healCount = (_medic getVariable ["AIP_HealingPerformed", 0]) + 1;
-                            _medic setVariable ["AIP_HealingPerformed", _healCount, true];
-                            
-                            // Mejorar habilidad de curación cada cierto número de curaciones
-                            if (_healCount % ((AIP_Config select 3) select 0 select 2) == 0) then {
-                                _newSpeed = (_medic getVariable ["AIP_HealingSpeed", 0.2]) + ((AIP_Config select 3) select 0 select 1);
-                                _medic setVariable ["AIP_HealingSpeed", _newSpeed min 0.9, true];
-                                
-                                if (AIP_Debug) then {
-                                    systemChat format ["%1 mejoró velocidad de curación a %2 (tras %3 curaciones)", 
-                                        name _medic, 
-                                        (_newSpeed * 100) toFixed 0 + "%", 
-                                        _healCount
-                                    ];
-                                };
-                            };
-                            
-                            // Boost de moral para ambos
-                            [_medic, 2] call AIP_AdjustMorale;
-                            [_target, 5] call AIP_AdjustMorale;
-                        };
-                        
-                        // Restaurar movimiento
-                        _medic enableAI "MOVE";
-                        _medic doFollow (leader group _medic);
-                        _medic setVariable ["AIP_IsHealing", false, true];
-                    };
-                };
-            };
-        };
-    } forEach AIP_UnitsTracked;
-};
-
-// Sistema de reparaciones de ingenieros
-AIP_CheckAndRepairNearby = {
-    // Ejecutar para cada ingeniero
-    {
-        _engineer = _x;
-        
-        if (alive _engineer && {_engineer getVariable ["AIP_IsEngineer", false]}) then {
-            // Buscar vehículos dañados cercanos
-            _nearVehicles = _engineer nearEntities [["Car", "Tank", "Ship"], 50];
-            _damaged = [];
-            
-            {
-                if ((damage _x > 0.1 || !canMove _x) && {side _x == side _engineer || side _x == civilian}) then {
-                    _damaged pushBack _x;
-                };
-            } forEach _nearVehicles;
-            
-            // Si hay vehículos dañados, el ingeniero intenta repararlos
-            if (count _damaged > 0) then {
-                _targetToRepair = _damaged select 0; // Priorizar el primer vehículo encontrado
-                
-                // Comprobar si no está ya reparando
-                if (!(_engineer getVariable ["AIP_IsRepairing", false])) then {
-                    _engineer setVariable ["AIP_IsRepairing", true, true];
-                    
-                    // Mover al ingeniero hacia el vehículo
-                    _engineer doMove (position _targetToRepair);
-                    
-                    // Proceso de reparación
-                    [_engineer, _targetToRepair] spawn {
-                        params ["_engineer", "_vehicle"];
-                        
-                        // Esperar a que llegue cerca del vehículo
-                        waitUntil {_engineer distance _vehicle < 5 || !alive _engineer || !alive _vehicle};
-                        
-                        if (!alive _engineer || !alive _vehicle) exitWith {
-                            _engineer setVariable ["AIP_IsRepairing", false, true];
-                        };
-                        
-                        // Detener movimiento
-                        _engineer doWatch _vehicle;
-                        _engineer disableAI "MOVE";
-                        
-                        // Comprobar velocidad de reparación
-                        _repairSpeed = _engineer getVariable ["AIP_RepairSpeed", 0.2];
-                        _repairTime = 20 * (1 - (_repairSpeed min 0.9)); // Entre 2 y 20 segundos
-                        
-                        // Animación y reparación
-                        if (AIP_Debug) then {
-                            systemChat format ["%1 está reparando un %2 (tiempo: %3s)", name _engineer, getText(configFile >> "CfgVehicles" >> typeOf _vehicle >> "displayName"), _repairTime toFixed 1];
-                        };
-                        
-                        sleep _repairTime;
-                        
-                        if (alive _engineer && alive _vehicle) then {
-                            // Reparar
-                            _vehicle setDamage 0;
-                            
-                            // Si es un vehículo con ruedas o cadenas, asegurarse de que pueda moverse
-                            if (_vehicle isKindOf "Car" || _vehicle isKindOf "Tank") then {
-                                // Reparar ruedas/cadenas para que pueda moverse
-                                _vehicle setFuel 1;
-                                _vehicle setVehicleAmmo 1;
-                            };
-                            
-                            // Incrementar contador
-                            _repairCount = (_engineer getVariable ["AIP_RepairsPerformed", 0]) + 1;
-                            _engineer setVariable ["AIP_RepairsPerformed", _repairCount, true];
-                            
-                            // Mejorar habilidad de reparación
-                            if (_repairCount % ((AIP_Config select 3) select 1 select 2) == 0) then {
-                                _newSpeed = (_engineer getVariable ["AIP_RepairSpeed", 0.2]) + ((AIP_Config select 3) select 1 select 1);
-                                _engineer setVariable ["AIP_RepairSpeed", _newSpeed min 0.9, true];
-                                
-                                if (AIP_Debug) then {
-                                    systemChat format ["%1 mejoró velocidad de reparación a %2 (tras %3 reparaciones)", 
-                                        name _engineer, 
-                                        (_newSpeed * 100) toFixed 0 + "%", 
-                                        _repairCount
-                                    ];
-                                };
-                            };
-                            
-                            // Boost de moral
-                            [_engineer, 3] call AIP_AdjustMorale;
-                        };
-                        
-                        // Restaurar movimiento
-                        _engineer enableAI "MOVE";
-                        _engineer doFollow (leader group _engineer);
-                        _engineer setVariable ["AIP_IsRepairing", false, true];
-                    };
-                };
-            };
-        };
-    } forEach AIP_UnitsTracked;
-};
-
-// Sistema de desactivación EOD
-AIP_CheckAndDefuseNearby = {
-    // Para implementar en futuras versiones - necesita lógica para detectar IEDs/minas
-};
-
-// Inicializar todas las unidades IA existentes
-AIP_InitAllAI = {
-    {
-        if (!isPlayer _x && {_x isKindOf "CAManBase"} && {side _x != civilian}) then {
-            [_x] call AIP_InitUnit;
-        };
-    } forEach allUnits;
-    
-    systemChat format ["Sistema inicializado en %1 unidades", count AIP_UnitsTracked];
-};
-
-// Actualización periódica de habilidades basadas en acciones
-AIP_UpdateSkillsBasedOnActions = {
-    // Ejecutar en segundo plano
-    [] spawn {
-        private ["_unit", "_currentPos", "_lastPos", "_distance", "_isInCombat", "_terrainType"];
-        
-        // Bucle infinito con pausa
-        while {true} do {
-            {
-                _unit = _x;
-                
-                if (alive _unit) then {
-                    // Comprobar si está en combate
-                    _isInCombat = (behaviour _unit == "COMBAT" || combatMode _unit == "RED");
-                    _unit setVariable ["AIP_IsInCombat", _isInCombat, true];
-                    
-                    // Actualizar distancia recorrida (siempre, independiente del combate)
-                    _currentPos = getPosATL _unit;
-                    _lastPos = _unit getVariable ["AIP_LastPosition", _currentPos];
-                    _distance = _currentPos distance _lastPos;
-                    
-                    if (_distance > 5) then {
-                        // Actualizar contador de distancia
-                        _totalDistance = (_unit getVariable ["AIP_DistanceRun", 0]) + _distance;
-                        _unit setVariable ["AIP_LastPosition", _currentPos, true];
-                        _unit setVariable ["AIP_DistanceRun", _totalDistance, true];
-                        
-                        // Mejorar resistencia basada en distancia (escalando con el tiempo)
-                        _improvementInterval = 100 * (1 + floor (_totalDistance / 1000)); // 100m, luego 200m, 300m, etc.
-                        if (_totalDistance % _improvementInterval < _distance) then {
-                            [_unit, "endurance", 0.005] call AIP_ImproveSkill;
-                            
-                            if (AIP_Debug) then {
-                                systemChat format ["%1 mejoró resistencia por recorrer %2m", name _unit, _totalDistance];
-                            };
-                        };
-                        
-                        // Registrar tipo de terreno para adaptación (sistema simplificado)
-                        _terrainType = "Unknown";
-                        if (surfaceIsWater _currentPos) then {
-                            _terrainType = "Water";
-                        } else {
-                            _surfaceType = surfaceType _currentPos;
-                            
-                            switch (true) do {
-                                case (_surfaceType find "#GdtForest" >= 0): { _terrainType = "Forest"; };
-                                case (_surfaceType find "#GdtConcrete" >= 0): { _terrainType = "Urban"; };
-                                case (_surfaceType find "#GdtDirt" >= 0): { _terrainType = "Field"; };
-                                case (_surfaceType find "#GdtRock" >= 0): { _terrainType = "Mountain"; };
-                                case (_surfaceType find "#GdtSand" >= 0): { _terrainType = "Desert"; };
-                                default { _terrainType = "Field"; };
-                            };
-                        };
-                        
-                        // Actualizar tiempo en terreno
-                        _terrainTime = _unit getVariable ["AIP_TimeInTerrain", createHashMap];
-                        _currentTime = _terrainTime getOrDefault [_terrainType, 0];
-                        _terrainTime set [_terrainType, _currentTime + 1];
-                        _unit setVariable ["AIP_TimeInTerrain", _terrainTime, true];
-                        
-                        // Cada minuto en un tipo de terreno, comprobar adaptación
-                        if ((_currentTime + 1) % 60 == 0) then {
-                            // Comprobar si ya es terreno favorito
-                            _favTerrains = _unit getVariable ["AIP_FavoriteTerrain", []];
-                            
-                            if !(_terrainType in _favTerrains) then {
-                                // Añadir como terreno favorito si ha pasado suficiente tiempo
-                                if (_currentTime > 300) then { // Más de 5 minutos
-                                    _favTerrains pushBack _terrainType;
-                                    _unit setVariable ["AIP_FavoriteTerrain", _favTerrains, true];
-                                    
-                                    // Bonus de adaptación
-                                    [_unit, "spotDistance", 0.02] call AIP_ImproveSkill;
-                                    [_unit, "spotTime", 0.02] call AIP_ImproveSkill;
-                                    
-                                    if (AIP_Debug) then {
-                                        systemChat format ["%1 se ha adaptado al terreno: %2", name _unit, _terrainType];
-                                    };
-                                };
-                            };
-                        };
-                    };
-                    
-                    // Resto de habilidades solo en combate
-                    if (_isInCombat) then {
-                        // Actualizar tiempo en combate
-                        _combatTime = (_unit getVariable ["AIP_TimeInCombat", 0]) + 1;
-                        _unit setVariable ["AIP_TimeInCombat", _combatTime, true];
-                        
-                        // Cada minuto en combate, mejorar el valor
-                        if (_combatTime % 60 == 0) then {
-                            [_unit, "courage", 0.01] call AIP_ImproveSkill;
-                            
-                            if (AIP_Debug) then {
-                                systemChat format ["%1 mejoró valor tras %2 minutos en combate", name _unit, floor(_combatTime / 60)];
-                            };
-                        };
-                        
-                        // Comprobar si está apuntando en combate
-                        if ((stance _unit == "CROUCH" || stance _unit == "PRONE") && _unit call AIP_IsAiming) then {
-                            _aimingTime = (_unit getVariable ["AIP_TimeAiming", 0]) + 1;
-                            _unit setVariable ["AIP_TimeAiming", _aimingTime, true];
-                            
-                            // Cada 20 segundos apuntando en combate, mejorar la precisión y estabilidad
-                            if (_aimingTime % 20 == 0) then {
-                                [_unit, "aimingShake", 0.005] call AIP_ImproveSkill;
-                                [_unit, "aimingAccuracy", 0.005] call AIP_ImproveSkill;
-                                
-                                if (AIP_Debug) then {
-                                    systemChat format ["%1 mejoró puntería tras %2s apuntando en combate", name _unit, _aimingTime];
-                                };
-                            };
-                        };
-                        
-                        // Comandando mejora con tiempo en combate si es líder de grupo
-                        if (leader (group _unit) == _unit && _combatTime % 120 == 0) then {
-                            [_unit, "commanding", 0.01] call AIP_ImproveSkill;
-                            
-                            if (AIP_Debug) then {
-                                systemChat format ["%1 mejoró comando tras liderar en combate", name _unit];
-                            };
-                        };
-                    };
-                };
-            } forEach AIP_UnitsTracked;
-            
-            // Procesamiento de especialidades médicas, ingenieros y EOD
-            call AIP_CheckAndHealNearby;    // Médicos buscan y curan heridos
-            call AIP_CheckAndRepairNearby;  // Ingenieros buscan y reparan vehículos
-            // call AIP_CheckAndDefuseNearby;  // EOD buscan y desactivan minas/IEDs (futuro)
-            
-            // Esperar antes de la siguiente actualización
-            sleep 1;
-        };
-    };
-    
-    systemChat "Sistema de actualización de habilidades activado";
-};
-
-// Comprobar si una unidad está apuntando
-AIP_IsAiming = {
-    private _unit = _this;
-    private _weapon = currentWeapon _unit;
-    
-    // Si no tiene arma, no está apuntando
-    if (_weapon == "") exitWith {false};
-    
-    // Comprobar si está en postura de apuntado
-    private _anim = animationState _unit;
-    private _isAiming = _anim find "aim" > -1 || 
-                       {_anim find "Aim" > -1} || 
-                       {_anim find "wait" > -1 && (_anim find "prone" > -1 || _anim find "crouch" > -1)};
-    
-    _isAiming
-};
-
-// Monitoreo continuo para nuevas unidades
-AIP_StartMonitoring = {
-    // Crear bucle que ejecuta cada 5 segundos
-    [] spawn {
-        while {true} do {
-            // Buscar unidades nuevas
-            {
-                if (!isPlayer _x && {_x isKindOf "CAManBase"} && {side _x != civilian} && {!(_x getVariable ["AIP_Initialized", false])}) then {
-                    [_x] call AIP_InitUnit;
-                };
-            } forEach allUnits;
-            
-            // Esperar antes de la siguiente comprobación
-            sleep 5;
-        };
-    };
-    
-    systemChat "Monitoreo de nuevas unidades activado";
-};
-
-// Obtener información detallada de una unidad
-AIP_GetUnitInfo = {
-    params ["_unit"];
-    
-    if (!alive _unit) exitWith {
-        systemChat "La unidad está muerta";
-    };
-    
-    _kills = _unit getVariable ["AIP_Kills", 0];
-    _vehKills = _unit getVariable ["AIP_VehicleKills", 0];
-    _airKills = _unit getVariable ["AIP_AirKills", 0];
-    _rankIndex = _unit getVariable ["AIP_RankIndex", 0];
-    _rankName = rank _unit;
-    _damageReduction = (_unit getVariable ["AIP_DamageReduction", 0]) * 100;
-    _morale = _unit getVariable ["AIP_Morale", 50];
-    _specialties = _unit getVariable ["AIP_Specialties", []];
-    _favTerrains = _unit getVariable ["AIP_FavoriteTerrain", []];
-    
-    // Obtener todas las habilidades
-    _acc = (_unit skill "aimingAccuracy") * 100;
-    _shake = (_unit skill "aimingShake") * 100;
-    _speed = (_unit skill "aimingSpeed") * 100;
-    _endur = (_unit skill "endurance") * 100;
-    _spotD = (_unit skill "spotDistance") * 100;
-    _spotT = (_unit skill "spotTime") * 100;
-    _cour = (_unit skill "courage") * 100;
-    _reload = (_unit skill "reloadSpeed") * 100;
-    _command = (_unit skill "commanding") * 100;
-    
-    // Obtener contadores de acción
-    _distance = _unit getVariable ["AIP_DistanceRun", 0];
-    _combatTime = _unit getVariable ["AIP_TimeInCombat", 0];
-    _reloads = _unit getVariable ["AIP_ReloadsPerformed", 0];
-    _shots = _unit getVariable ["AIP_ShotsFired", 0];
-    _hits = _unit getVariable ["AIP_HitsLanded", 0];
-    
-    // Calcular precisión
-    _accuracy = if (_shots > 0) then {(_hits / _shots) * 100} else {0};
-    
-    // Información de especialidades
-    _medicInfo = "";
-    _engineerInfo = "";
-    _eodInfo = "";
-    
-    if (_unit getVariable ["AIP_IsMedic", false]) then {
-        _healSpeed = (_unit getVariable ["AIP_HealingSpeed", 0.2]) * 100;
-        _healCount = _unit getVariable ["AIP_HealingPerformed", 0];
-        _medicInfo = format ["Médico (Vel: %1%2, Cur: %3)", _healSpeed toFixed 0, "%", _healCount];
-    };
-    
-    if (_unit getVariable ["AIP_IsEngineer", false]) then {
-        _repairSpeed = (_unit getVariable ["AIP_RepairSpeed", 0.2]) * 100;
-        _repairCount = _unit getVariable ["AIP_RepairsPerformed", 0];
-        _engineerInfo = format ["Ingeniero (Vel: %1%2, Rep: %3)", _repairSpeed toFixed 0, "%", _repairCount];
-    };
-    
-    if (_unit getVariable ["AIP_IsEOD", false]) then {
-        _defuseSpeed = (_unit getVariable ["AIP_DefuseSpeed", 0.2]) * 100;
-        _defuseCount = _unit getVariable ["AIP_DefusalsPerformed", 0];
-        _eodInfo = format ["EOD (Vel: %1%2, Des: %3)", _defuseSpeed toFixed 0, "%", _defuseCount];
-    };
-    
-    // Mostrar información básica
-    systemChat format ["===== %1 (Rango: %2) =====", name _unit, _rankName];
-    systemChat format ["Kills: Infantería %1 | Vehículos %2 | Aéreos %3", _kills - (_vehKills + _airKills), _vehKills, _airKills];
-    systemChat format ["Reducción de daño: %1%2 | Moral: %3%4", _damageReduction toFixed 1, "%", _morale toFixed 0, "%"];
-    
-    // Mostrar contadores
-    systemChat format ["Distancia: %1m | T. Combate: %2min | Recargas: %3", 
-        floor _distance, 
-        floor (_combatTime/60), 
-        _reloads
-    ];
-    
-    systemChat format ["Disparos: %1 | Impactos: %2 | Precisión: %3%4", 
-        _shots,
-        _hits,
-        _accuracy toFixed 1,
-        "%"
-    ];
-    
-    // Mostrar habilidades
-    systemChat format ["Precisión: %1% | Estabilidad: %2% | Vel. Apuntado: %3%", _acc toFixed 0, _shake toFixed 0, _speed toFixed 0];
-    systemChat format ["Resistencia: %1% | Det. Distancia: %2% | Det. Tiempo: %3%", _endur toFixed 0, _spotD toFixed 0, _spotT toFixed 0];
-    systemChat format ["Valor: %1% | Vel. Recarga: %2% | Comando: %3%", _cour toFixed 0, _reload toFixed 0, _command toFixed 0];
-    
-    // Mostrar especialidades
-    if (count _specialties > 0) then {
-        systemChat format ["Especialidades: %1", _specialties joinString ", "];
-    };
-    
-    if (count _favTerrains > 0) then {
-        systemChat format ["Terrenos favoritos: %1", _favTerrains joinString ", "];
-    };
-    
-    // Mostrar roles especiales con detalles
-    _roles = [];
-    if (_medicInfo != "") then { _roles pushBack _medicInfo };
-    if (_engineerInfo != "") then { _roles pushBack _engineerInfo };
-    if (_eodInfo != "") then { _roles pushBack _eodInfo };
-    
-    if (count _roles > 0) then {
-        {
-            systemChat format ["Rol especial: %1", _x];
-        } forEach _roles;
-    };
-};
-
-// Añadir acciones para los jugadores
+// 🎮 Añadir acciones para los jugadores
 AIP_AddPlayerActions = {
+    // Ver estadísticas
     player addAction [
         "<img image='\A3\UI_F\data\IGUI\Cfg\Actions\talk_ca.paa' /> Ver estadísticas de unidad", 
         {
             _targets = nearestObjects [player, ["Man"], 5];
-            _target = _targets select 1; // El 0 es el jugador mismo
-            
-            if (!isNil "_target" && {_target getVariable ["AIP_Initialized", false]}) then {
-                [_target] call AIP_GetUnitInfo;
+            if (count _targets > 1) then {
+                [_targets select 1] call AIP_GetUnitInfo;
             } else {
-                systemChat "No hay unidades cercanas con sistema de progresión";
+                hint "No hay unidades cercanas con sistema de progresión";
             };
         },
-        nil,
-        1.5,
-        true,
-        true,
-        "",
-        "count (nearestObjects [player, ['Man'], 5]) > 1",
-        3
+        nil, 1.5, true, true, "", "count (nearestObjects [player, ['Man'], 5]) > 1", 3
     ];
     
+    // Llamar médico
     player addAction [
         "<img image='\A3\UI_F\data\IGUI\Cfg\Actions\heal_ca.paa' /> Llamar médico cercano", 
         {
-            // Buscar médico cercano
             _medics = [];
             {
-                if (!isPlayer _x && {alive _x} && {side _x == side player} && {_x getVariable ["AIP_IsMedic", false]}) then {
+                if (!isPlayer _x && alive _x && side _x == side player && _x getVariable ["AIP_IsMedic", false]) then {
                     _medics pushBack _x;
                 };
             } forEach (player nearEntities ["Man", 100]);
             
             if (count _medics > 0) then {
-                _nearestMedic = _medics select 0;
+                _medic = _medics select 0;
                 
-                if !(_nearestMedic getVariable ["AIP_IsHealing", false]) then {
-                    _nearestMedic setVariable ["AIP_IsHealing", true, true];
+                if !(_medic getVariable ["AIP_IsHealing", false]) then {
+                    _medic setVariable ["AIP_IsHealing", true, true];
+                    _medic doMove (position player);
                     
-                    // Mover al médico hacia el jugador
-                    _nearestMedic doMove (position player);
-                    
-                    // Proceso de curación
-                    [_nearestMedic, player] spawn {
-                        params ["_medic", "_target"];
+                    [_medic, player] spawn {
+                        params ["_medic", "_player"];
                         
-                        systemChat format ["Médico %1 acudiendo a tu posición...", name _medic];
-                        
-                        // Esperar a que llegue cerca
-                        waitUntil {_medic distance _target < 3 || !alive _medic || !alive _target};
+                        hint format ["Médico %1 acudiendo a tu posición...", name _medic];
+                        waitUntil {_medic distance _player < 3 || !alive _medic};
                         
                         if (!alive _medic) exitWith {
-                            systemChat "El médico ha caído en combate";
+                            hint "El médico ha caído en combate";
                             _medic setVariable ["AIP_IsHealing", false, true];
                         };
                         
-                        if (!alive _target) exitWith {
-                            _medic setVariable ["AIP_IsHealing", false, true];
-                        };
-                        
-                        // Detener movimiento
-                        _medic doWatch _target;
+                        _medic doWatch _player;
                         _medic disableAI "MOVE";
-                        
-                        // Comprobar velocidad de curación
                         _healingSpeed = _medic getVariable ["AIP_HealingSpeed", 0.2];
-                        _healingTime = 10 * (1 - (_healingSpeed min 0.9)); // Entre 1 y 10 segundos
+                        _healingTime = 10 * (1 - (_healingSpeed min 0.9));
                         
-                        // Curación
-                        systemChat format ["%1 te está curando (tiempo: %2s)", name _medic, _healingTime toFixed 1];
-                        
+                        hint format ["%1 te está curando (%2s)", name _medic, _healingTime toFixed 1];
                         sleep _healingTime;
                         
-                        if (alive _medic && alive _target) then {
-                            // Curar
-                            _target setDamage 0;
-                            
-                            // Incrementar contador
+                        if (alive _medic) then {
+                            _player setDamage 0;
                             _healCount = (_medic getVariable ["AIP_HealingPerformed", 0]) + 1;
                             _medic setVariable ["AIP_HealingPerformed", _healCount, true];
                             
-                            // Mejorar habilidad de curación cada cierto número de curaciones
                             if (_healCount % ((AIP_Config select 3) select 0 select 2) == 0) then {
                                 _newSpeed = (_medic getVariable ["AIP_HealingSpeed", 0.2]) + ((AIP_Config select 3) select 0 select 1);
                                 _medic setVariable ["AIP_HealingSpeed", _newSpeed min 0.9, true];
                             };
                             
-                            systemChat "Has sido curado completamente";
-                            
-                            // Boost de moral para el médico
+                            hint "Has sido curado completamente";
                             [_medic, 3] call AIP_AdjustMorale;
                         };
                         
-                        // Restaurar movimiento
                         _medic enableAI "MOVE";
                         _medic doFollow (leader group _medic);
                         _medic setVariable ["AIP_IsHealing", false, true];
                     };
                 } else {
-                    systemChat "El médico más cercano ya está ocupado curando a alguien";
+                    hint "El médico más cercano ya está ocupado";
                 };
             } else {
-                systemChat "No hay médicos disponibles en las cercanías";
+                hint "No hay médicos disponibles en las cercanías";
             };
         },
-        nil,
-        1.4,
-        true,
-        true,
-        "",
-        "damage player > 0.1",
-        3
+        nil, 1.4, true, true, "", "damage player > 0.1", 3
     ];
     
-     player addAction [
+    // Llamar ingeniero
+    player addAction [
         "<img image='\A3\UI_F\data\IGUI\Cfg\Actions\repair_ca.paa' /> Llamar ingeniero para reparar vehículo", 
         {
-            // Buscar vehículo cercano
             _vehicles = [];
             {
                 if (_x isKindOf "Car" || _x isKindOf "Tank" || _x isKindOf "Ship") then {
@@ -1255,7 +882,6 @@ AIP_AddPlayerActions = {
             if (count _vehicles > 0) then {
                 _vehicle = _vehicles select 0;
                 
-                // Buscar ingeniero cercano
                 _engineers = [];
                 {
                     if (!isPlayer _x && {alive _x} && {side _x == side player} && {_x getVariable ["AIP_IsEngineer", false]}) then {
@@ -1276,18 +902,18 @@ AIP_AddPlayerActions = {
                         [_nearestEngineer, _vehicle] spawn {
                             params ["_engineer", "_vehicle"];
                             
-                            systemChat format ["Ingeniero %1 acudiendo a reparar el vehículo...", name _engineer];
+                            hint format ["Ingeniero %1 acudiendo a reparar el vehículo...", name _engineer];
                             
                             // Esperar a que llegue cerca
                             waitUntil {_engineer distance _vehicle < 5 || !alive _engineer || !alive _vehicle};
                             
                             if (!alive _engineer) exitWith {
-                                systemChat "El ingeniero ha caído en combate";
+                                hint "El ingeniero ha caído en combate";
                                 _engineer setVariable ["AIP_IsRepairing", false, true];
                             };
                             
                             if (!alive _vehicle) exitWith {
-                                systemChat "El vehículo ha sido destruido";
+                                hint "El vehículo ha sido destruido";
                                 _engineer setVariable ["AIP_IsRepairing", false, true];
                             };
                             
@@ -1300,7 +926,7 @@ AIP_AddPlayerActions = {
                             _repairTime = 20 * (1 - (_repairSpeed min 0.9)); // Entre 2 y 20 segundos
                             
                             // Reparación
-                            systemChat format ["%1 está reparando el vehículo (tiempo: %2s)", name _engineer, _repairTime toFixed 1];
+                            hint format ["%1 está reparando el vehículo (tiempo: %2s)", name _engineer, _repairTime toFixed 1];
                             
                             sleep _repairTime;
                             
@@ -1319,7 +945,7 @@ AIP_AddPlayerActions = {
                                     _engineer setVariable ["AIP_RepairSpeed", _newSpeed min 0.9, true];
                                 };
                                 
-                                systemChat "El vehículo ha sido reparado completamente";
+                                hint "El vehículo ha sido reparado completamente";
                                 
                                 // Boost de moral
                                 [_engineer, 3] call AIP_AdjustMorale;
@@ -1331,13 +957,13 @@ AIP_AddPlayerActions = {
                             _engineer setVariable ["AIP_IsRepairing", false, true];
                         };
                     } else {
-                        systemChat "El ingeniero más cercano ya está ocupado";
+                        hint "El ingeniero más cercano ya está ocupado";
                     };
                 } else {
-                    systemChat "No hay ingenieros disponibles en las cercanías";
+                    hint "No hay ingenieros disponibles en las cercanías";
                 };
             } else {
-                systemChat "No hay vehículos dañados cerca";
+                hint "No hay vehículos dañados cerca";
             };
         },
         nil,
@@ -1348,11 +974,18 @@ AIP_AddPlayerActions = {
         "count (nearestObjects [player, ['Car', 'Tank', 'Ship'], 10]) > 0",
         3
     ];
-    
-    systemChat "Acciones para interactuar con IA añadidas";
 };
 
-// Iniciar todo el sistema
+// Inicializar todas las unidades existentes
+AIP_InitAllAI = {
+    {
+        if (!isPlayer _x && {_x isKindOf "CAManBase"} && {side _x != civilian} && {!(_x getVariable ["AIP_Initialized", false])}) then {
+            [_x] call AIP_InitUnit;
+        };
+    } forEach allUnits;
+};
+
+// 🚀 Iniciar todo el sistema
 AIP_Initialize = {
     // Inicializar unidades existentes
     call AIP_InitAllAI;
@@ -1363,12 +996,12 @@ AIP_Initialize = {
     // Iniciar monitoreo de moral
     call AIP_InitMoraleMonitoring;
     
-    // Iniciar sistema de mejora de habilidades
+    // Iniciar sistema de mejora de habilidades basado en acciones
     call AIP_UpdateSkillsBasedOnActions;
     
     // Añadir acciones para el jugador
     call AIP_AddPlayerActions;
 };
 
-// Iniciar el sistema
+// 🚦 Iniciar el sistema
 call AIP_Initialize;
