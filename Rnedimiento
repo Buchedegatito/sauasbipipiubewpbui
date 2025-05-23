@@ -55,6 +55,10 @@ OPT_radioSimulacionOriginal = OPT_radioSimulacion;
 OPT_cadaveresPendientes = [];
 OPT_tiempoRagdoll = 5; // Tiempo para permitir la física ragdoll (segundos)
 OPT_enHeadless = !hasInterface && !isDedicated;
+OPT_esSingleplayer = !isMultiplayer;
+OPT_esMultiplayer = isMultiplayer;
+OPT_esServidor = isServer;
+OPT_esCliente = hasInterface;
 OPT_eventosImportantes = [];
 OPT_ultimoEvento = time;
 OPT_objetosPequenos = [];
@@ -62,7 +66,7 @@ OPT_clasesDecorativas = ["Furniture_base_F", "Items_base_F", "House_Small_F", "H
 OPT_ultimaLimpieza = time;
 OPT_radioDecoraciones = 50; // Radio para optimización de decoraciones (más agresivo)
 OPT_version = "3.3";
-OPT_radioJugadores = 5; // Radio para detectar jugadores cercanos
+OPT_radioJugadores = 50; // Radio para detectar jugadores cercanos
 OPT_todosJugadores = []; // Array para almacenar todos los jugadores
 OPT_zeusActivo = false; // Variable para controlar si el Zeus está activo
 OPT_ultimaComprobacionZeus = time; // Última comprobación de Zeus
@@ -439,6 +443,16 @@ OPT_fnc_aplicarOptimizacion = {
                 _entidad enableSimulationGlobal true;
                 _entidad hideObjectGlobal false;
                 
+				// Función auxiliar para ejecutar comandos globales desde el servidor
+OPT_fnc_setSimulationState = {
+    params ["_objeto", "_simular", "_ocultar"];
+    
+    if (!isServer) exitWith {};
+    
+    _objeto enableSimulationGlobal _simular;
+    _objeto hideObjectGlobal _ocultar;
+};
+				
                 // Para IA, restauramos comportamiento completo
                 if (_entidad isKindOf "CAManBase" && {!isPlayer _entidad}) then {
                     // Restaurar FSM de IA si fue simplificado
@@ -509,19 +523,20 @@ OPT_fnc_procesarEntidad = {
     params ["_entidad"];
     
     // Ignorar jugadores y objetos no gestionables
-    if (isPlayer _entidad) then {
-        // Nada que hacer con jugadores
-    } else {
-        if !(_entidad in OPT_entidadesGestionadas) then {
-            // Nada que hacer con objetos no gestionados
-        } else {
-            // Calcular prioridad
-            private _prioridad = [_entidad] call OPT_fnc_calcularPrioridad;
-            
-            // Aplicar optimización
-            [_entidad, _prioridad] call OPT_fnc_aplicarOptimizacion;
-        };
+    if (isPlayer _entidad) exitWith {};
+    if !(_entidad in OPT_entidadesGestionadas) exitWith {};
+    
+    // Verificar si la entidad está asignada a este cliente
+    if (OPT_enHeadless) then {
+        private _asignadoA = _entidad getVariable ["OPT_asignadoA", 0];
+        if (_asignadoA > 0 && _asignadoA != clientOwner) exitWith {};
     };
+    
+    // Calcular prioridad
+    private _prioridad = [_entidad] call OPT_fnc_calcularPrioridad;
+    
+    // Aplicar optimización
+    [_entidad, _prioridad] call OPT_fnc_aplicarOptimizacion;
 };
 
 // 💀 Función para procesar ragdoll de cadáveres
@@ -639,6 +654,14 @@ OPT_fnc_actualizarCache = {
         // Compartir posición del jugador con headless clients
         if (!OPT_enHeadless && hasInterface && !isNull player) then {
             missionNamespace setVariable ["OPT_posicionJugadorGlobal", getPosATL player, true];
+        };
+		
+		// Sincronizar otras variables importantes
+        if (isServer) then {
+           missionNamespace setVariable ["OPT_eventosImportantes", OPT_eventosImportantes, true];
+           missionNamespace setVariable ["OPT_ultimoEvento", OPT_ultimoEvento, true];
+           missionNamespace setVariable ["OPT_estaVolando", OPT_estaVolando, true];
+           missionNamespace setVariable ["OPT_zeusActivo", OPT_zeusActivo, true];
         };
         
         // Forzar distancia de visión si tiene interfaz
@@ -917,14 +940,35 @@ OPT_fnc_inicializar = {
     // Guardar valor original del radio de simulación
     OPT_radioSimulacionOriginal = OPT_radioSimulacion;
     
-    // Si es un headless client, comportamiento especial
-    if (OPT_enHeadless) then {
-        OPT_radioSimulacion = OPT_radioSimulacion * 0.8;
-        OPT_intervaloCacheado = 8;
+// Configuración específica por tipo de cliente
+if (OPT_enHeadless) then {
+    // Para HC, priorizar gestión de unidades IA
+    OPT_radioSimulacion = OPT_radioSimulacion * 0.8;
+    OPT_intervaloCacheado = 8;
+    OPT_optimizarIA = true;
+    OPT_optimizarVehiculos = true;
+    OPT_optimizarObjetos = false; // Los objetos estáticos se gestionan mejor en el servidor
+    OPT_ultimaPosJugador = [0,0,0];
+    
+} else {
+    if (hasInterface && !isServer) then {
+        // Para clientes puros, priorizar decoraciones y efectos visuales
+        OPT_optimizarDecoraciones = true;
+        OPT_optimizarIA = false; // La IA se gestiona desde el servidor o HC
+        OPT_procesarLimiteVisibilidad = true;
         
-        // Sincronizar posición del jugador desde el servidor
-        OPT_ultimaPosJugador = [0,0,0];
+    } else {
+        if (isServer && !hasInterface) then {
+            // Para servidores dedicados sin HC
+            OPT_optimizarIA = true;
+            OPT_optimizarVehiculos = true;
+            OPT_optimizarObjetos = true;
+            OPT_procesarLimiteVisibilidad = false; // No hay interfaz
+            
+        };
+        // Si es servidor+cliente (no dedicado) o singleplayer, mantener configuración original
     };
+};
     
     // Guardar configuración original de vista
     if (hasInterface) then {
@@ -951,6 +995,41 @@ OPT_fnc_inicializar = {
             };
         };
     };
+	
+	
+// Sistema para distribuir carga entre múltiples HC
+OPT_fnc_distribuirCarga = {
+    if (!isServer) exitWith {};
+    
+    private _HCs = entities "HeadlessClient_F";
+    if (count _HCs == 0) exitWith {};
+    
+    private _unidades = allUnits - allPlayers;
+    private _unidadesPorHC = floor (count _unidades / count _HCs);
+    private _indiceHC = 0;
+    
+    {
+        if (!isPlayer _x) then {
+            private _HC = _HCs select (_indiceHC % count _HCs);
+            private _idHC = owner _HC;
+            
+            // Asignar unidad al HC
+            _x setVariable ["OPT_asignadoA", _idHC, true];
+            _indiceHC = _indiceHC + 1;
+        };
+    } forEach _unidades;
+    
+    // Llamar a esta función cada 5 minutos
+    [OPT_fnc_distribuirCarga, [], 300] call CBA_fnc_waitAndExecute;
+};
+
+// Llamar a esta función al inicio si es el servidor
+if (isServer) then {
+    [] spawn {
+        sleep 10; // Esperar a que se conecten los HC
+        call OPT_fnc_distribuirCarga;
+    };
+};	
     
     // Activar el procesamiento del límite de visibilidad
     OPT_procesarLimiteVisibilidad = true;
@@ -1477,7 +1556,149 @@ Gatito_fnc_hide = {
                     [_allRocks, _player, 300] call Gatito_fnc_loopObjectsFast;
                 };
             };
-            
+           
+// 🏝️ Procesar objetos costeros de Malden
+case 10: {
+    if (_HideCoastal) then {
+        _allCoastalObjects = [];
+        
+        // Lista de elementos costeros típicos de Malden
+        _coastalClasses = [
+            "Land_PierWooden_01_F", "Land_PierWooden_02_F", "Land_PierWooden_03_F",
+            "Land_PierConcrete_01_F", "Land_PierConcrete_02_F", "Land_PierConcrete_03_F",
+            "Land_Pier_F", "Land_Pier_small_F", "Land_Pier_addon_F",
+            "Land_Sea_Wall_F", "Land_Jetty_F", "Land_Slum_House01_F", "Land_Slum_House02_F",
+            "Land_Slum_House03_F", "Land_Boat_01_F", "Land_Boat_02_F", "Land_Boat_03_F",
+            "Land_Boat_04_F", "Land_Boat_05_F", "Land_Boat_06_F", "Land_FishingGear_01_F",
+            "Land_FishingGear_02_F", "Land_Pier_Box_F", "Land_Lighthouse_small_F", "Land_Lighthouse_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _coastalObjs = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _coastalObjs > 2) then {
+                _coastalObjs resize 2;
+            };
+            _allCoastalObjects append _coastalObjs;
+        } forEach _coastalClasses;
+        
+        // Limitar cantidad
+        if (count _allCoastalObjects > 15) then {
+            _allCoastalObjects resize 15;
+        };
+        
+        [_allCoastalObjects, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};
+
+// 🧰 Procesar objetos pequeños abundantes
+case 11: {
+    if (_HideSmallObjects) then {
+        _allSmallObjects = [];
+        
+        // Lista de objetos pequeños comunes
+        _smallClasses = [
+            "Land_Pallets_F", "Land_Pallets_stack_F", "Land_Pallet_F", "Land_Pallet_vertical_F",
+            "Land_Sacks_heap_F", "Land_Sacks_goods_F", "Land_Basket_F", "Land_Sack_F",
+            "Land_WoodenBox_F", "Land_WoodenCrate_01_F", "Land_WoodenCrate_01_stack_x3_F",
+            "Land_WoodPile_F", "Land_WoodPile_large_F", "Land_Tyres_F", "Land_TyreBarrier_01_F",
+            "Land_TyreBarrier_02_F", "Land_Can_V1_F", "Land_Can_V2_F", "Land_Can_V3_F", 
+            "Land_BottlePlastic_V1_F", "Land_BottlePlastic_V2_F", "Land_Canteen_F",
+            "Land_Ground_sheet_F", "Land_Ground_sheet_folded_F", "Land_Ground_sheet_folded_khaki_F",
+            "Land_Garbage_square3_F", "Land_Garbage_square5_F", "Land_Garbage_line_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _smallObjs = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _smallObjs > 2) then {
+                _smallObjs resize 2;
+            };
+            _allSmallObjects append _smallObjs;
+        } forEach _smallClasses;
+        
+        // Limitar cantidad
+        if (count _allSmallObjects > 20) then {
+            _allSmallObjects resize 20;
+        };
+        
+        [_allSmallObjects, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};
+
+// 🏙️ Procesar elementos urbanos mediterráneos
+case 12: {
+    if (_HideUrban) then {
+        _allUrbanObjects = [];
+        
+        // Lista de elementos urbanos típicos de Malden
+        _urbanClasses = [
+            "Land_Sidewalk_01_F", "Land_Sidewalk_02_F", "Land_Sidewalk_03_F", "Land_Sidewalk_04_F",
+            "Land_RoadCone_01_F", "Land_RoadBarrier_01_F", "Land_RoadBarrier_Small_F", "Land_Obstacle_Bridge_F",
+            "Land_RoadCrack_01_F", "Land_RoadCrack_02_F", "Land_CityGate_01_F", "Land_Wall_IndCnc_4_F",
+            "Land_City_Gate_F", "Land_City_8m_F", "Land_City_4m_F", "Land_City_Pillar_F",
+            "Land_LampStreet_Small_F", "Land_LampStreet_F", "Land_LampShabby_F", 
+            "Land_PowerPoleWooden_F", "Land_PowerPoleWooden_Small_F", "Land_PowerLine_01_pole_lamp_F",
+            "Land_PowerLine_01_pole_small_F", "Land_PowerLine_01_pole_transformer_F",
+            "Land_House_Small_01_F", "Land_House_Small_02_F", "Land_House_Small_03_F", 
+            "Land_House_Big_01_F", "Land_House_Big_02_F", "Land_House_Big_03_F",
+            "Land_House_Native_01_F", "Land_House_Native_02_F",
+            "Land_VillageStore_01_F", "Land_FuelStation_01_shop_F", "Land_FuelStation_01_workshop_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _urbanObjs = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _urbanObjs > 1) then {
+                _urbanObjs resize 1;
+            };
+            _allUrbanObjects append _urbanObjs;
+        } forEach _urbanClasses;
+        
+        // Limitar cantidad
+        if (count _allUrbanObjects > 12) then {
+            _allUrbanObjects resize 12;
+        };
+        
+        [_allUrbanObjects, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};
+
+// 🌿 Procesar vegetación mediterránea (sin árboles)
+case 13: {
+    if (_HideVegetation) then {
+        _allVegetation = [];
+        
+        // Lista de vegetación mediterránea (sin árboles)
+        _vegetationClasses = [
+            "Land_Bush_01_F", "Land_Bush_02_F", "Land_Bush_03_F", "Land_Bush_04_F", "Land_Bush_05_F",
+            "Land_Grain_01_F", "Land_Sunflower_01_F", "Land_Vineyard_01_F",
+            "Land_Flower_01_F", "Land_Flower_02_F", "Land_Flower_03_F", "Land_Flower_04_F",
+            "Land_Grass_Patch_01_F", "Land_Grass_Tall_01_F", "Land_Grass_Dry_01_F",
+            "Land_ClutterCutter_small_F", "Land_ClutterCutter_medium_F", "Land_ClutterCutter_large_F",
+            "Land_Weed_01_F", "Land_Weed_02_F", "Land_Plant_01_F", "Land_Plant_02_F",
+            "Land_BambooFence_01_F", "Land_BambooFence_02_F", "Land_PlantsGreen_F", 
+            "Land_PlantMedFern_F", "Land_PlantSmallFern_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _vegetationObjs = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _vegetationObjs > 3) then {
+                _vegetationObjs resize 3;
+            };
+            _allVegetation append _vegetationObjs;
+        } forEach _vegetationClasses;
+        
+        // Limitar cantidad
+        if (count _allVegetation > 25) then {
+            _allVegetation resize 25;
+        };
+        
+        [_allVegetation, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};		   
+		
             // 🌿 Procesar plantas
             case 2: {
                 if (_HidePlants) then {
