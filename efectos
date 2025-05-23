@@ -1,0 +1,2005 @@
+/*
+    🌟 Script: Efectos
+    👨‍💻 Autor: Vianna & Enkeli
+    📅 Creación: 2025-05-18
+    🎨 Descripción: Sistema efectos para Arma 3
+*/
+
+// ======================================================
+// MODIFICADORES GLOBALES DE PARTÍCULAS
+// ======================================================
+
+// Valores multiplicadores para mejorar los efectos
+#define PARTICLE_SIZE_MULT 1.2      // Multiplicador de tamaño de partículas
+#define PARTICLE_LIFE_MULT 1.15     // Multiplicador de vida de partículas
+#define PARTICLE_COUNT_MULT 1.25    // Multiplicador de cantidad de partículas
+#define PARTICLE_DETAIL_LEVEL 1.2   // Multiplicador de detalle general
+
+// Configuración para todos los humos blancos en la misión
+{
+    if (_x isKindOf "SmokeShellWhite") then {
+        // Modificar tamaño de las partículas (mejorado)
+        _x setParticleParams [
+            ["\A3\data_f\ParticleEffects\Universal\smokeshell_white", 16, 12, 10],
+            "", "Billboard", 1, 14, [0, 0, 0], 1, 1.5, "", "", [1.0, 10.0, 40],
+            [0.8, 0.95, 0.8], 1, 1, 0.12, [0.25, 0.6, 0.15], 0.6, 1, 0.25, "", "", "", 0
+        ];
+    };
+} forEach allMissionObjects "SmokeShellWhite";
+
+// ======================================================
+// EFECTOS DE BLAST WAVE / ONDA DE CHOQUE
+// ======================================================
+
+// Blast Wave básico
+blastWave = {
+    params [["_particlePos", [0,0,0], [[]]]]; 
+    
+    private _strength = 1.2; // Aumentado de 1.0
+    
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 1, 0.4 * _strength,
+        [0,0,0],
+        [0,0,0],
+        0, 10, 7.9000001, 0.1, [2.4,2.4,29,72,126,180,252], // Tamaños incrementados
+        [
+            [0.15,0.15,0.15,1],
+            [0.3,0.3,0.3,1],
+            [0.6,0.6,0.6,1],
+            [0,0,0,1],
+            [0,0,0,0.6],
+            [0,0,0,0.4]
+        ],
+        [1],
+        0.25, 0.25,
+        "", "",
+        _particleSource,
+        1, false,
+        -1, [],
+        [0,1,0]
+    ];
+    
+    deleteVehicle _particleSource;
+    true;
+};
+
+// Blast Wave configurable con tamaño
+blastWaveConfigurable = {
+    params [["_particlePos", [0,0,0], [[]]], ["_size", "medium", [""]]];
+    
+    private _strength = 1.2; // Aumentado de 1.0
+    
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    private _dropParams = switch (_size) do {
+        case "huge": {
+            [
+                0.6 * _strength,
+                [3.6,7.2,14.4,28.8,57.6,76.8,115.2] // Aumentados 20%
+            ]
+        };
+        case "medium": {
+            [
+                0.36 * _strength,
+                [1.2,1.2,7.2,14.4,28.8,38.4,57.6] // Aumentados 20%
+            ]
+        };
+        case "small": {
+            [
+                0.15 * _strength,
+                [1.2,2.4,6.0,9.6,14.4,20.4] // Aumentados 20%
+            ]
+        };
+        case "tiny": {
+            [
+                0.12 * _strength,
+                [0.6,1.2,3.0,4.8,7.2,10.2] // Aumentados 20%
+            ]
+        };
+        case "large": {
+            [
+                0.48 * _strength,
+                [2.4,2.4,28.8,72,126,180,252] // Aumentados 20%
+            ]
+        };
+        default {
+            [0.24 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]
+        };
+    };
+    
+    private _lifeTime = _dropParams select 0;
+    private _sizeArray = _dropParams select 1;
+    
+    // Crear efecto
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 1, _lifeTime,
+        [0,0,0],
+        [0,0,0],
+        0, 10, 7.9, 0.1,
+        _sizeArray,
+        [
+            [0.15,0.15,0.15,1],
+            [0.3,0.3,0.3,1],
+            [0.6,0.6,0.6,1],
+            [0,0,0,1],
+            [0,0,0,0.6],
+            [0,0,0,0.4]
+        ],
+        [1],
+        0.25, 0.25,
+        "", "",
+        _particleSource,
+        1, false,
+        -1, [],
+        [0,1,0]
+    ];
+    
+    deleteVehicle _particleSource;
+    true;
+};
+
+// ======================================================
+// EFECTOS DE EXPLOSIÓN COMPLETA
+// ======================================================
+
+// Versión básica de la explosión
+explosionBasic = {
+    params ["_pos"];
+    
+    // --- CLOUDLETS (Partículas) ---
+    // Chispas 1
+    private _spark1 = "#particlesource" createVehicleLocal _pos;
+    _spark1 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,2,32,0],"","Billboard",
+        0.003,6.5,[0,0,0],[0,12,0],0,28,9,0,[0.12],[[1,1,1,-0.05]],[1000],0,0,"","",_spark1
+    ];
+    _spark1 setDropInterval 0.008; // Más frecuente
+    
+    // Chispas 2
+    private _spark2 = "#particlesource" createVehicleLocal _pos;
+    _spark2 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,48,0],"","Billboard",
+        0.001,1.0,[0,0,0],[0,12,0],0,0.18,0.12,0.2,[0.24],[[1,1,0.8,1],[1,1,0.7,0]],[-2],1,0,"","",_spark2
+    ];
+    _spark2 setDropInterval 0.0008; // Más frecuente
+    
+    // Humo oscuro 1
+    private _smok1 = "#particlesource" createVehicleLocal _pos;
+    _smok1 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,32,0],"","Billboard",
+        0.07,1.1,[0,0,0],[0,24,0],0,12.1,9.5,0.09,[6,60],[[0.1,0.1,0.1,0.7],[0.2,0.2,0.2,0.5]], [0],1,0,"","",_smok1
+    ];
+    _smok1 setDropInterval 0.06;
+    
+    // Humo oscuro 2
+    private _smok2 = "#particlesource" createVehicleLocal _pos;
+    _smok2 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,32,0],"","Billboard",
+        0.08,1.1,[0,0,0],[0,24,0],0,60,9.5,0.09,[18,0],[[1,1,0.6,0.008],[1,1,0.6,0]], [0],1,0,"","",_smok2
+    ];
+    _smok2 setDropInterval 0.07;
+    
+    // Partículas de explosión pequeñas
+    private _explPar = "#particlesource" createVehicleLocal _pos;
+    _explPar setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,2,80,0],"","Billboard",
+        0.015,0.6,[0,0,0],[0,5,0],0,0.065,0.048,0.12,[3.6,5.4],[[1,1,1,-4],[1,1,1,-1],[1,1,1,0]],[0.33],1,0,"","",_explPar
+    ];
+    _explPar setDropInterval 0.012;
+    
+    // Humo duradero 1
+    private _smokL1 = "#particlesource" createVehicleLocal _pos;
+    _smokL1 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,48,0],"","Billboard",
+        0.03,14,[0,0,0],[0,2.5,0],0,0.06,0.05,0.03,[3.6,8.4,12],[[0.1,0.1,0.1,0.7],[0.2,0.2,0.2,0.5],[0.3,0.3,0.3,0.4],[0.4,0.4,0.4,0.3],[0.6,0.6,0.6,0]],[0.6],1,0,"","",_smokL1
+    ];
+    _smokL1 setDropInterval 0.025;
+    
+    // Humo duradero 2
+    private _smokL2 = "#particlesource" createVehicleLocal _pos;
+    _smokL2 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,48,0],"","Billboard",
+        0.008,185,[0,0,0],[0,12,0],0,12.1,9.5,1.2,[7.2,18],[[0.1,0.1,0.1,0.7],[0.2,0.2,0.2,0.5],[0.3,0.3,0.3,0.4],[0.4,0.4,0.4,0.3],[0.6,0.6,0.6,0]],[0.011],1,0,"","",_smokL2
+    ];
+    _smokL2 setDropInterval 0.006;
+    
+    // Humo duradero 3
+    private _smokL3 = "#particlesource" createVehicleLocal _pos;
+    _smokL3 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,7,48,0],"","Billboard",
+        0.008,185,[0,0,0],[0,6,0],0,12.1,9.5,1.2,[7.2,18],[[0.1,0.1,0.1,0.7],[0.2,0.2,0.2,0.5],[0.3,0.3,0.3,0.4],[0.4,0.4,0.4,0.3],[0.6,0.6,0.6,0]],[0.011],1,0,"","",_smokL3
+    ];
+    _smokL3 setDropInterval 0.006;
+    
+    // Bola de fuego 1
+    private _ball1 = "#particlesource" createVehicleLocal _pos;
+    _ball1 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,2,32,0],"","Billboard",
+        0.01,4.2,[0,0,0],[0,12,0],12.1,12.1,9.5,1.2,[0,2.4,4.8,4.8,4.8,4.8,4.8],[[1,1,1,-1],[1,1,1,0]],[0.011],1,0,"","",_ball1
+    ];
+    _ball1 setDropInterval 0.008;
+    
+    // Bola de fuego 2
+    private _ball2 = "#particlesource" createVehicleLocal _pos;
+    _ball2 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,2,32,0],"","Billboard",
+        0.025,4.2,[0,0,0],[0,12,0],12.1,12.1,9.5,1.2,[1.56,1.56,1.56],[[1,1,1,1],[1,1,1,0]],[0.06],1,0,"","",_ball2
+    ];
+    _ball2 setDropInterval 0.02;
+    
+    // Bola de fuego 3
+    private _ball3 = "#particlesource" createVehicleLocal _pos;
+    _ball3 setParticleParams [
+        ["\\A3\\data_f\\ParticleEffects\\Universal\\Universal.p3d",16,2,32,0],"","Billboard",
+        0.005,4.2,[0,0,0],[0,18,0],12.1,12.1,9.5,1.2,[1.2,4.8,0],[[1,1,0.2,-2],[1,1,1,0]],[1.8],1,0,"","",_ball3
+    ];
+    _ball3 setDropInterval 0.004;
+    
+    // --- LUCES ---
+    // Luz principal
+    private _light1 = "#lightpoint" createVehicleLocal _pos;
+    _light1 setLightBrightness 0.84;
+    _light1 setLightAmbient [0.36,0.36,0.36];
+    _light1 setLightColor [0.84,0.84,0.84];
+    _light1 setLightFlareSize 84;
+    _light1 setLightFlareMaxDistance 3600;
+    _light1 setLightUseFlare false;
+    
+    // Luz secundaria (tono cálido)
+    private _light2 = "#lightpoint" createVehicleLocal _pos;
+    _light2 setLightBrightness 0.54;
+    _light2 setLightAmbient [0.12,0.048,0.018];
+    _light2 setLightColor [1,0.54,0.18];
+    _light2 setLightFlareSize 36;
+    _light2 setLightFlareMaxDistance 3600;
+    _light2 setLightUseFlare false;
+    
+    // Limpiar entidades después de tiempo
+    [_spark1, _spark2, _smok1, _smok2, _explPar, _smokL1, _smokL2, _smokL3, _ball1, _ball2, _ball3, _light1, _light2] spawn {
+        params ["_sp1", "_sp2", "_sm1", "_sm2", "_exp", "_sl1", "_sl2", "_sl3", "_b1", "_b2", "_b3", "_l1", "_l2"];
+        sleep 0.3; 
+        { deleteVehicle _x } forEach [_sp1, _sp2, _sm1, _sm2, _exp];
+        sleep 0.5;
+        { deleteVehicle _x } forEach [_l1, _l2];
+        sleep 2.0;
+        { deleteVehicle _x } forEach [_sl1, _sl2, _sl3, _b1, _b2, _b3];
+    };
+    
+    // Retornar éxito
+    true
+};
+
+// ======================================================
+// EFECTOS DE VAPOR PARA AERONAVES
+// ======================================================
+
+vapourEffect = {
+    params ["_v"];
+    
+    if (typeName _v != "OBJECT" || {isNull _v}) exitWith {false};
+    
+    sleep (0.1 + random 0.2);
+    
+    private _trail1 = objNull;
+    private _trail2 = objNull;
+    private _fusv1 = objNull;
+    private _fusv2 = objNull;
+    
+    // Crear partículas en puntas de ala si existen puntos de memoria
+    if (([0,0,0] distance (_v selectionPosition "cerveny pozicni")) != 0) then {
+        _trail1 = "#particlesource" createVehicleLocal (_v modelToWorld [0,0,0]);
+        _trail1 attachTo [_v, [0,0,0], "cerveny pozicni"];
+        _trail1 setParticleRandom [0.25, [0.08,0.08,0.08], [0,0,0], 0, 0, [0,0,0,0], 0, 0];
+        
+        _trail2 = "#particlesource" createVehicleLocal (_v modelToWorld [0,0,0]);
+        _trail2 attachTo [_v, [0,0,0], "zeleny pozicni"];
+        _trail2 setParticleRandom [0.25, [0.08,0.08,0.08], [0,0,0], 0, 0, [0,0,0,0], 0, 0];
+    };
+    if (isNull _trail1) exitWith {false};
+    
+    // Recoger parámetros de segmento y validar puntos de memoria
+    private _posLS = _v selectionPosition "body_vapour_L_S";
+    private _posLE = _v selectionPosition "body_vapour_L_E";
+    private _posRS = _v selectionPosition "body_vapour_R_S";
+    private _posRE = _v selectionPosition "body_vapour_R_E";
+    
+    if (_posLS isEqualTo [0,0,0] || _posLE isEqualTo [0,0,0] || _posRS isEqualTo [0,0,0] || _posRE isEqualTo [0,0,0]) exitWith {false};
+    
+    // Preparar emisores del fuselaje
+    _fusv1 = "#particlesource" createVehicleLocal (_v modelToWorld _posLS);
+    _fusv2 = "#particlesource" createVehicleLocal (_v modelToWorld _posRS);
+    
+    _fusv1 attachTo [_v, [0,0,0], "body_vapour_L_S"];
+    _fusv2 attachTo [_v, [0,0,0], "body_vapour_R_S"];
+    
+    private _lgap = _posLS distance _posLE;
+    private _rgap = _posRS distance _posRE;
+    
+    if (_lgap <= 0 || _rgap <= 0) exitWith {false};
+    
+    private _lemmiters = [_fusv1];
+    private _remmiters = [_fusv2];
+    
+    // Crear emisores intermedios (más densos)
+    private _i = 0;
+    private _step = 0.8;
+    private _xd = (_posLE select 0) - (_posLS select 0);
+    private _yd = (_posLE select 1) - (_posLS select 1);
+    private _zd = (_posLE select 2) - (_posLS select 2);
+    while {_i < _lgap} do {
+        private _pe = "#particlesource" createVehicleLocal (_v modelToWorld [0,0,0]);
+        _pe setParticleRandom [0.25, [0.08,0.08,0.08], [0,0,0], 0, 0.25, [0,0,0,0], 0, 0];
+        _pe attachTo [_v, [_posLS select 0 + _i * (_xd/_lgap), _posLS select 1 + _i * (_yd/_lgap), _posLS select 2 + _i * (_zd/_lgap)]];
+        _lemmiters pushBack _pe;
+        _i = _i + _step;
+    };
+    
+    _i = 0;
+    _xd = (_posRE select 0) - (_posRS select 0);
+    _yd = (_posRE select 1) - (_posRS select 1);
+    _zd = (_posRE select 2) - (_posRS select 2);
+    while {_i < _rgap} do {
+        private _pe = "#particlesource" createVehicleLocal (_v modelToWorld [0,0,0]);
+        _pe setParticleRandom [0.25, [0.08,0.08,0.08], [0,0,0], 0, 0.25, [0,0,0,0], 0, 0];
+        _pe attachTo [_v, [_posRS select 0 + _i * (_xd/_rgap), _posRS select 1 + _i * (_yd/_rgap), _posRS select 2 + _i * (_zd/_rgap)]];
+        _remmiters pushBack _pe;
+        _i = _i + _step;
+    };
+    
+    // Bucle principal de actualización
+    [_v, _trail1, _trail2, _lemmiters, _remmiters] spawn {
+        params ["_v", "_t1", "_t2", "_lems", "_rems"];
+        
+        while {alive _v} do {
+            private _vel = velocity _v;
+            private _speed = sqrt ((_vel select 0)^2 + (_vel select 1)^2 + (_vel select 2)^2);
+            
+            if (_speed > 45) then {
+                sleep 0.05;
+                
+                private _pitchvel = abs ((velocity _v select 2) atan2 (_vel select 0 + _vel select 1));
+                private _vdir = vectorDir _v;
+                private _pitch = abs ((_vdir select 2) atan2 ((_vdir select 0) + (_vdir select 1)));
+                private _dirvel = abs ((velocity _v select 0) atan2 (velocity _v select 1));
+                private _dir = getDir _v;
+                if (_dir > 180) then {_dir = 360 - _dir};
+                
+                private _aoa = abs(_pitch - _pitchvel) + abs(_dir - _dirvel);
+                private _interval = 1 / (_speed * 2.8);
+                private _intensity = (_aoa * (_speed / 3500)) min 3.5;
+                
+                if (_intensity > 0.25) then {
+                    private _particleSize = [0.8, 0.5] * (0.7 + (_intensity * 0.3));
+                    private _particleLife = 0.65 * _intensity;
+                    
+                    {
+                        _x setDropInterval _interval;
+                        _x setParticleParams [
+                            ["\A3\data_f\ParticleEffects\Universal\Universal.p3d", 16, 13, 3, 0],
+                            "", "Billboard", 1, _particleLife,
+                            [0, 0, 0], velocity _v, 0, 1.2, 0.85, 0, 
+                            _particleSize, 
+                            [[1,1,1,0.1], [1,1,1,0.12], [1,1,1,0.08], [1,1,1,0]], 
+                            [1000], 0, 0, "", "", _v
+                        ];
+                    } forEach (_t1 + _t2);
+                    
+                    {
+                        _x setDropInterval _interval;
+                        _x setParticleParams [
+                            ["\A3\data_f\ParticleEffects\Universal\Universal.p3d", 16, 13, 3, 0],
+                            "", "Billboard", 1, _particleLife * 0.8,
+                            [0, 0, 0], velocity _v, 0, 1.1, 0.8, 0, 
+                            _particleSize * 0.9, 
+                            [[1,1,1,0.1], [1,1,1,0.12], [1,1,1,0.08], [1,1,1,0]], 
+                            [1000], 0, 0, "", "", _v
+                        ];
+                    } forEach (_lems + _rems);
+                } else {
+                    {_x setDropInterval 0} forEach (_t1 + _t2 + _lems + _rems);
+                };
+            } else {
+                sleep 0.75;
+            };
+        };
+    };
+    
+    // Limpiar al apagar motor
+    _v addEventHandler ["Engine", {
+        params ["_veh", "_engineOn"];
+        if (!_engineOn) then {
+            {
+                if !(isNull _x) then {deleteVehicle _x};
+            } forEach (_veh getVariable ["vapourSources", []]);
+        };
+    }];
+    
+    _v setVariable ["vapourSources", [_trail1, _trail2, _fusv1, _fusv2] + _lemmiters + _remmiters];
+    true
+};
+
+// ======================================================
+// EFECTOS DE REFRACCIÓN GRANDES
+// ======================================================
+
+blastRefractLarge = {
+    params ["_particlePos"];
+    
+    private _strength = 1.2;  // Aumentado de 1.0
+    
+    // Convertir posición AGL a ASL
+    private _particleASL = AGLtoASL _particlePos;
+    
+    // Crear objeto auxiliar invisible
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", _particleASL, true];
+    
+    // Crear efecto de onda refractiva mejorado
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 1, 0.48 * _strength,
+        [0, 0, 0], 
+        [0, 0, 0],
+        0,
+        12,
+        9.5,
+        0.12,
+        [2.4, 2.4, 28.8, 72, 126, 180, 252], // Tamaños aumentados 20%
+        [
+            [0.15, 0.15, 0.15, 1],
+            [0.3, 0.3, 0.3, 1],
+            [0.6, 0.6, 0.6, 1],
+            [0, 0, 0, 1],
+            [0, 0, 0, 0.6],
+            [0, 0, 0, 0.4]
+        ],
+        [1],
+        0.24, 0.24,
+        "", "",
+        _particleSource,
+        1, false,
+        -1, [],
+        [0, 1, 0]
+    ];
+    
+    // Eliminar objeto auxiliar
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE IMPLOSIÓN / ANILLOS DE CONVERGENCIA
+// ======================================================
+
+bombRefractEffect = {
+    // Configuración del efecto mejorada
+    #define DIST_FROM_CENTER 14.4      // Aumentado de 12.0
+    #define DIST_VARIATION 6.0         // Aumentado de 5.0
+    #define VELOCITY_REDUCTION 1.4     // Ajustado para velocidad óptima
+    #define STARTING_HEIGHT 0.06       // Aumentado ligeramente
+    #define VELOCITY_DOWN 0            // Mantener plano
+    #define DIR_STEP_SIZE 7            // Reducido de 8 para más partículas
+    
+    private _expCenter = _this;
+    
+    // Crear objeto invisible que sirve como fuente de referencia
+    private _particleSource = "Land_HelipadEmpty_F" createVehicleLocal [0, 0, 0];
+    _particleSource enableSimulation false;
+    _particleSource setPosASL (AGLtoASL _expCenter);
+    
+    // Calcular las direcciones radiales
+    private _directions = [];
+    for "_i" from 0 to 360 step DIR_STEP_SIZE do {
+        _directions pushBack [sin _i, cos _i, 0];
+    };
+    
+    // Generar partículas mejoradas
+    {
+        private _randomX = random [-DIST_VARIATION, 0, DIST_VARIATION];
+        private _randomY = random [-DIST_VARIATION, 0, DIST_VARIATION];
+        private _currentPosition = [
+            (DIST_FROM_CENTER * (_x # 0)) + _randomX,
+            (DIST_FROM_CENTER * (_x # 1)) + _randomY,
+            STARTING_HEIGHT
+        ];
+        private _currentDirection = [
+            (_x # 0)/-VELOCITY_REDUCTION,
+            (_x # 1)/-VELOCITY_REDUCTION,
+            -VELOCITY_DOWN
+        ];
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\smoke_2", 1, 0, 1, 1],
+            "", "Billboard", 1, 9.5,
+            _currentPosition,
+            _currentDirection,
+            0, 0.06, 0.05, 0.015,
+            [1.2, 6.0],
+            [
+                [0.33, 0.27, 0.22, 0.42],
+                [0.66, 0.55, 0.44, 0]
+            ],
+            [1],
+            1, 0.25,
+            "", "",
+            _particleSource,
+            0, false,
+            -1, [],
+            [0, 1, 0]
+        ];
+    } forEach _directions;
+    
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE CALOR / DISTORSIÓN TÉRMICA
+// ======================================================
+
+heatHazeEffect = {
+    private _particlePos = _this;
+    
+    if (player distance _particlePos > 120) exitWith {false}; // Aumentado de 100
+    
+    // Fuente del efecto
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    // Variación de tamaño aleatoria (aumentada)
+    private _sizeVar = random [0.6, 1.2, 1.8];
+    
+    // Temperatura - efecto más intenso
+    private _airTemp = 0.24;
+    private _weatherEffect = true;
+    
+    if (_weatherEffect) then {
+        _airTemp = (ambientTemperature # 0) / 90; // Modificado de 100 para más intensidad
+    };
+    
+    // Rango de efecto aumentado
+    _airTemp = (_airTemp max 0.18) min 0.54; // Aumentado de 0.15-0.45
+    
+    // Crear efecto de distorsión mejorado
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 0, 1.0, // Vida aumentada de 0.85
+        [0,0,0],
+        [0,0,0],
+        1, 1.5, 1.2, 0.08, // Valores ajustados
+        [_sizeVar],
+        [
+            [0.07, 0.07, 0.07, _airTemp],
+            [0.36, 0.36, 0.36, _airTemp - 0.3],
+            [0.36, 0.36, 0.36, _airTemp - 0.6],
+            [0.36, 0.36, 0.36, _airTemp - 0.9],
+            [0.36, 0.36, 0.36, _airTemp - 0.15]
+        ],
+        [1],
+        0.12, 0.025,
+        "", "",
+        _particleSource,
+        1, false,
+        -1, [],
+        [0,1,0]
+    ];
+    
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE EXPLOSIÓN CON FRAGMENTOS FÍSICOS
+// ======================================================
+
+blastRefractWithDebris = {
+    params ["_particlePos", "_size"];
+    
+    private _strength = 1.2; // Aumentado de 1.0
+    
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    private _dropParams = switch (_size) do {
+        case "medium": {
+            [0.36 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]] // Aumentados 20%
+        };
+        case "small": {
+            [0.15 * _strength, [1.2,2.4,6.0,9.6,14.4,20.4]] // Aumentados 20%
+        };
+        case "tiny": {
+            [0.12 * _strength, [0.6,1.2,3.0,4.8,7.2,10.2]] // Aumentados 20%
+        };
+        case "large": {
+            [0.48 * _strength, [2.4,2.4,28.8,72,126,180,252]] // Aumentados 20%
+        };
+        default {
+            [0.24 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]
+        };
+    };
+    
+    private _lifeTime = _dropParams select 0;
+    private _sizeArray = _dropParams select 1;
+    
+    // Onda de refracción principal
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 1, _lifeTime,
+        [0,0,0], [0,0,0],
+        0, 12, 9.5, 0.12,
+        _sizeArray,
+        [
+            [0.15,0.15,0.15,1],[0.3,0.3,0.3,1],
+            [0.6,0.6,0.6,1],[0,0,0,1],
+            [0,0,0,0.6],[0,0,0,0.4]
+        ],
+        [1], 0.25, 0.25,
+        "", "", _particleSource, 1, false, -1, [], [0,1,0]
+    ];
+    
+    // Efectos vanilla complementarios mejorados:
+    
+    // Fragmentos de piedra (más grandes y veloces)
+    drop [
+        ["\A3\data_f\ParticleEffects\Pstone\Data\pstone_nohq.paa", 1, 0, 1], 
+        "", "Billboard", 1.8, 1.4, 
+        [0,0,0], [random 0.5 - 0.25, random 0.5 - 0.25, random 1.5], 
+        random 3, 0.6, 0.6, 0.12, 
+        [0.24, 0.18, 0.12] * PARTICLE_SIZE_MULT, 
+        [[0.7,0.7,0.7,1],[0.4,0.4,0.4,0.6],[0,0,0,0]], 
+        [0.8], 0.3, 0.3, "", "", _particleSource
+    ];
+    
+    // Chispa brillante (más intensa)
+    drop [
+        ["#(argb,8,8,3)color(1,0.2,0.2,1)", 1, 0, 1], 
+        "", "Billboard", 0.7, 0.95, 
+        [0,0,0], [random 0.5 - 0.25, random 0.5 - 0.25, random 0.8], 
+        random 2, 1.2, 1.2, 0.24, 
+        [0.12, 0.06] * PARTICLE_SIZE_MULT, 
+        [[1,0.2,0.2,1],[1,0.1,0.1,0.6],[0,0,0,0]], 
+        [1.2], 0.24, 0.24, "", "", _particleSource
+    ];
+    
+    // Carbón incandescente (más rojo)
+    drop [
+        ["#(argb,8,8,3)color(1,0.4,0,1)", 1, 0, 1], 
+        "", "Billboard", 1.8, 3.0, 
+        [0,0,0], [random 0.3 - 0.15, random 0.3 - 0.15, 0.1 + random 0.2], 
+        random 2, 0.6, 0.6, 0.12, 
+        [0.6, 0.48, 0.36] * PARTICLE_SIZE_MULT, 
+        [[1,0.4,0,1],[0.5,0.2,0,0.7],[0,0,0,0]], 
+        [1.2], 0.36, 0.36, "", "", _particleSource
+    ];
+    
+    // Glow superficial (más brillante)
+    drop [
+        ["#(argb,8,8,3)color(1,1,1,0.8)", 1, 0, 1], 
+        "", "Billboard", 2.4, 1.4, 
+        [0,0,0], [0,0,0], 
+        0, 0.12, 0.12, 0.06, 
+        [0.48, 0.36, 0.12] * PARTICLE_SIZE_MULT, 
+        [[1,1,1,0.85],[1,1,1,0.5],[1,1,1,0]], 
+        [1.2], 0.12, 0.12, "", "", _particleSource
+    ];
+    
+    // Fragmentos de carne (más realistas)
+    drop [
+        ["#(argb,8,8,3)color(0.5,0.1,0.1,1)", 1, 0, 1], 
+        "", "Billboard", 1.2, 1.8, 
+        [0,0,0], [random 0.5 - 0.25, random 0.5 - 0.25, 0.2 + random 0.3], 
+        random 2, 0.36, 0.48, 0.06, 
+        [0.24, 0.18, 0.06] * PARTICLE_SIZE_MULT, 
+        [[0.5,0.1,0.1,1],[0.2,0.05,0.05,0.6],[0,0,0,0]], 
+        [1.0], 0.24, 0.18, "", "", _particleSource
+    ];
+    
+    // Fragmentos de vidrio (más brillantes)
+    drop [
+        ["#(argb,8,8,3)color(0.5,0.5,1,0.8)", 1, 0, 1], 
+        "", "Billboard", 1.2, 1.45, 
+        [0,0,0], [random 0.5 - 0.25, random 0.5 - 0.25, 0.1 + random 0.2], 
+        random 3, 0.48, 0.48, 0.12, 
+        [0.24, 0.12] * PARTICLE_SIZE_MULT, 
+        [[0.5,0.5,1,0.85],[0.2,0.2,0.5,0.5],[0,0,0,0]], 
+        [1.2], 0.12, 0.12, "", "", _particleSource
+    ];
+    
+    // Luz base explosiva (más intensa)
+    drop [
+        ["#(argb,8,8,3)color(1,0.5,0,1)", 1, 0, 1], 
+        "", "Billboard", 0.6, 0.96, 
+        [0,0,0], [0,0,0], 
+        0, 0.72, 0.6, 0.12, 
+        [0.24, 0.06] * PARTICLE_SIZE_MULT, 
+        [[1,0.5,0,1],[1,0.2,0,0.7],[0,0,0,0]], 
+        [1.2], 0.36, 0.36, "", "", _particleSource
+    ];
+    
+    // Fragmentos de madera (más voluminosos)
+    drop [
+        ["#(argb,8,8,3)color(0.4,0.3,0.2,1)", 1, 0, 1], 
+        "", "Billboard", 1.8, 2.4, 
+        [0,0,0], [random 0.3 - 0.15, random 0.3 - 0.15, 0.05 + random 0.1], 
+        random 2, 0.6, 0.48, 0.12, 
+        [0.3, 0.24, 0.12] * PARTICLE_SIZE_MULT, 
+        [[0.4,0.3,0.2,1],[0.2,0.15,0.1,0.7],[0,0,0,0]], 
+        [1.0], 0.24, 0.24, "", "", _particleSource
+    ];
+    
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE EXPLOSIÓN MÚLTIPLES FASES
+// ======================================================
+
+multiphaseBlastEffect = {
+    params ["_particlePos", "_size"];
+    
+    private _strength = 1.2; // Aumentado de 1.0
+    
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    private _dropParams = switch (_size) do {
+        case "tiny":   {[0.12 * _strength, [0.6,1.2,3.0,4.8,7.2,10.2]]};
+        case "small":  {[0.15 * _strength, [1.2,2.4,6.0,9.6,14.4,20.4]]};
+        case "medium": {[0.36 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]};
+        case "large":  {[0.48 * _strength, [2.4,2.4,28.8,72,126,180,252]]};
+        default        {[0.24 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]};
+    };
+    
+    private _lifeTime = _dropParams select 0;
+    private _sizeArray = _dropParams select 1;
+    
+    // ==================================================
+    // FASE 1: ONDA REFRACTIVA + LUZ INICIAL
+    // ==================================================
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0, 1, 0],
+        "", "Billboard", 1, _lifeTime,
+        [0,0,0], [0,0,0],
+        0, 12, 9.5, 0.12,
+        _sizeArray,
+        [[0.15,0.15,0.15,1],[0.6,0.6,0.6,1],[0,0,0,1],[0,0,0,0.4]],
+        [1], 0.25, 0.25, "", "", _particleSource, 1, false, -1, [], [0,1,0]
+    ];
+    
+    // Flash explosivo (más brillante)
+    drop [
+        ["#(argb,8,8,3)color(1,1,1,0.85)", 1, 0, 1], 
+        "", "Billboard", 0.24, 0.12, 
+        [0,0,0], [0,0,0], 
+        0, 1.2, 1.2, 0, 
+        [3.0 * PARTICLE_SIZE_MULT], 
+        [[1,1,1,0.85],[1,1,1,0]], 
+        [1.2], 0, 0, "", "", _particleSource
+    ];
+    
+    // ==================================================
+    // FASE 2: FRAGMENTACIÓN MEJORADA
+    // ==================================================
+    private _frags = [
+        // Piedra (mejorado)
+        ["#(argb,8,8,3)color(0.7,0.7,0.7,1)", [0.24,0.18,0.12] * PARTICLE_SIZE_MULT],
+        // Carne (mejorado) 
+        ["#(argb,8,8,3)color(0.5,0.1,0.1,1)", [0.24,0.18,0.06] * PARTICLE_SIZE_MULT],
+        // Vidrio (mejorado)
+        ["#(argb,8,8,3)color(0.5,0.5,1,0.85)", [0.24,0.12] * PARTICLE_SIZE_MULT],
+        // Madera (mejorado)
+        ["#(argb,8,8,3)color(0.4,0.3,0.2,1)", [0.3,0.24,0.12] * PARTICLE_SIZE_MULT]
+    ];
+    
+    {
+        private _tex = _x select 0;
+        private _sizes = _x select 1;
+        
+        for "_i" from 0 to floor(3 * PARTICLE_COUNT_MULT) do {
+            drop [
+                [_tex, 1, 0, 1], 
+                "", "Billboard", 
+                1.8, 1.45, 
+                [0,0,0], 
+                [random 0.3 - 0.15, random 0.3 - 0.15, random 0.5], 
+                random 2, 
+                0.48, 0.48, 0.12, 
+                _sizes, 
+                [[1,1,1,1],[0,0,0,0.36],[0,0,0,0]], 
+                [1.0], 
+                0.24, 0.24, 
+                "", "", _particleSource
+            ];
+        };
+    } forEach _frags;
+    
+    // ==================================================
+    // FASE 3: EFECTOS VISUALES MEJORADOS
+    // ==================================================
+    
+    // Glow central (más brillante)
+    drop [
+        ["#(argb,8,8,3)color(1,1,1,0.7)", 1, 0, 1], 
+        "", "Billboard", 
+        2.4, 1.8, 
+        [0,0,0], [0,0,0], 
+        0, 0.12, 0.12, 0.06, 
+        [0.36, 0.12] * PARTICLE_SIZE_MULT, 
+        [[1,1,1,0.7],[1,1,1,0.36],[1,1,1,0]], 
+        [1.2], 
+        0.12, 0.12, 
+        "", "", _particleSource
+    ];
+    
+    // Chispas tipo T800 (más numerosas)
+    for "_i" from 0 to floor(4 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(1,0.2,0.2,1)", 1, 0, 1], 
+            "", "Billboard", 
+            0.72, 0.95, 
+            [0,0,0], 
+            [random 0.3 - 0.15, random 0.3 - 0.15, random 0.4], 
+            random 2, 
+            1.2, 1.2, 0.24, 
+            [0.12, 0.06] * PARTICLE_SIZE_MULT, 
+            [[1,0.2,0.2,1],[1,0.1,0.1,0.6],[0,0,0,0]], 
+            [1.2], 
+            0.24, 0.24, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Carbón incandescente (más brillante)
+    for "_i" from 0 to floor(3 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(1,0.4,0,1)", 1, 0, 1], 
+            "", "Billboard", 
+            1.8, 3.0, 
+            [0,0,0], 
+            [random 0.25 - 0.125, random 0.25 - 0.125, random 0.3], 
+            random 1.5, 
+            0.6, 0.6, 0.12, 
+            [0.6, 0.48, 0.36] * PARTICLE_SIZE_MULT, 
+            [[1,0.4,0,1],[0.5,0.2,0,0.7],[0,0,0,0]], 
+            [1.2], 
+            0.36, 0.36, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // ==================================================
+    // FASE 4: SONIDO (MEJORADO)
+    // ==================================================
+    playSound3D ["A3\Sounds_F\weapons\Explosion\expl_big_2.wss", objNull, false, _particlePos, 3.6, 1, 120];
+    
+    // Eco a distancia con retardo
+    [_particlePos] spawn {
+        params ["_pos"];
+        sleep 0.6; // Retardo ligeramente superior
+        playSound3D ["A3\Sounds_F\weapons\Explosion\expl_big_distance_01.wss", objNull, false, _pos, 2.4, 0.9, 240];
+    };
+    
+    // ==================================================
+    // FASE 5: EFECTOS SECUNDARIOS
+    // ==================================================
+    
+    // Polvo residual
+    [_particlePos, _particleSource] spawn {
+        params ["_pos", "_source"];
+        sleep 1.0;
+        
+        drop [
+            ["#(argb,8,8,3)color(0.4,0.4,0.4,0.36)", 1, 0, 1], 
+            "", "Billboard", 
+            4.8, 2.4, 
+            [0,0,0], [0,0,0.24], 
+            0, 0.24, 0.24, 0.06, 
+            [3.0, 2.4, 1.2] * PARTICLE_SIZE_MULT, 
+            [[0.4,0.4,0.4,0.36],[0.2,0.2,0.2,0.12],[0,0,0,0]], 
+            [1.0], 
+            0.12, 0.12, 
+            "", "", _source
+        ];
+    };
+    
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE EXPLOSIÓN EXTREMA
+// ======================================================
+
+extremeExplosionEffect = {
+    params ["_particlePos", "_size"];
+    
+    private _strength = 1.2;
+    
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _particlePos, true];
+    
+    private _dropParams = switch (_size) do {
+        case "medium": {
+            [0.36 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]
+        };
+        case "small": {
+            [0.15 * _strength, [1.2,2.4,6.0,9.6,14.4,20.4]]
+        };
+        case "tiny": {
+            [0.12 * _strength, [0.6,1.2,3.0,4.8,7.2,10.2]]
+        };
+        case "large": {
+            [0.48 * _strength, [2.4,2.4,28.8,72,126,180,252]]
+        };
+        default {
+            [0.24 * _strength, [1.2,1.2,7.2,14.4,28.8,38.4,57.6]]
+        };
+    };
+    
+    private _lifeTime = _dropParams select 0;
+    private _sizeArray = _dropParams select 1;
+    
+    // Onda de refracción extremadamente mejorada
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Refract", 1, 0],
+        "", "Billboard", 1, _lifeTime,
+        [0,0,0], [0,0,0],
+        0, 12, 9.5, 0.12,
+        _sizeArray,
+        [
+            [0.15,0.15,0.15,1],[0.3,0.3,0.3,1],
+            [0.6,0.6,0.6,1],[0,0,0,1],
+            [0,0,0,0.6],[0,0,0,0.4]
+        ],
+        [1], 0.25, 0.25,
+        "", "", _particleSource, 1, false, -1, [], [0,1,0]
+    ];
+    
+    // Fragmentos de piedra extremadamente mejorados
+    for "_i" from 0 to floor(5 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["\A3\data_f\ParticleEffects\Pstone\Data\pstone_nohq.paa", 1, 0, 1], 
+            "", "Billboard", 
+            72, 54, 
+            [0,0,0], 
+            [random 8 - 4, random 8 - 4, random [4, 8, 12]], 
+            random [2, 4, 6], 
+            2.4, 2.4, 0.24, 
+            [0.48, 0.42, 0.24] * PARTICLE_SIZE_MULT, 
+            [[0.7,0.7,0.7,1],[0.4,0.4,0.4,0.6],[0,0,0,0]], 
+            [0.8], 
+            0.36, 0.36, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Chispas extremadamente mejoradas
+    for "_i" from 0 to floor(8 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(1,0.2,0.2,1)", 1, 0, 1], 
+            "", "Billboard", 
+            12, 9.6, 
+            [0,0,0], 
+            [random [-4, 0, 4], random [-4, 0, 4], random [2, 4, 6]], 
+            random [1, 2, 3], 
+            2.4, 1.2, 0.24, 
+            [0.24, 0.12] * PARTICLE_SIZE_MULT, 
+            [[1,0.2,0.2,1],[1,0.1,0.1,0.6],[0,0,0,0]], 
+            [1.2], 
+            0.24, 0.24, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Carbón incandescente extremadamente mejorado
+    for "_i" from 0 to floor(6 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(1,0.4,0,1)", 1, 0, 1], 
+            "", "Billboard", 
+            36, 30, 
+            [0,0,0], 
+            [random [-1, 0, 1], random [-1, 0, 1], random [0.5, 1, 1.5]], 
+            random [0.5, 1, 1.5], 
+            0.6, 0.6, 0.12, 
+            [0.6, 0.48, 0.36] * PARTICLE_SIZE_MULT, 
+            [[1,0.4,0,1],[0.5,0.2,0,0.7],[0,0,0,0]], 
+            [1.2], 
+            0.36, 0.36, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Glow superficial extremadamente mejorado
+    drop [
+        ["#(argb,8,8,3)color(1,1,1,0.85)", 1, 0, 1], 
+        "", "Billboard", 
+        6, 3.6, 
+        [0,0,0], 
+        [0,0,0.12], 
+        0.24, 0.36, 0.24, 0.06, 
+        [0.72, 0.48, 0.24] * PARTICLE_SIZE_MULT, 
+        [[1,1,1,0.85],[1,1,1,0.4],[1,1,1,0]], 
+        [1.2], 
+        0.24, 0.24, 
+        "", "", _particleSource
+    ];
+    
+    // Fragmentos de carne extremadamente mejorados
+    for "_i" from 0 to floor(4 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(0.5,0.1,0.1,1)", 1, 0, 1], 
+            "", "Billboard", 
+            24, 18, 
+            [0,0,0], 
+            [random [-0.5, 0, 0.5], random [-0.5, 0, 0.5], random [0.5, 1, 1.5]], 
+            random [0.25, 0.5, 0.75], 
+            0.36, 0.48, 0.06, 
+            [0.36, 0.24, 0.12] * PARTICLE_SIZE_MULT, 
+            [[0.5,0.1,0.1,1],[0.2,0.05,0.05,0.6],[0,0,0,0]], 
+            [1.0], 
+            0.24, 0.18, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Fragmentos de vidrio extremadamente mejorados
+    for "_i" from 0 to floor(5 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(0.5,0.5,1,0.85)", 1, 0, 1], 
+            "", "Billboard", 
+            30, 24, 
+            [0,0,0], 
+            [random [-1, 0, 1], random [-1, 0, 1], random [1, 1.5, 2]], 
+            random [0.5, 1, 1.5], 
+            0.6, 0.48, 0.12, 
+            [0.36, 0.24] * PARTICLE_SIZE_MULT, 
+            [[0.5,0.5,1,0.85],[0.2,0.2,0.5,0.5],[0,0,0,0]], 
+            [1.2], 
+            0.12, 0.12, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Luz explosiva extremadamente mejorada
+    drop [
+        ["#(argb,8,8,3)color(1,0.5,0,1)", 1, 0, 1], 
+        "", "Billboard", 
+        3.6, 6, 
+        [0,0,0], 
+        [0,0,0], 
+        0, 0.95, 0.72, 0.24, 
+        [0.48, 0.12] * PARTICLE_SIZE_MULT, 
+        [[1,0.5,0,1],[1,0.2,0,0.7],[0,0,0,0]], 
+        [1.2], 
+        0.36, 0.36, 
+        "", "", _particleSource
+    ];
+    
+    // Fragmentos de madera extremadamente mejorados
+    for "_i" from 0 to floor(5 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["#(argb,8,8,3)color(0.4,0.3,0.2,1)", 1, 0, 1], 
+            "", "Billboard", 
+            48, 36, 
+            [0,0,0], 
+            [random [-0.25, 0, 0.25], random [-0.25, 0, 0.25], random [0.25, 0.5, 0.75]], 
+            random [0.5, 0.75, 1], 
+            0.6, 0.48, 0.12, 
+            [0.48, 0.36, 0.24] * PARTICLE_SIZE_MULT, 
+            [[0.4,0.3,0.2,1],[0.2,0.15,0.1,0.7],[0,0,0,0]], 
+            [1.0], 
+            0.24, 0.24, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Fuego radiante extremadamente persistente
+    drop [
+        ["#(argb,8,8,3)color(1,0.3,0,1)", 1, 0, 1], 
+        "", "Billboard", 
+        18, 14.5, 
+        [0,0,0], 
+        [random [-0.1, 0, 0.1], random [-0.1, 0, 0.1], random [0.05, 0.1, 0.15]], 
+        random [0.25, 0.5, 0.75], 
+        0.36, 0.3, 0.06, 
+        [0.48, 0.36, 0.24] * PARTICLE_SIZE_MULT, 
+        [[1,0.3,0,1],[1,0.2,0,0.7],[0,0,0,0]], 
+        [1.2], 
+        0.36, 0.36, 
+        "", "", _particleSource
+    ];
+    
+    // Humo negro ascendente extremadamente persistente
+    for "_i" from 0 to floor(3 * PARTICLE_COUNT_MULT) do {
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 8, 0], 
+            "", "Billboard", 
+            30, 24, 
+            [0,0,0], 
+            [random [-0.1, 0, 0.1], random [-0.1, 0, 0.1], random [0.5, 0.75, 1]], 
+            random [0.15, 0.3, 0.45], 
+            0.24, 0.24, 0.06, 
+            [0.72, 0.96, 1.44] * PARTICLE_SIZE_MULT, 
+            [[0.1,0.1,0.1,0.5],[0.1,0.1,0.1,0.4],[0.1,0.1,0.1,0.3],[0.1,0.1,0.1,0.2],[0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0]], 
+            [0.1], 
+            0.12, 0.12, 
+            "", "", _particleSource
+        ];
+    };
+    
+    // Sonido explosivo extremadamente impactante
+    playSound3D ["A3\\Sounds_F\\weapons\\Explosion\\expl_big_2.wss", objNull, false, _particlePos, 4, 0.9, 150];
+    
+    // Eco ambiental mejorado
+    [_particlePos] spawn {
+        params ["_pos"];
+        sleep 0.5;
+        playSound3D ["A3\\Sounds_F\\weapons\\Explosion\\expl_big_distance_01.wss", objNull, false, _pos, 2.5, 0.9, 300];
+    };
+    
+    // Efectos de luz
+    private _light1 = "#lightpoint" createVehicleLocal _particlePos;
+    _light1 setLightBrightness 2.5;
+    _light1 setLightAmbient [0.8, 0.6, 0.2];
+    _light1 setLightColor [1.0, 0.8, 0.3];
+    _light1 setLightFlareSize 200;
+    _light1 setLightFlareMaxDistance 5000;
+    _light1 setLightUseFlare true;
+    
+    // Eliminación retardada de luz
+    [_light1] spawn {
+        params ["_light"];
+        sleep 0.3;
+        _light setLightBrightness 1.0;
+        sleep 0.2;
+        _light setLightBrightness 0.3;
+        sleep 0.1;
+        deleteVehicle _light;
+    };
+    
+    deleteVehicle _particleSource;
+    true
+};
+
+// ======================================================
+// EFECTOS DE SANGRE Y HERIDAS
+// ======================================================
+
+bloodSplatterEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_dir", 0, [0]], ["_intensity", 1, [0]]];
+    
+    // Ajuste de intensidad mejorado
+    _intensity = _intensity * PARTICLE_SIZE_MULT;
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Spray principal de sangre
+    for "_i" from 0 to (round(6 * _intensity * PARTICLE_COUNT_MULT)) do {
+        private _particleDir = _dir + (random 40 - 20);
+        private _particleSpeed = 3 + random 2;
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 1, 0],
+            "", "Billboard", 1, 2.0,
+            [0, 0, 0],
+            [sin _particleDir * _particleSpeed, cos _particleDir * _particleSpeed, 0.5 + random 1.2],
+            1, 0.4, 0.32, 0.06,
+            [0.24, 0.36, 0.18] * _intensity,
+            [[0.7, 0, 0, 0.8], [0.4, 0, 0, 0.5], [0.2, 0, 0, 0]],
+            [0.6], 0.36, 0.24,
+            "", "", _particleSource
+        ];
+    };
+    
+    // Gotas secundarias
+    for "_i" from 0 to (round(9 * _intensity * PARTICLE_COUNT_MULT)) do {
+        private _particleDir = _dir + (random 90 - 45);
+        private _particleSpeed = 0.5 + random 2.5;
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 1, 0],
+            "", "Billboard", 1, 1.5 + random 1,
+            [0, 0, 0],
+            [sin _particleDir * _particleSpeed, cos _particleDir * _particleSpeed, -0.8 - random 1.4],
+            1, 0.35, 0.25, 0.06,
+            [0.06, 0.12, 0.03] * _intensity,
+            [[0.7, 0, 0, 0.8], [0.4, 0, 0, 0.6], [0.2, 0, 0, 0]],
+            [0.6], 0.36, 0.24,
+            "", "", _particleSource
+        ];
+    };
+    
+    // Charco de sangre
+    if (_intensity > 0.6) then {
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 1, 0],
+            "", "Billboard", 1, 9.0,
+            [0, 0, 0],
+            [0, 0, 0],
+            0, 0.25, 0.2, 0,
+            [0.36, 0.72, 0.6] * _intensity,
+            [[0.6, 0, 0, 0.7], [0.4, 0, 0, 0.5], [0.2, 0, 0, 0]],
+            [0.6], 0, 0,
+            "", "", _particleSource
+        ];
+    };
+    
+    deleteVehicle _particleSource;
+};
+
+bloodMistEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_intensity", 1, [0]]];
+    
+    // Ajustar intensidad
+    _intensity = _intensity * PARTICLE_SIZE_MULT;
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Niebla sangrienta difusa
+    for "_i" from 0 to (round(4 * _intensity * PARTICLE_COUNT_MULT)) do {
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 9, 0],
+            "", "Billboard", 1, 3.0,
+            [0, 0, 0],
+            [random 1 - 0.5, random 1 - 0.5, 0.3 + random 0.8],
+            0, 0.2, 0.15, 0.06,
+            [0.6, 1.2, 0.6] * _intensity,
+            [[0.5, 0, 0, 0.3], [0.3, 0, 0, 0.15], [0.2, 0, 0, 0]],
+            [0.6], 0.1, 0.1,
+            "", "", _particleSource
+        ];
+    };
+    
+    // Gotas de sangre definidas
+    for "_i" from 0 to (round(6 * _intensity * PARTICLE_COUNT_MULT)) do {
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 13, 1, 0],
+            "", "Billboard", 1, 1.5 + random 1,
+            [0, 0, 0],
+            [random 2 - 1, random 2 - 1, random 1 - 0.2],
+            1, 0.35, 0.25, 0.06,
+            [0.06, 0.12, 0.03] * _intensity,
+            [[0.7, 0, 0, 0.8], [0.4, 0, 0, 0.6], [0.2, 0, 0, 0]],
+            [0.6], 0.36, 0.24,
+            "", "", _particleSource
+        ];
+    };
+    
+    deleteVehicle _particleSource;
+};
+
+// ======================================================
+// EFECTOS DE DISPAROS Y ARMAS
+// ======================================================
+
+muzzleFlashEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_dir", 0, [0]], ["_size", 1.0, [0]]];
+    
+    // Ajustar tamaño
+    _size = _size * PARTICLE_SIZE_MULT;
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Destello principal
+    drop [
+        ["#(argb,8,8,3)color(1,0.85,0.4,1)", 1, 0, 1], 
+        "", "Billboard", 1, 0.08,
+        [0, 0, 0],
+        [0, 0, 0],
+        0, 1.3, 1.1, 0,
+        [0.25, 0.15] * _size,
+        [[1, 0.85, 0.4, 1], [1, 0.7, 0.3, 0]],
+        [1], 0, 0,
+        "", "", _particleSource, _dir
+    ];
+    
+    // Halo secundario
+    drop [
+        ["#(argb,8,8,3)color(1,0.65,0.2,0.8)", 1, 0, 1], 
+        "", "Billboard", 1, 0.1,
+        [0, 0, 0],
+        [0, 0, 0],
+        0, 1.2, 1.0, 0,
+        [0.35, 0.15] * _size,
+        [[1, 0.7, 0.3, 0.85], [0.8, 0.5, 0.2, 0]],
+        [1], 0, 0,
+        "", "", _particleSource, _dir
+    ];
+    
+    // Humo (más visible)
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 7, 48, 0],
+        "", "Billboard", 1, 1.8,
+        [0, 0, 0],
+        [sin _dir * 2.2, cos _dir * 2.2, 0.6],
+        0, 0.08, 0.07, 0.025,
+        [0.15, 0.3, 0.45] * _size,
+        [[0.7, 0.7, 0.7, 0.2], [0.8, 0.8, 0.8, 0.1], [0.9, 0.9, 0.9, 0]],
+        [0.6], 0.25, 0.25,
+        "", "", _particleSource
+    ];
+    
+    // Chispas (opcional para armas grandes)
+    if (_size > 0.9) then {
+        for "_i" from 0 to floor(3 * PARTICLE_COUNT_MULT) do {
+            private _sparkDir = _dir + (random 35 - 17.5);
+            private _sparkVel = 2.5 + random 2;
+            drop [
+                ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 2, 32, 0],
+                "", "Billboard", 1, 0.6 + random 0.6,
+                [0, 0, 0],
+                [sin _sparkDir * _sparkVel, cos _sparkDir * _sparkVel, random 1.2 - 0.6],
+                1, 0.13, 0.11, 0,
+                [0.06, 0.03] * _size,
+                [[1, 0.85, 0.4, 1], [1, 0.7, 0.3, 0.5], [1, 0.5, 0.2, 0]],
+                [0.6], 0, 0,
+                "", "", _particleSource
+            ];
+        };
+    };
+    
+    deleteVehicle _particleSource;
+};
+
+bulletImpactEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_norm", [0,0,1], [[]]], ["_material", "concrete", [""]]];
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Determinar color según material
+    private _colors = switch (_material) do {
+        case "concrete";
+        case "stone";
+        case "rock": {[[0.8, 0.8, 0.8, 1], [0.7, 0.7, 0.7, 0.5], [0.5, 0.5, 0.5, 0]]};
+        
+        case "wood";
+        case "wooden";
+        case "plank": {[[0.7, 0.5, 0.3, 0.8], [0.6, 0.4, 0.2, 0.5], [0.5, 0.3, 0.15, 0]]};
+        
+        case "metal";
+        case "steel";
+        case "iron": {[[0.9, 0.9, 1, 1], [0.8, 0.8, 0.9, 0.5], [0.6, 0.6, 0.7, 0]]};
+        
+        case "dirt";
+        case "soil";
+        case "ground": {[[0.6, 0.5, 0.4, 0.8], [0.5, 0.4, 0.3, 0.5], [0.4, 0.3, 0.2, 0]]};
+        
+        case "sand": {[[0.8, 0.7, 0.5, 0.8], [0.7, 0.6, 0.4, 0.5], [0.6, 0.5, 0.3, 0]]};
+        
+        case "grass": {[[0.5, 0.6, 0.3, 0.8], [0.4, 0.5, 0.3, 0.5], [0.3, 0.4, 0.2, 0]]};
+        
+        default {[[0.7, 0.7, 0.7, 0.8], [0.6, 0.6, 0.6, 0.5], [0.5, 0.5, 0.5, 0]]};
+    };
+    
+    // Calcular matriz de rotación (necesaria para orientar partículas)
+    private _zaxis = _norm;
+    private _xaxis = [0, 0, 1] vectorCrossProduct _zaxis;
+    if (_xaxis isEqualTo [0, 0, 0]) then {_xaxis = [1, 0, 0]};
+    private _yaxis = _zaxis vectorCrossProduct _xaxis;
+    private _matrix = [_xaxis, _yaxis, _zaxis];
+    
+    // Función auxiliar para multiplicar vector por matriz
+    private _fnc_matrixMult = {
+        params ["_vector", "_matrix"];
+        private _result = [0,0,0];
+        for "_i" from 0 to 2 do {
+            _result set [_i, ((_vector select 0) * ((_matrix select 0) select _i)) + 
+                             ((_vector select 1) * ((_matrix select 1) select _i)) + 
+                             ((_vector select 2) * ((_matrix select 2) select _i))];
+        };
+        _result
+    };
+    
+    // Chispas / fragmentos
+    for "_i" from 0 to (4 + floor(random 5)) do {
+        private _velVec = [random 2 - 1, random 2 - 1, random 1];
+        private _vel = [_velVec, _matrix] call _fnc_matrixMult;
+        _vel = _vel vectorMultiply (2.5 + random 1);
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 2, 80, 0],
+            "", "Billboard", 1, 0.3 + random 0.3,
+            [0, 0, 0],
+            _vel,
+            random 1.2, 0.09, 0.08, 0,
+            [0.09, 0.04, 0.02] * PARTICLE_SIZE_MULT,
+            [[1, 0.85, 0.4, 1], [1, 0.65, 0.2, 0.6], [1, 0.5, 0.1, 0]],
+            [0.6], 0.25, 0.25,
+            "", "", _particleSource, random 360
+        ];
+    };
+    
+    // Polvo de impacto
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 0.6 + random 0.6,
+        [0, 0, 0],
+        (_norm vectorMultiply (0.6 + random 0.6)),
+        0, 0.08, 0.06, 0.03,
+        [0.12, 0.6, 0.96],
+        _colors,
+        [0.6], 0.18, 0.18,
+        "", "", _particleSource
+    ];
+    
+    // Fragmentos del material
+    for "_i" from 0 to (2 + floor(random 3)) do {
+        private _velVec = [random 1 - 0.5, random 1 - 0.5, random 0.6];
+        private _vel = [_velVec, _matrix] call _fnc_matrixMult;
+        _vel = _vel vectorMultiply (1.8 + random 0.6);
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+            "", "Billboard", 1, 1.0 + random 1.0,
+            [0, 0, 0],
+            _vel,
+            1, 0.09, 0.08, 0.03,
+            [0.04, 0.06, 0.03] * PARTICLE_SIZE_MULT,
+            _colors,
+            [0.6], 0.18, 0.18,
+            "", "", _particleSource
+        ];
+    };
+    
+    // Cráter/marca del impacto (más visible)
+    if (_material != "metal" && _material != "steel") then {
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+            "", "Billboard", 1, 12.0,
+            [0, 0, 0],
+            [0, 0, 0],
+            0, 0.06, 0.05, 0,
+            [0.1, 0.1],
+            [_colors#0, _colors#1, [0,0,0,0]],
+            [0.1], 0, 0,
+            "", "", _particleSource, 0, true
+        ];
+    };
+    
+    // Sonidos según material
+    private _sound = switch (_material) do {
+        case "concrete";
+        case "stone";
+        case "rock": {"A3\Sounds_F\weapons\hits\concrete_1.wss"};
+        
+        case "wood";
+        case "wooden";
+        case "plank": {"A3\Sounds_F\weapons\hits\wood_1.wss"};
+        
+        case "metal";
+        case "steel";
+        case "iron": {"A3\Sounds_F\weapons\hits\metal_1.wss"};
+        
+        case "dirt";
+        case "soil";
+        case "ground";
+        case "sand": {"A3\Sounds_F\weapons\hits\sand_1.wss"};
+        
+        case "grass": {"A3\Sounds_F\weapons\hits\grass_1.wss"};
+        
+        default {"A3\Sounds_F\weapons\hits\concrete_1.wss"};
+    };
+    
+    // Reproducir sonido
+    playSound3D [_sound, objNull, false, _pos, 0.7, 1, 30];
+    
+    deleteVehicle _particleSource;
+};
+
+// ======================================================
+// EFECTOS DE AGUA
+// ======================================================
+
+waterSplashEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_size", "medium", [""]]];
+    
+    // Determinar escala según tamaño
+    private _scale = switch (_size) do {
+        case "tiny":   {0.36};
+        case "small":  {0.72};
+        case "medium": {1.2};
+        case "large":  {2.16};
+        case "huge":   {3.6};
+        default        {1.2};
+    };
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Columna central de agua
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 1.8 * _scale,
+        [0, 0, 0], [0, 0, 4.8 * _scale],
+        0, 0.6, 0.5, 0,
+        [1.2 * _scale, 2.4 * _scale, 3.6 * _scale],
+        [[0.7, 0.8, 1, 0.6], [0.7, 0.8, 1, 0.6], [0.7, 0.8, 1, 0]],
+        [0.12], 0, 0, "", "", _particleSource
+    ];
+    
+    // Gotas de agua principales
+    for "_i" from 0 to (6 * _scale) do {
+        private _dir = random 360;
+        private _speed = 3.6 + random 2.4;
+        private _height = 1.8 + random 2.4;
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+            "", "Billboard", 1, 1.45 * _scale,
+            [0, 0, 0],
+            [sin _dir * _speed, cos _dir * _speed, _height],
+            1, 0.6, 0.5, 0.06,
+            [0.12 * _scale, 0.18 * _scale, 0.18 * _scale],
+            [[0.7, 0.8, 1, 0.85], [0.7, 0.8, 1, 0.6], [0.7, 0.8, 1, 0]],
+            [0.12], 1, 0, "", "", _particleSource
+        ];
+    };
+    
+    // Gotas de agua pequeñas (spray)
+    for "_i" from 0 to (18 * _scale) do {
+        private _dir = random 360;
+        private _speed = 2.4 + random 3.6;
+        private _height = 0.6 + random 1.2;
+        
+        drop [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+            "", "Billboard", 1, 0.95 * _scale,
+            [0, 0, 0],
+            [sin _dir * _speed, cos _dir * _speed, _height],
+            1, 0.6, 0.5, 0.06,
+            [0.06 * _scale, 0.12 * _scale, 0.06 * _scale],
+            [[0.7, 0.8, 1, 0.6], [0.7, 0.8, 1, 0.4], [0.7, 0.8, 1, 0]],
+            [0.12], 1, 0, "", "", _particleSource
+        ];
+    };
+    
+    // Anillo de ondas
+    drop [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 3.0 * _scale,
+        [0, 0, 0], [0, 0, 0],
+        0, 0.6, 0.5, 0,
+        [0.6 * _scale, 4.8 * _scale, 9.6 * _scale],
+        [[0.7, 0.8, 1, 0.4], [0.7, 0.8, 1, 0.25], [0.7, 0.8, 1, 0]],
+        [0.12], 0, 0, "", "", _particleSource
+    ];
+    
+    // Reproducir sonido
+    private _soundFile = switch (_size) do {
+        case "tiny":   {"A3\Sounds_F\weapons\pools\water_splash_small2.wss"};
+        case "small":  {"A3\Sounds_F\weapons\pools\water_splash_small1.wss"};
+        case "medium": {"A3\Sounds_F\weapons\pools\battle_splash1.wss"};
+        case "large":  {"A3\Sounds_F\weapons\pools\battle_splash2.wss"};
+        case "huge":   {"A3\Sounds_F\weapons\pools\battle_splash3.wss"};
+        default        {"A3\Sounds_F\weapons\pools\battle_splash1.wss"};
+    };
+    
+    playSound3D [_soundFile, objNull, false, _pos, 2.4, 1, 120];
+    
+    deleteVehicle _particleSource;
+};
+
+underwaterBubblesEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_intensity", 1, [0]]];
+    
+    if (player distance _pos > 80) exitWith {false};
+    
+    // Crear fuente de emisión
+    private _bubbleEmitter = "#particlesource" createVehicleLocal _pos;
+    
+    // Configurar el emisor
+    _bubbleEmitter setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 4.8 * _intensity,
+        [0, 0, 0], [0, 0, 1.2],
+        0, 0.25, 0.2, 0.06,
+        [0.06, 0.12, 0.18],
+        [[1, 1, 1, 0.25], [1, 1, 1, 0.15], [1, 1, 1, 0]],
+        [0.12], 1, 0, "", "", ""
+    ];
+    
+    _bubbleEmitter setParticleRandom [
+        1, [0.25, 0.25, 0.25], [0.12, 0.12, 0.12], 0, 0.12, [0, 0, 0, 0], 0, 0
+    ];
+    
+    _bubbleEmitter setDropInterval (0.04 / _intensity);
+    
+    // Retornar el emisor para eliminación posterior
+    _bubbleEmitter
+};
+
+// ======================================================
+// EFECTOS DE FUEGO
+// ======================================================
+
+fireEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_size", "medium", [""]]];
+    
+    if (player distance _pos > 200) exitWith {false};
+    
+    // Determinar escala según tamaño
+    private _scale = switch (_size) do {
+        case "tiny":   {0.48};
+        case "small":  {0.84};
+        case "medium": {1.2};
+        case "large":  {1.8};
+        case "huge":   {3.0};
+        default        {1.2};
+    };
+    
+    // Crear emisores
+    private _flame = "#particlesource" createVehicleLocal _pos;
+    private _smoke = "#particlesource" createVehicleLocal _pos;
+    private _sparks = "#particlesource" createVehicleLocal _pos;
+    private _light = "#lightpoint" createVehicleLocal _pos;
+    
+    // Configurar llamas
+    _flame setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 1, 12, 0], 
+        "", "Billboard",
+        1, 0.85 * _scale, 
+        [0, 0, 0], 
+        [0, 0, 0.6 * _scale], 
+        0, 0.07, 0.05, 0.06,
+        [0.72 * _scale, 1.8 * _scale, 0.6 * _scale],
+        [
+            [1, 1, 1, 0], 
+            [1, 0.9, 0.6, 0.8], 
+            [1, 0.7, 0.3, 0.8], 
+            [1, 0.4, 0.2, 0.6], 
+            [1, 0, 0, 0]
+        ],
+        [0.9, 0.4, 0.3], 1, 0, "", "", ""
+    ];
+    
+    _flame setParticleRandom [
+        0.6, 
+        [0.3 * _scale, 0.3 * _scale, 0.12 * _scale], 
+        [0.25, 0.25, 0.6], 
+        0.6, 0.4, 
+        [0, 0, 0, 0], 
+        0, 0
+    ];
+    
+    _flame setDropInterval (0.025 / _scale);
+    
+    // Configurar humo
+    _smoke setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 7, 48, 0], 
+        "", "Billboard",
+        1, 6 * _scale, 
+        [0, 0, 0.6 * _scale], 
+        [0, 0, 1.8 * _scale], 
+        0, 0.06, 0.05, 0.04,
+        [0.6 * _scale, 1.8 * _scale, 3.6 * _scale],
+        [
+            [0.1, 0.1, 0.1, 0.25], 
+            [0.2, 0.2, 0.2, 0.3], 
+            [0.3, 0.3, 0.3, 0.25], 
+            [0.4, 0.4, 0.4, 0.15], 
+            [0.5, 0.5, 0.5, 0.01]
+        ],
+        [0.3, 0.6], 1, 0, "", "", ""
+    ];
+    
+    _smoke setParticleRandom [
+        1.2, 
+        [0.3 * _scale, 0.3 * _scale, 0.12 * _scale], 
+        [0.25, 0.25, 0.4], 
+        0.6, 0.4, 
+        [0, 0, 0, 0], 
+        0, 0
+    ];
+    
+    _smoke setDropInterval (0.05 / _scale);
+    
+    // Configurar chispas (para fuegos medianos y grandes)
+    if (_scale >= 1.0) then {
+        _sparks setParticleParams [
+            ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 2, 32, 0], 
+            "", "Billboard",
+            1, 1.5, 
+            [0, 0, 0.3 * _scale], 
+            [0, 0, 1.2], 
+            1, 0.2, 0.15, 0.05,
+            [0.03, 0.015, 0.005],
+            [
+                [1, 1, 1, 1], 
+                [1, 0.85, 0.5, 1], 
+                [1, 0.65, 0.1, 0]
+            ],
+            [0.08], 1, 0, "", "", ""
+        ];
+        
+        _sparks setParticleRandom [
+            0.2, 
+            [0.15 * _scale, 0.15 * _scale, 0.1 * _scale], 
+            [0.6, 0.6, 1.2], 
+            0, 0.05, 
+            [0, 0, 0, 0], 
+            0, 0
+        ];
+        
+        _sparks setDropInterval (0.05 / _scale);
+    };
+    
+    // Configurar luz
+    _light setLightBrightness (1.2 * _scale);
+    _light setLightColor [1, 0.7, 0.35];
+    _light setLightAmbient [0.15, 0.05, 0];
+    _light setLightIntensity (60 * _scale);
+    _light setLightAttenuation [0, 0, 0, 1.5, 6 * _scale, 12 * _scale];
+    _light setLightFlareSize (0.5 * _scale);
+    _light setLightFlareMaxDistance (180 * _scale);
+    _light setLightUseFlare true;
+    _light setLightDayLight true;
+    
+    // Retornar todas las fuentes para limpieza posterior
+    [_flame, _smoke, _sparks, _light]
+};
+
+// ======================================================
+// EFECTOS DE CLIMA Y AMBIENTE
+// ======================================================
+
+dustCloudEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_size", 1, [0]]];
+    
+    if (player distance _pos > 150) exitWith {false};
+    
+    // Crear emisor
+    private _dustEmitter = "#particlesource" createVehicleLocal _pos;
+    
+    // Configurar parámetros
+    _dustEmitter setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 12,
+        [0, 0, 0], 
+        [0, 0, 0.1],
+        0, 0.06, 0.05, 0.03,
+        [1.2 * _size, 2.4 * _size, 3 * _size, 3.6 * _size],
+        [
+            [0.6, 0.5, 0.4, 0], 
+            [0.6, 0.5, 0.4, 0.2], 
+            [0.6, 0.5, 0.4, 0.15],
+            [0.6, 0.5, 0.4, 0.1],
+            [0.6, 0.5, 0.4, 0.05],
+            [0.6, 0.5, 0.4, 0]
+        ],
+        [0.2], 0.1, 0.05,
+        "", "", ""
+    ];
+    
+    _dustEmitter setParticleRandom [
+        3, [5 * _size, 5 * _size, 0.3],
+        [0.25, 0.25, 0.1], 0.2, 0.1,
+        [0, 0, 0, 0.1], 0.2, 0
+    ];
+    
+    _dustEmitter setParticleCircle [
+        7 * _size, [0, 0, 0]
+    ];
+    
+    _dustEmitter setDropInterval (0.02 / (_size * 0.5));
+    
+    // Retornar el emisor
+    _dustEmitter
+};
+
+// ======================================================
+// EFECTOS DE PORTALES Y DISTORSIÓN
+// ======================================================
+
+portalEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_radius", 2, [0]], ["_color", [0.3, 0.6, 1], [[]]]];
+    
+    if (player distance _pos > 150) exitWith {false};
+    
+    // Crear emisores
+    private _outer = "#particlesource" createVehicleLocal _pos;
+    private _inner = "#particlesource" createVehicleLocal _pos;
+    private _glow = "#particlesource" createVehicleLocal _pos;
+    private _light = "#lightpoint" createVehicleLocal _pos;
+    
+    // Emisor exterior (rotación)
+    _outer setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 3.6,
+        [0, 0, 0], [0, 0, 0],
+        2, 0.06, 0.05, 0,
+        [_radius * 0.85, _radius * 1.2, _radius * 1.3, _radius * 1.1],
+        [
+            [_color select 0, _color select 1, _color select 2, 0],
+            [_color select 0, _color select 1, _color select 2, 0.4],
+            [_color select 0, _color select 1, _color select 2, 0.6],
+            [_color select 0, _color select 1, _color select 2, 0]
+        ],
+        [0.1], 1, 0, "", "", ""
+    ];
+    
+    _outer setParticleRandom [
+        0, [0, 0, 0], [0, 0, 0], 0, 0, [0, 0, 0, 0], 0, 0
+    ];
+    
+    _outer setParticleCircle [
+        _radius, [0, 0, 0]
+    ];
+    
+    _outer setDropInterval 0.008;
+    
+    // Emisor interior (vórtice)
+    _inner setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 12, 13, 0],
+        "", "Billboard", 1, 2.4,
+        [0, 0, 0], [0, 0, 0.6],
+        1, 0.06, 0.05, 0.06,
+        [_radius * 0.5, _radius * 0.7, _radius * 0.6, _radius * 0.4],
+        [
+            [_color select 0, _color select 1, _color select 2, 0],
+            [_color select 0, _color select 1, _color select 2, 0.6],
+            [_color select 0, _color select 1, _color select 2, 0.85],
+            [_color select 0, _color select 1, _color select 2, 0]
+        ],
+        [0.1], 0.1, 0.06, "", "", ""
+    ];
+    
+    _inner setParticleRandom [
+        0.6, [_radius * 0.35, _radius * 0.35, _radius * 0.15], [0, 0, 0], 0, 0, [0, 0, 0, 0], 0, 0
+    ];
+    
+    _inner setDropInterval 0.016;
+    
+    // Emisor de glow
+    _glow setParticleParams [
+        ["\A3\data_f\ParticleEffects\Universal\Universal", 16, 2, 32, 0],
+        "", "Billboard", 1, 1.8,
+        [0, 0, 0], [0, 0, 0],
+        0, 0.12, 0.1, 0,
+        [0.06 * _radius, 0.12 * _radius, 0.06 * _radius],
+        [
+            [1, 1, 1, 0],
+            [1, 1, 1, 1],
+            [1, 1, 1, 0]
+        ],
+        [0.1], 1, 0, "", "", ""
+    ];
+    
+    _glow setParticleRandom [
+        2.5, [_radius * 0.6, _radius * 0.6, _radius * 0.25], [0.6, 0.6, 0.6], 0, 0, [0, 0, 0, 0], 0, 0
+    ];
+    
+    _glow setDropInterval 0.04;
+    
+    // Luz
+    _light setLightBrightness 0.6;
+    _light setLightColor _color;
+    _light setLightAmbient [_color select 0 * 0.5, _color select 1 * 0.5, _color select 2 * 0.5];
+    _light setLightFlareSize 6;
+    _light setLightFlareMaxDistance 250;
+    _light setLightUseFlare true;
+    
+    // Sonido ambiental
+    [_pos] spawn {
+        params ["_soundPos"];
+        while {true} do {
+            playSound3D ["a3\sounds_f\environment\ambient\theme\jazzy1.wss", objNull, false, _soundPos, 0.3, 0.7, 100];
+            sleep 12.5;
+        };
+    };
+    
+    // Retornar las fuentes
+    [_outer, _inner, _glow, _light]
+};
+
+// ======================================================
+// EFECTOS COMBINADOS PREDEFINIDOS
+// ======================================================
+
+// Explosión completa con todas las fases
+fullExplosionSequence = {
+    params [["_pos", [0,0,0], [[]]], ["_size", "medium", [""]]];
+    
+    // 1. Crear onda de choque más intensa
+    [_pos, _size] call blastWaveConfigurable;
+    sleep 0.05;
+    
+    // 2. Ejecutar una explosión completa
+    [_pos, _size] call multiphaseBlastEffect;
+    sleep 0.1;
+    
+    // 3. Añadir efecto de calor
+    [_pos] call heatHazeEffect;
+    sleep 0.2;
+    
+    // 4. Para tamaños grandes, añadir anillo de convergencia
+    if (_size in ["large", "huge"]) then {
+        [_pos] call bombRefractEffect;
+    };
+    
+    // 5. Para tamaños pequeños, ejecutar fragmentos adicionales
+    if (_size in ["tiny", "small"]) then {
+        [_pos, "metal"] call createDebrisEffect;
+    };
+    
+    true
+};
+
+// Efecto de impacto personalizado con fragmentos
+createDebrisEffect = {
+    params [["_pos", [0,0,0], [[]]], ["_type", "generic", [""]], ["_count", 5, [0]], ["_speed", 1, [0]]];
+    
+    // Crear objeto emisor
+    private _particleSource = createSimpleObject ["Land_HelipadEmpty_F", AGLtoASL _pos, true];
+    
+    // Definir colores/texturas según tipo
+    private _info = switch (_type) do {
+        case "concrete": {
+            ["#(argb,8,8,3)color(0.7,0.7,0.7,1)", 
+             [[0.7,0.7,0.7,1],[0.4,0.4,0.4,0.6],[0,0,0,0]], 
+             [0.25,0.2,0.15]]
+        };
+        case "wood": {
+            ["#(argb,8,8,3)color(0.4,0.3,0.2,1)", 
+             [[0.4,0.3,0.2,1],[0.2,0.15,0.1,0.7],[0,0,0,0]], 
+             [0.3,0.25,0.15]]
+        };
+        case "metal": {
+            ["#(argb,8,8,3)color(0.6,0.6,0.7,1)", 
+             [[0.6,0.6,0.7,1],[0.4,0.4,0.5,0.7],[0,0,0,0]], 
+             [0.22,0.18,0.12]]
+        };
+        case "glass": {
+            ["#(argb,8,8,3)color(0.5,0.5,1,0.85)", 
+             [[0.5,0.5,1,0.85],[0.2,0.2,0.5,0.5],[0,0,0,0]], 
+             [0.2,0.15,0.1]]
+        };
+        case "flesh": {
+            ["#(argb,8,8,3)color(0.5,0.1,0.1,1)", 
+             [[0.5,0.1,0.1,1],[0.2,0.05,0.05,0.6],[0,0,0,0]], 
+             [0.15,0.1,0.05]]
+        };
+        default {
+            ["#(argb,8,8,3)color(0.7,0.7,0.7,1)", 
+             [[0.7,0.7,0.7,1],[0.4,0.4,0.4,0.6],[0,0,0,0]], 
+             [0.25,0.2,0.15]]
+        };
+    };
+    
+    _info params ["_tex", "_colors", "_sizes"];
+    
+    // Generar fragmentos con valores mejorados
+    for "_i" from 0 to _count do {
+        private _dir = random 360;
+        private _angle = 30 + random 60;
+        private _vel = [
+            sin _dir * cos _angle * _speed * (0.95 + random 0.5),
+            cos _dir * cos _angle * _speed * (0.95 + random 0.5),
+            sin _angle * _speed * (0.95 + random 0.5)
+        ];
+        
+        drop [
+            [_tex, 1, 0, 1], 
+            "", "Billboard", 
+            1, 3.0 + random 1.8, 
+            [0,0,0], _vel, 
+            random 1.2, 0.6, 0.5, 0.12, 
+            _sizes * PARTICLE_SIZE_MULT, 
+            _colors, 
+            [1.2], 0.25, 0.25, 
+            "", "", _particleSource, random 360
+        ];
+    };
+    
+    // Eliminación retardada
+    [_particleSource] spawn {
+        params ["_source"];
+        sleep 0.2;
+        deleteVehicle _source;
+    };
+};
+
+// Este es el fin del sistema de efectos visuales avanzados
