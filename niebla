@@ -1,0 +1,1339 @@
+/*
+    🌟 Script: Naturaleza
+    👨‍💻 Autor: Vianna & Enkeli
+    📅 Creación: 2025-05-18
+    🎨 Descripción: Sistema optimizado de efectos visuales de la naturaleza para Arma 3
+*/
+
+// ⚠️ Salida temprana si no hay interfaz
+if (!hasInterface) exitWith {};
+
+// 🌳 SECCIÓN 1: ESCALADO DE VEGETACIÓN 
+// ==============================================
+private _radius = worldSize * 2; // Radio aumentado para cubrir todo el mapa
+
+private _scales = [
+    ["TREE", [1.01, 1.03, 1.05]],  // Escala para árboles (mín, máx, probabilidad media)
+    ["BUSH", [0.8, 1.0, 1.5]],     // Escala para arbustos
+	["small rock", 1.2],
+    ["ruin", 1.1],
+	["t_cocos_bend_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_cocos_small_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_cocos_tall_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_ficus_big_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_ficus_small_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_ficus_tall_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_pinus_s1_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_pinus_s2_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_pinus_s3_f.p3d", [1.01, 1.03, 1.05]],
+    ["t_pinus_s4_f.p3d", [1.01, 1.03, 1.05]]
+];
+
+// Recolectar jugadores o usar el jugador local si está vacío
+private _allPlayers = allPlayers;
+if (_allPlayers isEqualTo []) then {
+    _allPlayers = [player];
+};
+
+// Contenedor para almacenar los nuevos objetos
+private _newObjects = [];
+
+// Procesar para cada jugador
+{
+    private _center = getPosATL _x;
+
+    {
+        private _type = _x select 0;
+        private _scaleRange = _x select 1;
+
+        // Buscar objetos dependiendo del tipo
+        private _objects = nearestTerrainObjects [_center, [_type], _radius, false];
+
+        // Crear nuevos objetos escalados
+        {
+            // Generar escala aleatoria dentro del rango definido
+            private _factor = random [_scaleRange select 0, _scaleRange select 2, _scaleRange select 1]; 
+            private _originalPos = getPosATL _x;
+            private _originalDir = getDir _x;
+
+            // Ajustar posición inicial para crear el nuevo objeto
+            _originalPos set [2, 0]; // Asegurar que la posición inicial esté en el suelo
+
+            // Crear un objeto simple con el mismo modelo
+            private _newObject = createSimpleObject [(getModelInfo _x) select 1, _originalPos];
+            _newObject setObjectScale _factor;
+
+            // Ajustar la posición según la altura del terreno
+            private _newPos = getPosATL _newObject;
+            _newPos set [2, ((getPosWorld _newObject) select 2)];
+            _newObject setPosATL _newPos;
+
+            // Orientar el nuevo objeto y ocultar el original
+            _newObject setDir _originalDir;
+            _x hideObject true;
+
+            // Guardar el nuevo objeto
+            _newObjects pushBack _newObject;
+
+        } forEach _objects;
+
+    } forEach _scales;
+
+} forEach _allPlayers;
+
+
+// 🔍 SECCIÓN 2: DETECCIÓN DE ÁRBOLES 
+// ==============================================
+// Función para verificar si es una palmera
+isPalmTree = {
+    params ["_tree"];
+    private _isPalm = false;
+    private _modelName = getText(configFile >> "CfgVehicles" >> typeOf _tree >> "model");
+    private _className = typeOf _tree;
+    
+    if (_modelName find "palm" > -1 || 
+        _modelName find "Palm" > -1 || 
+        _modelName find "PALM" > -1 ||
+        _className find "palm" > -1 ||
+        _className find "Palm" > -1 ||
+        _className find "PALM" > -1) then {
+        _isPalm = true;
+    };
+    
+    _isPalm
+};
+
+
+// ✨ SECCIÓN 3: SISTEMA DE PARTÍCULAS AMBIENTALES
+// ==============================================
+[] spawn {
+    private ["_dustPS", "_dustActive", "_dustLevel", "_pos", "_inHouse", 
+             "_urbanObjs", "_inTown", "_drop", "_nearTrees", "_inForest",
+             "_treeObjects", "_processedTrees", "_sizeVariation", "_selectedColor"];
+    
+    _dustPS = objNull;
+    _dustActive = false;
+    _dustLevel = 0;
+    
+    // Array de colores regulares (para interiores y zonas urbanas)
+    private _regularColors = [
+        // Blanco
+        [
+            [1.0, 1.0, 1.0, 0],
+            [1.0, 1.0, 1.0, 0.8],
+            [1.0, 1.0, 1.0, 0]
+        ],
+        // Café claro
+        [
+            [0.8, 0.6, 0.4, 0],
+            [0.8, 0.6, 0.4, 0.8],
+            [0.8, 0.6, 0.4, 0]
+        ],
+        // Café oscuro
+        [
+            [0.4, 0.3, 0.2, 0],
+            [0.4, 0.3, 0.2, 0.8],
+            [0.4, 0.3, 0.2, 0]
+        ],
+        // Gris
+        [
+            [0.5, 0.5, 0.5, 0],
+            [0.5, 0.5, 0.5, 0.8],
+            [0.5, 0.5, 0.5, 0]
+        ]
+    ];
+    
+    // Array de colores SOLO para bosques (más brillantes)
+    private _forestColors = [
+        // Blanco brillante
+        [
+            [1.0, 1.0, 1.0, 0],
+            [1.0, 1.0, 1.0, 1.0],  // Mayor alfa para más brillo
+            [1.0, 1.0, 1.0, 0]
+        ],
+        // Amarillo
+        [
+            [1.0, 0.9, 0.2, 0],
+            [1.0, 0.9, 0.2, 1.0],  // Amarillo brillante
+            [1.0, 0.9, 0.2, 0]
+        ],
+        // Verde
+        [
+            [0.3, 0.8, 0.2, 0],
+            [0.3, 0.8, 0.2, 1.0],  // Verde brillante
+            [0.3, 0.8, 0.2, 0]
+        ],
+        // Café oscuro
+        [
+            [0.4, 0.3, 0.2, 0],
+            [0.4, 0.3, 0.2, 1.0],  // Mayor alfa para más brillo
+            [0.4, 0.3, 0.2, 0]
+        ]
+    ];
+
+    while {true} do {
+        sleep 1;
+
+        _pos = getPosATL player;
+        _inHouse = count (player nearObjects ["House", 8]) > 0;
+
+        // 🌲 DETECCIÓN DE BOSQUE MEJORADA
+        _nearTrees = nearestTerrainObjects [_pos, ["Tree"], 30, false];
+        
+        _treeObjects = nearestObjects [_pos, ["Land_TreeBin_F", "Land_Tree_01_F", "Land_Tree_02_F", 
+                                            "Land_Tree_03_F", "Land_Tree_04_F", "Land_Tree_05_F", 
+                                            "Land_Woods_Pine_Tall", "Land_Woods_Tree_Birch", "Land_Woods_Tree_Pine"], 30];
+        
+        // También verificar si hay árboles no-palmeras
+        _processedTrees = [];
+        {
+            if (!([_x] call isPalmTree)) then {
+                _processedTrees pushBack _x;
+            };
+        } forEach (_nearTrees + _treeObjects);
+        
+        // Requiere al menos 3 árboles para considerar bosque
+        _inForest = (count _processedTrees) >= 3;
+        
+        // Determinar entorno urbano
+        _urbanObjs = player nearObjects ["Building", 10];
+        _inTown = {!(_x isKindOf "House")} count _urbanObjs > 4;
+
+        // Determinar nivel de polvo
+        _dustLevel = if (_inForest) then {2} else {
+            if (_inHouse) then {1} else {
+                if (_inTown) then {1} else {0};
+            }
+        };
+
+        // Activar efecto si aplica
+        if (_dustLevel > 0 && !_dustActive) then {
+            _dustActive = true;
+
+            _drop = switch (_dustLevel) do {
+                case 1: {0.20};  // mínimo
+                case 2: {1.00};  // denso en bosque
+                default {0.10};
+            };
+
+            _dustPS = "#particlesource" createVehicleLocal _pos;
+            _dustPS setParticleCircle [0,[0,0,0]];
+            
+            // Configuración de aleatoriedad
+            _dustPS setParticleRandom [
+                5,                      // tiempo de vida
+                [1,1,3],                // posición
+                [0,0,0],                // velocidad
+                0,                      // rotación
+                0.005,                  // peso
+                [0,0,0,0.3],            // color (alpha)
+                0.2,                    // dirección
+                0.02                    // tamaño
+            ];
+            
+            // Seleccionar color y tamaño según el entorno
+            if (_inForest) then {
+                // BOSQUE: colores específicos y partículas más grandes (doble del exterior + un poco extra)
+                _selectedColor = selectRandom _forestColors;
+                // Tamaño original × 4 × 1.25 (un poco extra para bosque)
+                _sizeVariation = random [0.02, 0.032, 0.05]; 
+            } else {
+                if (_inHouse) then {
+                    // INTERIOR: tamaño doble del original
+                    _selectedColor = selectRandom _regularColors;
+                    _sizeVariation = random [0.014, 0.02, 0.03]; // El doble del tamaño original
+                } else {
+                    // EXTERIOR: tamaño cuádruple del original (doble del doble)
+                    _selectedColor = selectRandom _regularColors;
+                    _sizeVariation = random [0.028, 0.04, 0.06]; // Cuatro veces más grande
+                };
+            };
+            
+            _dustPS setParticleParams [
+                ["\A3\data_f\kouleSvetlo",1,0,1], "", "Billboard",
+                1, 10, [0,0,2], [0,0,0],
+                0, 10.08, 7.9, 0,
+                [_sizeVariation * 0.8, _sizeVariation, _sizeVariation * 0.8],  // Tamaño variable
+                _selectedColor,  // Color seleccionado según entorno
+                [0.08], 0.5, 0.01, "", "", player
+            ];
+            
+            _dustPS setDropInterval _drop;
+            
+            // Asegurar que las partículas sigan al jugador
+            [_dustPS] spawn {
+                private ["_ps"];
+                params ["_ps"];
+                while {!isNull _ps} do {
+                    _ps setPosATL (getPosATL player);
+                    sleep 0.5;
+                };
+            };
+        };
+
+        // Desactivar si se sale de zona válida
+        if (_dustLevel == 0 && _dustActive) then {
+            _dustActive = false;
+            if (!isNull _dustPS) then { deleteVehicle _dustPS; };
+        };
+    };
+};
+
+// 🌬️ SECCIÓN 4: EFECTOS DE VIENTO
+// ==============================================
+// CONFIGURACIÓN - MODIFICA ESTOS VALORES PARA AJUSTAR INTENSIDAD
+VIENTO_INTENSIDAD = 0.1;      // [AJUSTAR] Velocidad del viento (1=bajo, 5=fuerte)
+POLVO_INTENSIDAD = 0.0030;    // [AJUSTAR] Visibilidad del polvo (0.02=sutil, 0.2=intenso)
+HOJAS_CANTIDAD = 0.6;         // [AJUSTAR] Densidad de hojas (0.05=pocas, 0.01=muchas)
+HOJAS_VELOCIDAD = 1.0;        // [AJUSTAR] Velocidad de hojas (0.8=lento, 2.5=rápido)
+
+// CONFIGURACIÓN TEMPORAL - INTERVALOS DE APARICIÓN
+TIEMPO_ACTIVACION = 12;       // Duración de cada ráfaga de viento (en segundos)
+INTERVALO_PRINCIPAL = 120;    // Cada cuánto aparecen las ráfagas (15 min = 900 segundos)
+REPETICIONES_POR_CICLO = 6;   // Número de ráfagas seguidas
+INTERVALO_ENTRE_RAFAGAS = 10; // Segundos entre cada ráfaga del mismo ciclo
+
+// OPTIMIZACIÓN DE RENDIMIENTO
+DISTANCIA_MAXIMA = 50;       // [RENDIMIENTO] Máxima distancia a la que se ven efectos (metros)
+MODO_RENDIMIENTO = true;     // [RENDIMIENTO] Activar modo de rendimiento optimizado
+USAR_MENSAJES = true;        // [RENDIMIENTO] Mostrar mensajes de sistema (desactivar para FPS)
+
+// Función para detectar si estás dentro de edificio (por Killzone Kid)
+KK_fnc_inHouse = {
+    _house = lineIntersectsSurfaces [getPosWorld _this, getPosWorld _this vectorAdd [0, 0, 50], _this, objNull, true, 1, "GEOM", "NONE"];
+    if (count _house == 0) exitWith {false};
+    if (((_house select 0) select 3) isKindOf "house") exitWith {true};
+    false
+};
+
+// Función principal de efectos de viento (optimizada)
+fnc_crear_efectos_viento = {
+    // Comprobar rendimiento actual
+    if (MODO_RENDIMIENTO && diag_fps < 20) exitWith {
+        if (USAR_MENSAJES) then {systemChat ""};
+    };
+    
+    // Comprobar si el jugador está dentro de un edificio
+    _en_interior = player call KK_fnc_inHouse;
+    
+    // Solo crear efectos si está en exterior
+    if (!_en_interior) then {
+        // Color y alpha del polvo
+        _color = [1.0, 0.9, 0.8];
+        _alpha = POLVO_INTENSIDAD;
+        
+        // Vector de velocidad del viento 
+        _velocidad_viento = [VIENTO_INTENSIDAD, VIENTO_INTENSIDAD * 0.2, 0];
+        
+        // Determinar nivel de detalle según FPS
+        _fps_actual = diag_fps;
+        _factor_optimizacion = 1;
+        
+        // Ajustar detalle según FPS
+        if (_fps_actual < 30) then {_factor_optimizacion = 0.5};
+        if (_fps_actual < 20) then {_factor_optimizacion = 0.3};
+        
+        // 💨 EFECTO 1: POLVO
+        _dust_particles = "#particlesource" createVehiclelocal (getPos player);
+        if (vehicle player != player) then {
+            _dust_particles attachto [vehicle player, [0, -10, 0]];
+        } else {
+            _dust_particles attachto [player, [0, -10, 0]];
+        };
+        
+        _dust_particles setParticleCircle [15, [0, 0, 0]];
+        _dust_particles setParticleRandom [3, [5, 5, 0], [0, 0, 0], 1, 0, [0, 0, 0, 0.01], 0, 0];
+        _dust_particles setParticleParams [
+            ["\A3\data_f\cl_basic", 1, 0, 1], 
+            "", 
+            "Billboard", 
+            1, 
+            5, 
+            [0, 0, 0], 
+            _velocidad_viento, 
+            13, 
+            10, 
+            8, 
+            1, 
+            [2, 6, 10], 
+            [_color + [0], _color + [_alpha], _color + [0]], 
+            [0.08], 
+            1, 
+            0, 
+            "", 
+            "", 
+            vehicle player,
+            DISTANCIA_MAXIMA      // Añadir límite de distancia para rendimiento
+        ];
+        
+        // Ajustar cantidad de partículas según rendimiento
+        _dust_particles setDropInterval (0.01 / _factor_optimizacion);
+        
+        // 🍃 EFECTO 2: HOJAS (SOLO SI FPS SUFICIENTES)
+        _leaves_particles = objNull;
+        if (_fps_actual > 25) then {
+            _leaves_particles = "#particlesource" createVehicleLocal (getpos player);
+            if (vehicle player != player) then {
+                _leaves_particles attachto [vehicle player, [0, 0, 5]];
+            } else {
+                _leaves_particles attachto [player, [0, 0, 5]];
+            };
+            
+            _leaves_particles setParticleCircle [15, [1, 1, 0]];
+            _leaves_particles setParticleRandom [
+                0, 
+                [10, 10, 3], 
+                [
+                    -(_velocidad_viento select 1) * HOJAS_VELOCIDAD,
+                    -(_velocidad_viento select 0) * HOJAS_VELOCIDAD,
+                    0
+                ], 
+                0.2, 
+                0.01, 
+                [0, 0, 0, 0.1], 
+                0.5, 
+                0.5
+            ];
+            _leaves_particles setParticleParams [
+                ["\A3\data_f\ParticleEffects\Hit_Leaves\Leaves_Green.p3d", 1, 0, 1],
+                "",
+                "SpaceObject",
+                1,
+                7,
+                [0, 0, 2],
+                [
+                    (_velocidad_viento select 1) * HOJAS_VELOCIDAD,
+                    (_velocidad_viento select 0) * HOJAS_VELOCIDAD,
+                    0
+                ],
+                7,
+                0.15,
+                0.1,
+                1,
+                [1 + random 1],
+                [[0.68, 0.68, 0.68, 1]],
+                [0, 1],
+                0.2,
+                1.2,
+                "",
+                "",
+                vehicle player,
+                DISTANCIA_MAXIMA
+            ];
+            
+            // Reducir cantidad de hojas para mejorar rendimiento
+            _leaves_particles setDropInterval (HOJAS_CANTIDAD / _factor_optimizacion);
+        };
+        
+        // Guardar partículas en variables públicas para limpiarlas después
+        player setVariable ["efectos_viento_polvo", _dust_particles];
+        player setVariable ["efectos_viento_hojas", _leaves_particles];
+        
+        // Avisar al jugador (opcional)
+        if (USAR_MENSAJES) then {systemChat ""};
+    };
+};
+
+// Función para limpiar efectos anteriores
+fnc_limpiar_efectos_viento = {
+    // Eliminar polvo si existe
+    _dust_old = player getVariable ["efectos_viento_polvo", objNull];
+    if (!isNull _dust_old) then {
+        deleteVehicle _dust_old;
+    };
+    
+    // Eliminar hojas si existen
+    _leaves_old = player getVariable ["efectos_viento_hojas", objNull];
+    if (!isNull _leaves_old) then {
+        deleteVehicle _leaves_old;
+    };
+};
+
+// Función para activar una secuencia de ráfagas de viento
+fnc_ciclo_rafagas = {
+    // Repetir la cantidad especificada de ráfagas por ciclo
+    for "_i" from 1 to REPETICIONES_POR_CICLO do {
+        // Crear efectos
+        call fnc_crear_efectos_viento;
+        
+        // Mantener efectos durante el tiempo especificado
+        sleep TIEMPO_ACTIVACION;
+        
+        // Limpiar efectos
+        call fnc_limpiar_efectos_viento;
+        
+        // Avisar del fin de la ráfaga (opcional)
+        if (USAR_MENSAJES) then {systemChat ""};
+        
+        // Si no es la última ráfaga del ciclo, esperar antes de la siguiente
+        if (_i < REPETICIONES_POR_CICLO) then {
+            sleep INTERVALO_ENTRE_RAFAGAS;
+        };
+    };
+};
+
+// Inicializar sistema de ráfagas periódicas
+[] spawn {
+    waitUntil {!isNull player};
+    sleep 3; // Esperar un poco para que todo cargue
+    
+    // Mostrar al inicio para pruebas (una única ráfaga)
+    if (USAR_MENSAJES) then {
+        systemChat "";
+        systemChat "";
+    };
+    
+    // Crear ráfaga inicial de prueba
+    call fnc_crear_efectos_viento;
+    sleep TIEMPO_ACTIVACION;
+    call fnc_limpiar_efectos_viento;
+    
+    if (USAR_MENSAJES) then {
+        systemChat "";
+    };
+    
+    // Bucle principal (cada 15 minutos = 900 segundos)
+    while {true} do {
+        // Esperar hasta el próximo ciclo
+        sleep INTERVALO_PRINCIPAL;
+        
+        // Ejecutar un ciclo completo de ráfagas
+        call fnc_ciclo_rafagas;
+        
+        // Avisar del próximo ciclo
+        if (USAR_MENSAJES) then {
+            systemChat format [];
+        };
+    };
+};
+
+
+/*
+    🏙️ CIUDADES VIVAS v3.0 - SCRIPT OPTIMIZADO 🏙️
+    🎮 Mejoras Urbanas para Arma 3
+    🔧 Versión 3.0 - 2025-05-19
+    ✨ Objetos urbanos y costeros
+*/
+
+// ⚠️ Salida temprana si no hay interfaz
+if (!hasInterface) exitWith {};
+
+// =============================================
+// 📋 CONFIGURACIÓN GENERAL
+// =============================================
+
+// Parámetros ajustables para rendimiento
+CIUDAD_CONFIG = [
+    300,    // 0: Radio de detección en metros
+    15,     // 1: Máximo luces en ventanas
+    20,     // 2: Máximo objetos urbanos (basura, etc.)
+    10,     // 3: Máximo puntos de sonido
+    12,     // 4: Máximo objetos basura pequeños
+    15,     // 5: Máximo objetos de playa
+    8,      // 6: Máximo flores/plantas decorativas
+    0.8     // 7: Factor de brillo (0.5-1.0)
+];
+
+// Variables globales
+CIUDAD_initialized = false;
+CIUDAD_activo = false;
+CIUDAD_luces = [];
+CIUDAD_sonidos = [];
+CIUDAD_objetos = [];
+CIUDAD_objetosPlaya = [];
+CIUDAD_flores = [];
+CIUDAD_basuraPequena = [];
+CIUDAD_triggers = [];
+
+// =============================================
+// 🔍 DETECCIÓN DE ZONAS
+// =============================================
+
+// Función para detectar ciudades
+CIUDAD_fnc_detectarCiudad = {
+    private _posJugador = getPosATL player;
+    private _radio = CIUDAD_CONFIG select 0;
+    
+    // Contar edificios cercanos para determinar si es zona urbana
+    private _edificios = nearestObjects [_posJugador, ["House", "Building"], _radio];
+    private _calles = _posJugador nearRoads (_radio * 0.6);
+    
+    // Necesitamos suficientes edificios Y calles para considerar zona urbana
+    private _esUrbano = (count _edificios > 12 && count _calles > 5);
+    
+    // Verificar si estamos cerca de costa
+    private _esPlaya = false;
+    if (_esUrbano) then {
+        // Buscar playa cerca
+        for "_d" from 20 to 150 step 30 do {
+            for "_a" from 0 to 330 step 30 do {
+                private _checkPos = [
+                    (_posJugador select 0) + (_d * sin _a),
+                    (_posJugador select 1) + (_d * cos _a),
+                    0
+                ];
+                // Verificar si el terreno es playa o costa
+                private _superficie = surfaceType _checkPos;
+                if (["sand", _superficie] call BIS_fnc_inString || 
+                    ["beach", _superficie] call BIS_fnc_inString || 
+                    ["coast", _superficie] call BIS_fnc_inString) exitWith {
+                    _esPlaya = true;
+                };
+            };
+            if (_esPlaya) exitWith {};
+        };
+    };
+    
+    // Devolver resultado y datos
+    [_esUrbano, _esPlaya, _edificios, _calles]
+};
+
+// =============================================
+// 💡 SISTEMA DE LUCES DINÁMICAS
+// =============================================
+
+// Función para crear luces en ventanas
+CIUDAD_fnc_crearLuces = {
+    params ["_edificios"];
+    
+    private _maxLuces = CIUDAD_CONFIG select 1;
+    private _factorBrillo = CIUDAD_CONFIG select 7;
+    private _lucesCreadas = 0;
+    
+    // Asegurarse que hay suficientes edificios
+    if (count _edificios < 5) exitWith {};
+    
+    // Filtrar edificios grandes
+    private _edificiosGrandes = _edificios select {
+        private _box = boundingBox _x;
+        private _altura = abs((_box select 1 select 2) - (_box select 0 select 2));
+        _altura > 4
+    };
+    
+    // Si no hay edificios grandes, usar cualquiera
+    if (count _edificiosGrandes < 3) then {
+        _edificiosGrandes = _edificios;
+    };
+    
+    // Limitar cantidad
+    if (count _edificiosGrandes > 25) then {
+        _edificiosGrandes resize 25;
+    };
+    
+    // Ordenar aleatoriamente
+    _edificiosGrandes = _edificiosGrandes call BIS_fnc_arrayShuffle;
+    
+    {
+        // Limitar número total
+        if (_lucesCreadas >= _maxLuces) exitWith {};
+        
+        // Solo procesar algunos edificios (30%)
+        if (random 1 < 0.3) then {
+            // Posiciones para luces (ventanas)
+            private _posiciones = _x buildingPos -1;
+            
+            if (count _posiciones > 2) then {
+                // Mezclamos las posiciones
+                _posiciones = _posiciones call BIS_fnc_arrayShuffle;
+                
+                // Usamos 1-3 posiciones por edificio
+                private _cantidadPos = (1 + floor(random 3)) min count _posiciones;
+                _posiciones resize _cantidadPos;
+                
+                {
+                    // Crear luz con bajo impacto
+                    private _luz = "#lightpoint" createVehicleLocal _x;
+                    _luz setLightBrightness (0.05 * _factorBrillo);
+                    _luz setLightAmbient [0.8, 0.7, 0.5];
+                    _luz setLightColor [0.9, 0.8, 0.6];
+                    _luz setLightDayLight false;
+                    
+                    // Distancia corta para evitar impacto en rendimiento
+                    _luz setLightUseFlare false;
+                    _luz setLightAttenuation [4, 0, 0, 0.4, 30, 50];
+                    
+                    // Parpadeo aleatorio
+                    [_luz, _factorBrillo] spawn {
+                        params ["_luz", "_factorBrillo"];
+                        while {!isNull _luz && CIUDAD_activo} do {
+                            if (random 1 < 0.04) then { // 4% probabilidad
+                                _luz setLightBrightness 0;
+                                sleep (0.1 + random 0.2);
+                                if (!isNull _luz && CIUDAD_activo) then {
+                                    _luz setLightBrightness (0.05 * _factorBrillo);
+                                };
+                            };
+                            sleep (10 + random 20);
+                        };
+                    };
+                    
+                    // Guardar referencia
+                    CIUDAD_luces pushBack _luz;
+                    _lucesCreadas = _lucesCreadas + 1;
+                    
+                    // Salir si alcanzamos el máximo
+                    if (_lucesCreadas >= _maxLuces) exitWith {};
+                } forEach _posiciones;
+            };
+        };
+        
+        // Pequeña pausa para evitar congelamiento
+        if (_forEachIndex % 5 == 0) then {
+            sleep 0.01;
+        };
+    } forEach _edificiosGrandes;
+};
+
+// =============================================
+// 🔊 EFECTOS SONOROS URBANOS
+// =============================================
+
+// Función para crear ambiente sonoro
+CIUDAD_fnc_crearSonidos = {
+    params ["_edificios", "_calles"];
+    
+    private _maxSonidos = CIUDAD_CONFIG select 3;
+    
+    // Verificar sonidos disponibles
+    private _sonidosDisponibles = [];
+    
+    // Verificar sonidos de CIUDAD
+    private _sonidosCiudad = [
+        "A3\Sounds_F\environment\ambient\town\town1.wss",
+        "A3\Sounds_F\environment\ambient\town\town2.wss",
+        "A3\Sounds_F\environment\ambient\town\town3.wss"
+    ];
+    
+    {
+        if (fileExists _x) then {
+            _sonidosDisponibles pushBack _x;
+        };
+    } forEach _sonidosCiudad;
+    
+    // Si no hay sonidos básicos, añadir alternativas
+    if (count _sonidosDisponibles == 0) then {
+        private _sonidosAlternativos = [
+            "A3\Sounds_F\sfx\blip1.wss",
+            "A3\Sounds_F\environment\ambient\meadows\meadows_1.wss",
+            "A3\Sounds_F\environment\ambient\meadows\meadows_2.wss"
+        ];
+        
+        {
+            if (fileExists _x) then {
+                _sonidosDisponibles pushBack _x;
+            };
+        } forEach _sonidosAlternativos;
+    };
+    
+    // Si no hay sonidos disponibles, salir
+    if (count _sonidosDisponibles == 0) exitWith {};
+    
+    // Ubicaciones potenciales para sonidos
+    private _ubicaciones = [];
+    
+    // Algunos sonidos en edificios
+    if (count _edificios > 0) then {
+        private _edificiosSeleccionados = _edificios call BIS_fnc_arrayShuffle;
+        _edificiosSeleccionados resize ((_maxSonidos/2) min count _edificiosSeleccionados);
+        
+        {
+            _ubicaciones pushBack [getPosATL _x, "edificio"];
+        } forEach _edificiosSeleccionados;
+    };
+    
+    // Algunos sonidos en calles
+    if (count _calles > 0) then {
+        private _callesSeleccionadas = _calles call BIS_fnc_arrayShuffle;
+        _callesSeleccionadas resize ((_maxSonidos/2) min count _callesSeleccionadas);
+        
+        {
+            _ubicaciones pushBack [getPosATL _x, "calle"];
+        } forEach _callesSeleccionadas;
+    };
+    
+    // Limitar cantidad total
+    if (count _ubicaciones > _maxSonidos) then {
+        _ubicaciones resize _maxSonidos;
+    };
+    
+    // Crear triggers de sonido
+    {
+        _x params ["_pos", "_tipo"];
+        
+        // Crear trigger
+        private _trg = createTrigger ["EmptyDetector", _pos, false];
+        _trg setTriggerArea [80, 80, 0, false];
+        _trg setTriggerActivation ["ANYPLAYER", "PRESENT", true];
+        
+        // Intervalo según tipo
+        private _intervalo = switch (_tipo) do {
+            case "edificio": {45 + random 45};
+            case "calle": {30 + random 30};
+            default {40 + random 20};
+        };
+        
+        _trg setTriggerInterval _intervalo;
+        
+        // Seleccionar sonido y volumen
+        private _sonido = selectRandom _sonidosDisponibles;
+        private _volumen = 0.3 + random 0.2;
+        
+        // Statement para reproducir sonido
+        private _statement = format [
+            "if (player distance [%2, %3, %4] < 80) then {playSound3D ['%1', objNull, false, [%2, %3, %4], %5, 1, 100];};", 
+            _sonido, _pos select 0, _pos select 1, (_pos select 2) + 3, _volumen
+        ];
+        
+        _trg setTriggerStatements ["this", _statement, ""];
+        
+        // Guardar referencia
+        CIUDAD_sonidos pushBack _trg;
+        
+        // Pequeña pausa
+        if (_forEachIndex % 3 == 0) then {
+            sleep 0.01;
+        };
+    } forEach _ubicaciones;
+};
+
+// =============================================
+// 🗑️ OBJETOS URBANOS Y DECORACIÓN
+// =============================================
+
+// Función para crear objetos urbanos
+CIUDAD_fnc_crearObjetos = {
+    params ["_calles"];
+    
+    private _maxObjetos = CIUDAD_CONFIG select 2;
+    
+    // Verificar que hay suficientes calles
+    if (count _calles < 5) exitWith {};
+    
+    // Modelos de objetos urbanos comunes verificados
+    private _modelosUrbanos = [];
+    private _modelosCandidatos = [
+        "Land_Garbage_square3_F",
+        "Land_Garbage_line_F",
+        "Land_BottlePlastic_V2_F",
+        "Land_Can_V3_F",
+        "Land_WoodenBox_F",
+        "Land_MetalBarrel_F",
+        "Land_BarrelEmpty_F",
+        "Land_GarbageBin_01_F",
+        "Land_Basket_F",
+        "Land_CratesPlastic_F",
+        "Land_CratesShabby_F",
+        "Land_CratesWooden_F"
+    ];
+    
+    {
+        if (isClass(configFile >> "CfgVehicles" >> _x)) then {
+            _modelosUrbanos pushBack _x;
+        };
+    } forEach _modelosCandidatos;
+    
+    // Si no hay modelos disponibles, salir
+    if (count _modelosUrbanos == 0) exitWith {};
+    
+    // Mezclar calles aleatoriamente
+    private _callesSeleccionadas = _calles call BIS_fnc_arrayShuffle;
+    
+    // Limitar cantidad de calles
+    _callesSeleccionadas resize (_maxObjetos min count _callesSeleccionadas);
+    
+    // Crear objetos en lotes
+    private _lote = [];
+    private _contadorLote = 0;
+    private _maxPorLote = 5;
+    
+    {
+        // Obtener posición de la calle
+        private _pos = getPosATL _x;
+        private _dir = random 360;
+        private _dist = 1.5 + random 2; // Al costado de la calle
+        
+        private _finalPos = [
+            (_pos select 0) + (_dist * sin _dir),
+            (_pos select 1) + (_dist * cos _dir),
+            (_pos select 2)
+        ];
+        
+        // Asegurarse que no está en la carretera
+        if (!isOnRoad _finalPos) then {
+            // Crear objeto
+            private _modelo = selectRandom _modelosUrbanos;
+            private _obj = createSimpleObject [_modelo, _finalPos];
+            _obj setDir random 360;
+            
+            // Escala aleatoria para variedad
+            _obj setObjectScale (0.7 + random 0.3);
+            
+            _lote pushBack _obj;
+            _contadorLote = _contadorLote + 1;
+            
+            // Procesar en lotes
+            if (_contadorLote >= _maxPorLote) then {
+                CIUDAD_objetos append _lote;
+                _lote = [];
+                _contadorLote = 0;
+                sleep 0.01;
+            };
+        };
+    } forEach _callesSeleccionadas;
+    
+    // Añadir último lote
+    if (count _lote > 0) then {
+        CIUDAD_objetos append _lote;
+    };
+};
+
+// =============================================
+// 🍂 BASURA PEQUEÑA EN CALLES
+// =============================================
+
+// Función para crear basura pequeña
+CIUDAD_fnc_crearBasuraPequena = {
+    params ["_calles"];
+    
+    private _maxBasura = CIUDAD_CONFIG select 4;
+    
+    // Verificar que hay suficientes calles
+    if (count _calles < 3) exitWith {};
+    
+    // Modelos de basura pequeña verificados
+    private _modelosBasura = [];
+    
+    // Lista de modelos de basura pequeña disponibles en vanilla
+    private _modelosCandidatos = [
+        // Botellas y latas
+        "Land_BottlePlastic_V1_F",
+        "Land_BottlePlastic_V2_F",
+        "Land_Can_V1_F",
+        "Land_Can_V2_F",
+        "Land_Can_V3_F",
+        // Papeles y cartones
+        "Land_Garbage_square3_F",
+        "Land_Garbage_line_F",
+        "Land_Ground_sheet_F",
+        // Otros
+        "Land_Money_F",
+        "Land_TacticalBacon_F",
+        "Land_DuctTape_F",
+        "Land_FoodContainer_01_F",
+        "Land_Tableware_01_cup_F",
+        "Land_Tableware_01_stackOfplates_F"
+    ];
+    
+    // Verificar modelos disponibles
+    {
+        if (isClass(configFile >> "CfgVehicles" >> _x)) then {
+            _modelosBasura pushBack _x;
+        };
+    } forEach _modelosCandidatos;
+    
+    // Si no hay modelos disponibles, salir
+    if (count _modelosBasura == 0) exitWith {};
+    
+    // Crear puntos aleatorios cerca de calles
+    private _puntos = [];
+    private _callesMezcladas = _calles call BIS_fnc_arrayShuffle;
+    _callesMezcladas resize ((_maxBasura * 2) min count _callesMezcladas);
+    
+    {
+        private _pos = getPosATL _x;
+        
+        // Crear 1-2 posiciones por calle seleccionada
+        for "_i" from 1 to (1 + floor(random 2)) do {
+            private _dir = random 360;
+            private _dist = 0.5 + random 2.5;
+            
+            private _puntoPos = [
+                (_pos select 0) + (_dist * sin _dir),
+                (_pos select 1) + (_dist * cos _dir),
+                (_pos select 2)
+            ];
+            
+            // Comprobar que no está en la carretera
+            if (!isOnRoad _puntoPos) then {
+                _puntos pushBack _puntoPos;
+            };
+        };
+    } forEach _callesMezcladas;
+    
+    // Limitar cantidad
+    if (count _puntos > _maxBasura) then {
+        _puntos resize _maxBasura;
+    };
+    
+    // Crear objetos
+    {
+        private _modelo = selectRandom _modelosBasura;
+        private _obj = createSimpleObject [_modelo, _x];
+        
+        // Rotación aleatoria
+        _obj setDir random 360;
+        
+        // Escala pequeña para objetos de basura
+        _obj setObjectScale (0.6 + random 0.4);
+        
+        CIUDAD_basuraPequena pushBack _obj;
+        
+        // Pausa cada 5 objetos
+        if (_forEachIndex % 5 == 0) then {
+            sleep 0.01;
+        };
+    } forEach _puntos;
+};
+
+// =============================================
+// 🏖️ OBJETOS DE PLAYA
+// =============================================
+
+// Función para crear objetos de playa
+CIUDAD_fnc_crearObjetosPlaya = {
+    params ["_esPlaya"];
+    
+    // Salir si no estamos en playa
+    if (!_esPlaya) exitWith {};
+    
+    private _maxObjetos = CIUDAD_CONFIG select 5;
+    private _posJugador = getPosATL player;
+    
+    // Buscar puntos de playa
+    private _puntosPlaya = [];
+    private _radioPlaya = 150;
+    
+    for "_i" from 1 to 60 do {
+        private _dir = random 360;
+        private _dist = random _radioPlaya;
+        
+        private _checkPos = [
+            (_posJugador select 0) + (_dist * sin _dir),
+            (_posJugador select 1) + (_dist * cos _dir),
+            0
+        ];
+        
+        // Verificar si es playa
+        private _superficie = surfaceType _checkPos;
+        if (["sand", _superficie] call BIS_fnc_inString || 
+            ["beach", _superficie] call BIS_fnc_inString || 
+            ["coast", _superficie] call BIS_fnc_inString) then {
+            
+            // Ajustar altura al terreno
+            _checkPos set [2, getTerrainHeightASL _checkPos];
+            
+            // Verificar que no está bajo el agua
+            if (!surfaceIsWater _checkPos) then {
+                _puntosPlaya pushBack _checkPos;
+            };
+        };
+    };
+    
+    // Verificar si se encontraron puntos de playa
+    if (count _puntosPlaya == 0) exitWith {};
+    
+    // Limitar cantidad
+    if (count _puntosPlaya > _maxObjetos) then {
+        _puntosPlaya resize _maxObjetos;
+    };
+    
+    // Objetos de playa disponibles en vanilla
+    private _modelosPlaya = [];
+    private _modelosCandidatos = [
+        // Toallas, sombrillas, cubos
+        "Land_Sunshade_F",
+        "Land_Sunshade_01_F",
+        "Land_Sunshade_02_F",
+        "Land_Sunshade_03_F",
+        "Land_Sunshade_04_F",
+        "Land_Ground_sheet_blue_F",
+        "Land_Ground_sheet_yellow_F",
+        "Land_Ground_sheet_folded_blue_F",
+        "Land_Ground_sheet_folded_yellow_F",
+        // Objetos de playa
+        "Land_Bucket_F",
+        "Land_Bucket_clean_F",
+        "Land_Bucket_painted_F",
+        "Land_PlasticCase_01_small_F",
+        "Land_PlasticCase_01_small_gray_F",
+        // Pelotas y juguetes
+        "Land_Football_01_F",
+        "Land_BaseballBat_01_F"
+    ];
+    
+    // Verificar modelos disponibles
+    {
+        if (isClass(configFile >> "CfgVehicles" >> _x)) then {
+            _modelosPlaya pushBack _x;
+        };
+    } forEach _modelosCandidatos;
+    
+    // Si no hay modelos disponibles, usar alternativas
+    if (count _modelosPlaya == 0) then {
+        private _modelosAlternativa = [
+            "Land_Basket_F",
+            "Land_Can_V3_F",
+            "Land_BottlePlastic_V2_F"
+        ];
+        
+        {
+            if (isClass(configFile >> "CfgVehicles" >> _x)) then {
+                _modelosPlaya pushBack _x;
+            };
+        } forEach _modelosAlternativa;
+    };
+    
+    // Si aún no hay modelos, salir
+    if (count _modelosPlaya == 0) exitWith {};
+    
+    // Crear objetos
+    {
+        private _modelo = selectRandom _modelosPlaya;
+        private _obj = createSimpleObject [_modelo, _x];
+        
+        // Rotación aleatoria
+        _obj setDir random 360;
+        
+        // Escala aleatoria según tipo
+        if (_modelo in ["Land_Sunshade_F", "Land_Sunshade_01_F", "Land_Sunshade_02_F", 
+                         "Land_Sunshade_03_F", "Land_Sunshade_04_F"]) then {
+            _obj setObjectScale (0.8 + random 0.2);
+        } else {
+            _obj setObjectScale (0.6 + random 0.4);
+        };
+        
+        CIUDAD_objetosPlaya pushBack _obj;
+        
+        // Pausa cada 5 objetos
+        if (_forEachIndex % 5 == 0) then {
+            sleep 0.01;
+        };
+    } forEach _puntosPlaya;
+};
+
+// =============================================
+// 🌸 FLORES Y PLANTAS DECORATIVAS - CORREGIDO
+// =============================================
+
+// Función para crear flores y plantas
+CIUDAD_fnc_crearFlores = {
+    params ["_calles"];
+    
+    private _maxFlores = CIUDAD_CONFIG select 6;
+    
+    // Verificar que hay suficientes calles
+    if (count _calles < 5) exitWith {};
+    
+    // Modelos de flores y plantas
+    private _modelosFlores = [];
+    private _modelosCandidatos = [
+        // Plantas y flores
+        "Land_FlowerPot_01_F",
+        "Land_FlowerPot_01_Flower_F",
+        "Land_Flower_01_F",
+        "Land_Flower_02_F",
+        "Land_Bush_01_F",
+        // Plantas decorativas
+        "Land_TreeBin_F",
+        "Land_Hedge_01_s_2m_F",
+        "Land_Hedge_01_s_4m_F",
+        "Land_FlowerPot_01_Dirt_F",
+        "Land_FlowerPot_01_Flower_F",
+        "Land_FlowerPot_01_Decorated_F",
+        // Alternativas
+        "A3\plants_f\Bush\b_FicusC1s_F.p3d",
+        "A3\plants_f\Bush\b_NeriumO2s_F.p3d",
+        "A3\plants_f\Bush\b_NeriumO2s_white_F.p3d",
+        "A3\plants_f\Bush\b_ArundoD3s_F.p3d"
+    ];
+    
+    // Verificar modelos disponibles - primero objetos completos
+    {
+        if (_forEachIndex < 10) then { // Solo verificar los primeros 10 (objetos completos)
+            if (isClass(configFile >> "CfgVehicles" >> _x)) then {
+                _modelosFlores pushBack _x;
+            };
+        };
+    } forEach _modelosCandidatos;
+    
+    // Si no hay suficientes, añadir modelos simples
+    if (count _modelosFlores < 3) then {
+        {
+            if (_forEachIndex >= 10) then { // Verificar los últimos (modelos simples)
+                if (fileExists _x) then {
+                    _modelosFlores pushBack _x;
+                };
+            };
+        } forEach _modelosCandidatos;
+    };
+    
+    // Si no hay modelos disponibles, salir
+    if (count _modelosFlores == 0) exitWith {};
+    
+    // Buscar puntos para flores (cerca de aceras)
+    private _puntosFlores = [];
+    private _callesMezcladas = _calles call BIS_fnc_arrayShuffle;
+    
+    {
+        private _pos = getPosATL _x;
+        private _dir = random 360;
+        private _dist = 1.8 + random 1.5; // Más alejado del centro
+        
+        private _puntoPos = [
+            (_pos select 0) + (_dist * sin _dir),
+            (_pos select 1) + (_dist * cos _dir),
+            (_pos select 2)
+        ];
+        
+        // Solo si no está en carretera
+        if (!isOnRoad _puntoPos) then {
+            _puntosFlores pushBack _puntoPos;
+        };
+        
+        // Limitar búsqueda
+        if (count _puntosFlores >= _maxFlores * 2) exitWith {};
+    } forEach _callesMezcladas;
+    
+    // Mezclar puntos y limitar cantidad
+    _puntosFlores = _puntosFlores call BIS_fnc_arrayShuffle;
+    _puntosFlores resize (_maxFlores min count _puntosFlores);
+    
+    // Crear objetos - VERSIÓN SIMPLIFICADA Y CORREGIDA
+    {
+        private _modelo = selectRandom _modelosFlores;
+        private _obj = createSimpleObject [_modelo, _x];
+        
+        // Rotación aleatoria
+        _obj setDir random 360;
+        
+        // Determinar escala basada en nombre - SIMPLIFICADO
+        private _escala = 0.8;
+        private _nombreLower = toLower _modelo;
+        
+        switch (true) do {
+            case ([".p3d", _nombreLower] call BIS_fnc_inString): { _escala = 0.4 + random 0.3 };
+            case (["hedge", _nombreLower] call BIS_fnc_inString): { _escala = 0.5 + random 0.3 };
+            case (["tree", _nombreLower] call BIS_fnc_inString): { _escala = 0.7 + random 0.2 };
+            default { _escala = 0.9 + random 0.2 };
+        };
+        
+        _obj setObjectScale _escala;
+        CIUDAD_flores pushBack _obj;
+        
+        // Pausa cada 3 objetos
+        if (_forEachIndex % 3 == 0) then {
+            sleep 0.01;
+        };
+    } forEach _puntosFlores;
+};
+// =============================================
+// 🧹 FUNCIONES DE LIMPIEZA
+// =============================================
+
+// Función para limpiar todos los efectos
+CIUDAD_fnc_limpiarTodo = {
+    // Limpiar luces
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_luces;
+    CIUDAD_luces = [];
+    
+    // Limpiar sonidos
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_sonidos;
+    CIUDAD_sonidos = [];
+    
+    // Limpiar objetos
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_objetos;
+    CIUDAD_objetos = [];
+    
+    // Limpiar basura pequeña
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_basuraPequena;
+    CIUDAD_basuraPequena = [];
+    
+    // Limpiar objetos de playa
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_objetosPlaya;
+    CIUDAD_objetosPlaya = [];
+    
+    // Limpiar flores
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_flores;
+    CIUDAD_flores = [];
+    
+    // Limpiar triggers
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach CIUDAD_triggers;
+    CIUDAD_triggers = [];
+    
+    // Restablecer estado
+    CIUDAD_activo = false;
+};
+
+// =============================================
+// 🚀 INICIALIZACIÓN Y CONTROL PRINCIPAL
+// =============================================
+
+// Función para inicializar sistema
+CIUDAD_fnc_inicializar = {
+    if (CIUDAD_initialized) exitWith {};
+    
+    // Comprobar periódicamente si estamos en ciudad
+    [] spawn {
+        while {true} do {
+            private _resultado = call CIUDAD_fnc_detectarCiudad;
+            _resultado params ["_esCiudad", "_esPlaya", "_edificios", "_calles"];
+            
+            if (_esCiudad && !CIUDAD_activo) then {
+                // Activar ciudad
+                CIUDAD_activo = true;
+                
+                // Crear elementos
+                [_edificios] call CIUDAD_fnc_crearLuces;
+                [_edificios, _calles] call CIUDAD_fnc_crearSonidos;
+                [_calles] call CIUDAD_fnc_crearObjetos;
+                [_calles] call CIUDAD_fnc_crearBasuraPequena;
+                [_calles] call CIUDAD_fnc_crearFlores;
+                [_esPlaya] call CIUDAD_fnc_crearObjetosPlaya;
+            };
+            
+            if (!_esCiudad && CIUDAD_activo) then {
+                // Desactivar ciudad
+                call CIUDAD_fnc_limpiarTodo;
+            };
+            
+            // Comprobación cada 30 segundos
+            sleep 30;
+        };
+    };
+    
+    CIUDAD_initialized = true;
+};
+
+// Inicialización automática con retraso para evitar conflictos
+[] spawn {
+    sleep 10; // Esperar 10 segundos para carga completa
+    call CIUDAD_fnc_inicializar;
+};
