@@ -62,12 +62,15 @@ OPT_clasesDecorativas = ["Furniture_base_F", "Items_base_F", "House_Small_F", "H
 OPT_ultimaLimpieza = time;
 OPT_radioDecoraciones = 50; // Radio para optimización de decoraciones (más agresivo)
 OPT_version = "3.3";
-OPT_radioJugadores = 50; // Radio para detectar jugadores cercanos
+OPT_radioJugadores = 5; // Radio para detectar jugadores cercanos
 OPT_todosJugadores = []; // Array para almacenar todos los jugadores
+OPT_zeusActivo = false; // Variable para controlar si el Zeus está activo
+OPT_ultimaComprobacionZeus = time; // Última comprobación de Zeus
+OPT_intervaloComprobacionZeus = 1; // Comprobar Zeus cada segundo
 
 // === VARIABLES PARA LÍMITE DE VISIBILIDAD ===
-OPT_limiteVisibilidad = 1050; // Límite en metros para hacer objetos invisibles
-OPT_distanciaVisionForzada = 1000; // Distancia de visión forzada
+OPT_limiteVisibilidad = 1010; // Límite en metros para hacer objetos invisibles
+OPT_distanciaVisionForzada = 999; // Distancia de visión forzada
 OPT_altitudVuelo = 30; // Metros sobre el terreno para considerar que está volando
 OPT_estaVolando = false; // Estado actual de vuelo del jugador
 OPT_viewDistanciaOriginal = viewDistance; // Guardar vista original
@@ -86,6 +89,24 @@ OPT_displayListo = false; // Indica si el display ya está listo
 // ===== SISTEMA DE LOG VACÍO =====
 OPT_fnc_log = {
     // Función vacía para eliminar todos los mensajes de debug
+};
+
+// ===== FUNCIÓN PARA COMPROBAR SI HAY ZEUS ACTIVO =====
+OPT_fnc_esZeusActivo = {
+    if (isNull player) then {
+        false
+    } else {
+        // Verificar si el jugador actual es Zeus
+        private _esZeus = !isNull (getAssignedCuratorLogic player);
+        
+        // Si no es Zeus, comprobar si está visible el interfaz de Zeus
+        if (!_esZeus) then {
+            private _zeusDisplay = findDisplay 312; // ID del display de Zeus
+            (!isNull _zeusDisplay)
+        } else {
+            true
+        };
+    };
 };
 
 // ===== FUNCIÓN PARA COMPROBAR SI EL JUGADOR ESTÁ VOLANDO =====
@@ -140,7 +161,7 @@ OPT_fnc_ocultarObjetosLejanos = {
             private _posJugador = getPosATL player;
             
             // Restaurar visibilidad si está volando
-            if (OPT_estaVolando) then {
+            if (OPT_estaVolando || OPT_zeusActivo) then {
                 {
                     if (!isNull _x) then {
                         _x hideObjectGlobal false;
@@ -287,94 +308,100 @@ OPT_fnc_calcularPrioridad = {
         
         private _distancia = _posJugador distance _entidad;
         
-        // Si se aplica límite de visibilidad y el jugador no está volando
-        if (!OPT_estaVolando && hasInterface && OPT_procesarLimiteVisibilidad) then {
-            if (_distancia > OPT_limiteVisibilidad) then {
-                99 // Fuera del límite, ocultar
-            } else {
-                // Dentro del límite, calcular prioridad normal
-                private _prioridad = 3; // Por defecto: baja prioridad
-                
-                // Verificar si es un objeto decorativo
-                private _esDecoracion = false;
-                if (OPT_optimizarDecoraciones) then {
-                    {
-                        if (_entidad isKindOf _x) exitWith {
-                            _esDecoracion = true;
-                        };
-                    } forEach OPT_clasesDecorativas;
-                    
-                    // Si es decoración, usar un radio más pequeño
-                    if (_esDecoracion) then {
-                        if (_distancia < OPT_radioDecoraciones) then {
-                            _prioridad = 1;
-                        } else {
-                            _prioridad = 3; // Baja prioridad para decoraciones
-                        };
-                    };
-                };
-                
-                // Si no es decoración, usar lógica normal
-                if (!_esDecoracion) then {
-                    // Prioridad basada en distancia al jugador
-                    if (_distancia < OPT_radioSimulacion) then {
-                        _prioridad = 1; // Alta prioridad: simulación completa
-                    } else {
-                        if (_distancia < OPT_radioSimulacion * 2) then {
-                            _prioridad = 2; // Media prioridad
-                        };
-                    };
-                };
-                
-                // Comprobar si está cerca de un evento importante
-                {
-                    _x params ["_pos", "_radio", "_tiempoFin"];
-                    
-                    if (time <= _tiempoFin) then {
-                        private _distEvento = _pos distance _entidad;
-                        if (_distEvento < _radio) then {
-                            // Cerca de un evento importante, aumentar prioridad
-                            _prioridad = _prioridad - 1;
-                            _prioridad = _prioridad max 1;
-                        };
-                    };
-                } forEach OPT_eventosImportantes;
-                
-                // Ajustes por tipo de entidad
-                if (_entidad isKindOf "CAManBase") then {
-                    // Prioridad adicional para unidades en combate
-                    if (behaviour _entidad == "COMBAT") then {
-                        _prioridad = _prioridad max 2;
-                    };
-                    
-                    // Prioridad adicional para líderes de grupo
-                    if (leader group _entidad == _entidad) then {
-                        _prioridad = _prioridad max 2;
-                    };
+        // Si Zeus está activo, no ocultamos objetos más allá de cierta distancia
+        if (OPT_zeusActivo && _distancia > 80) then {
+            // En modo Zeus, todos los objetos mantienen simulación reducida pero visible
+            2 // Prioridad media para objetos en rango Zeus
+        } else {
+            // Si se aplica límite de visibilidad y el jugador no está volando ni Zeus activo
+            if (!OPT_estaVolando && !OPT_zeusActivo && hasInterface && OPT_procesarLimiteVisibilidad) then {
+                if (_distancia > OPT_limiteVisibilidad) then {
+                    99 // Fuera del límite, ocultar
                 } else {
-                    if (_entidad isKindOf "AllVehicles") then {
-                        // Vehículos con tripulación siempre tienen mayor prioridad
-                        if (count crew _entidad > 0) then {
+                    // Dentro del límite, calcular prioridad normal
+                    private _prioridad = 3; // Por defecto: baja prioridad
+                    
+                    // Verificar si es un objeto decorativo
+                    private _esDecoracion = false;
+                    if (OPT_optimizarDecoraciones) then {
+                        {
+                            if (_entidad isKindOf _x) exitWith {
+                                _esDecoracion = true;
+                            };
+                        } forEach OPT_clasesDecorativas;
+                        
+                        // Si es decoración, usar un radio más pequeño
+                        if (_esDecoracion) then {
+                            if (_distancia < OPT_radioDecoraciones) then {
+                                _prioridad = 1;
+                            } else {
+                                _prioridad = 3; // Baja prioridad para decoraciones
+                            };
+                        };
+                    };
+                    
+                    // Si no es decoración, usar lógica normal
+                    if (!_esDecoracion) then {
+                        // Prioridad basada en distancia al jugador
+                        if (_distancia < OPT_radioSimulacion) then {
+                            _prioridad = 1; // Alta prioridad: simulación completa
+                        } else {
+                            if (_distancia < OPT_radioSimulacion * 2) then {
+                                _prioridad = 2; // Media prioridad
+                            };
+                        };
+                    };
+                    
+                    // Comprobar si está cerca de un evento importante
+                    {
+                        _x params ["_pos", "_radio", "_tiempoFin"];
+                        
+                        if (time <= _tiempoFin) then {
+                            private _distEvento = _pos distance _entidad;
+                            if (_distEvento < _radio) then {
+                                // Cerca de un evento importante, aumentar prioridad
+                                _prioridad = _prioridad - 1;
+                                _prioridad = _prioridad max 1;
+                            };
+                        };
+                    } forEach OPT_eventosImportantes;
+                    
+                    // Ajustes por tipo de entidad
+                    if (_entidad isKindOf "CAManBase") then {
+                        // Prioridad adicional para unidades en combate
+                        if (behaviour _entidad == "COMBAT") then {
                             _prioridad = _prioridad max 2;
                         };
+                        
+                        // Prioridad adicional para líderes de grupo
+                        if (leader group _entidad == _entidad) then {
+                            _prioridad = _prioridad max 2;
+                        };
+                    } else {
+                        if (_entidad isKindOf "AllVehicles") then {
+                            // Vehículos con tripulación siempre tienen mayor prioridad
+                            if (count crew _entidad > 0) then {
+                                _prioridad = _prioridad max 2;
+                            };
+                        };
+                    };
+                    
+                    _prioridad
+                };
+            } else {
+                // No aplicamos límite de visibilidad, calcular prioridad normal
+                private _prioridad = 3; // Por defecto: baja prioridad
+                
+                if (_distancia < OPT_radioSimulacion) then {
+                    _prioridad = 1; // Alta prioridad: simulación completa
+                } else {
+                    if (_distancia < OPT_radioSimulacion * 2) then {
+                        _prioridad = 2; // Media prioridad
                     };
                 };
                 
                 _prioridad
             };
-        } else {
-            // No aplicamos límite de visibilidad, calcular prioridad normal
-            private _prioridad = 3; // Por defecto: baja prioridad
-            
-            if (_distancia < OPT_radioSimulacion) then {
-                _prioridad = 1; // Alta prioridad: simulación completa
-            } else {
-                if (_distancia < OPT_radioSimulacion * 2) then {
-                    _prioridad = 2; // Media prioridad
-                };
-            };
-            
-            _prioridad
         };
     };
 };
@@ -674,6 +701,32 @@ OPT_fnc_actualizarCache = {
     };
 };
 
+// Comprobar Zeus cada cierto tiempo
+if (time > OPT_ultimaComprobacionZeus + OPT_intervaloComprobacionZeus) then {
+    OPT_ultimaComprobacionZeus = time;
+    private _nuevoEstadoZeus = call OPT_fnc_esZeusActivo;
+    
+    // Si el estado de Zeus cambió, procesar todas las entidades
+    if (_nuevoEstadoZeus != OPT_zeusActivo) then {
+        OPT_zeusActivo = _nuevoEstadoZeus;
+        
+        if (OPT_zeusActivo) then {
+            // Notificar activación de Zeus
+            systemChat "Zeus activado: Sistema de ocultamiento desactivado";
+        } else {
+            // Notificar desactivación de Zeus
+            systemChat "Zeus desactivado: Sistema de ocultamiento reactivado";
+        };
+        
+        // Reprocesar todas las entidades para actualizar visibilidad
+        {
+            if (!isNull _x && !isPlayer _x) then {
+                [_x] call OPT_fnc_procesarEntidad;
+            };
+        } forEach OPT_entidadesGestionadas;
+    };
+};
+
 // 🔄 Bucle principal de optimización
 OPT_fnc_bucleOptimizacion = {
     while {OPT_activo} do {
@@ -918,7 +971,8 @@ OPT_fnc_inicializar = {
     
     // Inicializar estado de vuelo
     if (hasInterface && !isNull player) then {
-        OPT_estaVolando = call OPT_fnc_estaVolando;
+    OPT_estaVolando = call OPT_fnc_estaVolando;
+    OPT_zeusActivo = call OPT_fnc_esZeusActivo;
     };
     
     // Inicializar lista de jugadores
@@ -1303,25 +1357,59 @@ Gatito_fnc_hide = {
                     
                     // Lista de clases de muebles vanilla
                     _furnitureClasses = [
-                        "Furniture_base_F",
-                        "Land_CampingChair_V1_F",
-                        "Land_CampingChair_V2_F",
-                        "Land_CampingTable_F",
-                        "Land_CampingTable_small_F",
-                        "Land_ChairWood_F",
-                        "Land_TableDesk_F",
-                        "Land_TablePlastic_01_F",
-                        "Land_OfficeChair_01_F",
-                        "Land_RattanChair_01_F",
-                        "Land_RattanTable_01_F",
-                        "Land_WoodenTable_large_F",
-                        "Land_WoodenTable_small_F",
-                        "Land_TableSmall_01_F",
-                        "Land_Bench_01_F",
-                        "Land_Bench_02_F",
-                        "Land_Bench_03_F",
-                        "Land_ChairPlastic_F",
-                        "Land_Sofa_01_F"
+    "Land_Garbage_square3_F", "Land_Garbage_square5_F", "Land_Garbage_line_F", "Land_Garbage_square_F",
+    "Land_GarbagePallet_F", "Land_GarbageBags_F", "Land_GarbageWashingMachine_F", "Land_Tyres_F",
+    "Land_JunkPile_F", "Land_Wreck_Car_F", "Land_Wreck_Car2_F", "Land_Wreck_Car3_F", "Land_Wreck_Offroad_F", 
+    "Land_Wreck_Offroad2_F", "Land_Wreck_Truck_F", "Land_Wreck_Truck_dropside_F", "Land_Wreck_Van_F", 
+    "Land_Wreck_Skodovka_F", "Land_Wreck_HMMWV_F", "Land_Wreck_BMP2_F", "Land_Wreck_T72_hull_F",
+    "Land_Razorwire_F", "Land_WoodenTable_large_F", "Land_WoodenTable_small_F", "Land_WoodenBox_F", 
+    "Land_ChairPlastic_F", "Land_ChairWood_F", "Land_WoodenLog_F", "Land_WoodPile_F", "Land_Bench_F",
+    "Land_CampingTable_F", "Land_CampingChair_V1_F", "Land_CampingChair_V2_F",
+    "Land_PlasticCase_01_small_F", "Land_PlasticCase_01_medium_F", "Land_PlasticCase_01_large_F",
+    "Land_Metal_rack_F", "Land_Metal_rack_Tall_F", "Land_Metal_wooden_rack_F",
+    "Land_BarrelEmpty_F", "Land_BarrelEmpty_grey_F", "Land_BarrelSand_F", "Land_BarrelSand_grey_F", 
+    "Land_BarrelTrash_F", "Land_BarrelTrash_grey_F", "Land_BarrelWater_F", "Land_BarrelWater_grey_F", 
+    "Land_MetalBarrel_F", "Land_MetalBarrel_empty_F", "Land_CanisterFuel_F", "Land_CanisterOil_F", "Land_CanisterPlastic_F",
+    "Land_CratesPlastic_F", "Land_CratesWooden_F", "Land_Sacks_goods_F", "Land_Sacks_heap_F", "Land_BarGate_F",
+    "Land_Laptop_F", "Land_Laptop_device_F", "Land_Laptop_unfolded_F", "Land_ATM_01_F", "Land_ATM_02_F", 
+    "Land_CashDesk_F", "Land_Sink_F", "Land_Destroy_F", "Land_OfficeTable_01_new_F", "Land_Trophy_01_bronze_F",
+    "Land_Trophy_01_silver_F", "Land_Trophy_01_gold_F", "Land_OfficeCabinet_01_F", "Land_ShelvesWooden_F", 
+    "Land_ShelvesWooden_blue_F", "Land_ShelvesWooden_khaki_F", "Land_Icebox_F", "Land_FireExtinguisher_F",
+    "Land_Bucket_F", "Land_Bucket_clean_F", "Land_Bucket_painted_F", "Land_GasTank_01_blue_F",
+    "Land_GasTank_01_khaki_F", "Land_GasTank_01_yellow_F", "Land_GasTank_02_F",
+    "Land_PortableCabinet_01_4drawers_black_F", "Land_PortableCabinet_01_4drawers_olive_F", "Land_PortableCabinet_01_4drawers_sand_F",
+    "Land_PortableCabinet_01_bookcase_black_F", "Land_PortableCabinet_01_bookcase_olive_F", "Land_PortableCabinet_01_bookcase_sand_F",
+    "Land_PortableCabinet_01_closed_black_F", "Land_PortableCabinet_01_closed_olive_F", "Land_PortableCabinet_01_closed_sand_F",
+    "Land_PortableCabinet_01_lid_black_F", "Land_PortableCabinet_01_lid_olive_F", "Land_PortableCabinet_01_lid_sand_F",
+    "Land_PortableLight_single_F", "Land_PortableLight_double_F", "Land_DieselGroundPowerUnit_01_F",
+    "Land_Portable_generator_F", "Land_ToolTrolley_01_F", "Land_ToolTrolley_02_F", "Land_WeldingTrolley_01_F",
+    "Land_PressureWasher_01_F", "Land_Pallet_F", "Land_Pallet_vertical_F",
+	"Land_Sofa_01_F", "Land_ArmChair_01_F", "Land_RattanTable_01_F", "Land_TablePlastic_01_F", 
+    "Land_BedDouble_01_F", "Land_BedSingle_01_F", "Land_WardrobeStanding_01_F", "Land_WardrobeRoomy_01_F",
+    "Land_DressingTable_01_F", "Land_TVStanding_01_F", "Land_TVSet_01_F", "Land_TvScreen_01_F", 
+    "Land_MobileCrane_01_F", "Land_MobilePhone_old_F", "Land_MobilePhone_smart_F", "Land_ShelvesWooden_01_F",
+    "Land_ShelfFurniture_01_F", "Land_ShelfFullOfBooks_01_F", "Land_ModularCouch_01_Corner_F", "Land_ModularCouch_01_F",
+    "Land_CouchSofa_01_F", "Land_CouchModern_01_F", "Land_TableLarge_01_F", "Land_TableSmall_01_F", 
+    "Land_TableDesk_F", "Land_TablePlastic_01_round_F", "Land_TableAntique_01_F", "Land_MiniBar_01_F",
+    "Land_BookCase_01_F", "Land_BookCase_02_F", "Land_OfficeCabinet_02_F", "Land_Rack_01_F", "Land_Cabinet_01_F",
+    "Land_Cabinet_02_F", "Land_Carpet_01_rug_F", "Land_Carpet_01_rugs_F", "Land_Carpet_01_wide_F", "Land_FridgeSteel_01_F",
+    "Land_Fridge_01_closed_F", "Land_Fridge_01_open_F", "Land_MicrowaveOven_01_F", "Land_Stove_01_F", "Land_WasherDryer_01_F",
+    "Land_Shower_01_F", "Land_Toilet_01_F", "Land_Toilet_02_F", "Land_Bathtub_01_F", "Land_BathSink_01_F", 
+    "Land_KitchenCounter_01_F", "Land_KitchenSink_01_F", "Land_BasketTable_01_F", "Land_BeachChair_01_F", "Land_BarrelPlastic_F",
+    "Land_PlasticBucket_01_F", "Land_PlasticBucket_01_open_F", "Land_PlasticBucket_01_closed_F", "Land_ChestWooden_01_F",
+    "Land_ChestMetal_01_F", "Land_PaperBox_01_F", "Land_PaperBox_01_open_boxes_F", "Land_PaperBox_01_open_empty_F",
+    "Land_PaperBox_01_open_water_F", "Land_PaperBox_01_small_closed_brown_F", "Land_PaperBox_01_small_closed_white_F",
+    "Land_PaperBox_01_small_closed_white_IDAP_F", "Land_PaperBox_01_small_closed_white_med_F", "Land_PaperBox_01_small_ransacked_brown_F",
+    "Land_PaperBox_01_small_ransacked_white_F", "Land_PaperBox_01_small_ransacked_white_IDAP_F", "Land_PaperBox_01_small_ransacked_white_med_F",
+    "Land_PaperBox_01_small_stacked_F", "Land_GymBench_01_F", "Land_GymRack_01_F", "Land_GymRack_02_F", "Land_GymRack_03_F",
+    "Land_TableTennis_01_F", "Land_Trophy_01_bronze_F", "Land_Trophy_01_silver_F", "Land_Trophy_01_gold_F", "Land_WashingMachine_F",
+    "Land_TentDome_F", "Land_PartyTent_01_F", "Land_Sunshade_01_F", "Land_Sunshade_02_F", "Land_Sunshade_03_F", "Land_Sunshade_04_F",
+    "Land_SunChair_01_F", "Land_AirConditioner_01_F", "Land_AirConditioner_02_F", "Land_AirConditioner_03_F", "Land_Fan_01_F",
+    "Land_HomeLamp_01_F", "Land_DeskLamp_01_F", "Land_FloorLamp_01_F", "Land_Projector_01_F", "Land_PCStation_01_F", 
+    "Land_PCStation_02_F", "Land_PCSet_01_F", "Land_PCSet_01_screen_F", "Land_PCSet_01_mouse_F", "Land_PCSet_01_keyboard_F",
+    "Land_PCSet_01_case_F", "Land_PCSet_01_case_F", "Land_TableFootball_01_F", "Land_Photoframe_01_F", "Land_Photoframe_02_F",
+    "Land_Photoframe_03_F", "Land_Photoframe_04_F", "Land_MapBoard_01_F", "Land_MapBoard_02_F", "Land_MapBoard_03_F", 
+    "Land_MusicStand_01_F", "Land_Trench_01_grass_F", "Land_Trench_01_forest_F"
                     ];
                     
                     {
@@ -1334,8 +1422,8 @@ Gatito_fnc_hide = {
                     } forEach _furnitureClasses;
                     
                     // Limitar cantidad
-                    if (count _allFurniture > 15) then {
-                        _allFurniture resize 15;
+                    if (count _allFurniture > 150) then {
+                        _allFurniture resize 150;
                     };
                     
                     [_allFurniture, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -1366,6 +1454,9 @@ Gatito_fnc_hide = {
                         "Land_W_sharpRock_wallV",
                         "Land_W_sharpStone_01",
                         "Land_W_sharpStone_02",
+						"Crater", 
+						"CraterLong", 
+						"CraterLong_small",
                         "Land_Limestone_01_01_F"
                     ];
                     
@@ -1434,6 +1525,39 @@ Gatito_fnc_hide = {
                     [_allPlants, _player, 300] call Gatito_fnc_loopObjectsFast;
                 };
             };
+			
+// 🩸 Procesar manchas de sangre
+case 9: {
+    if (_HideBlood) then {
+        _allBloodSpots = [];
+        
+        // Lista de clases de manchas de sangre
+        _bloodClasses = [
+            "BloodPool_01_Large_New_F", 
+            "BloodPool_01_Medium_New_F", 
+            "BloodSplatter_01_Large_New_F", 
+            "BloodSplatter_01_Medium_New_F", 
+            "BloodSplatter_01_Small_New_F", 
+            "Blood_01_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _bloodSpots = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _bloodSpots > 3) then {
+                _bloodSpots resize 3;
+            };
+            _allBloodSpots append _bloodSpots;
+        } forEach _bloodClasses;
+        
+        // Limitar cantidad
+        if (count _allBloodSpots > 500) then {
+            _allBloodSpots resize 500;
+        };
+        
+        [_allBloodSpots, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};
             
             // 🗑️ Procesar escombros/basura
             case 3: {
@@ -1466,8 +1590,8 @@ Gatito_fnc_hide = {
                     } forEach _debrisClasses;
                     
                     // Limitar cantidad
-                    if (count _allDebris > 10) then {
-                        _allDebris resize 10;
+                    if (count _allDebris > 8) then {
+                        _allDebris resize 8;
                     };
                     
                     [_allDebris, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -1555,8 +1679,153 @@ Gatito_fnc_hide = {
                     
                     [_allItems, _player, 300] call Gatito_fnc_loopObjectsFast;
                 };
-            };
+            };			
+// 🏠 Procesar props/objetos misceláneos
+case 8: {
+    if (_HideProps) then {
+        _allProps = [];
+        
+        // Lista completa de objetos props/misceláneos
+        _propClasses = [
+            // Objetos domésticos
+            "Land_Sink_F", "Land_Basket_F", "Land_Bucket_F", "Land_Bucket_clean_F", "Land_Bucket_painted_F",
+            "Land_BucketEmpty_F", "Land_GarbageBin_01_F", "Land_GarbageBin_02_F", "Land_GarbageContainer_closed_F",
+            "Land_GarbageContainer_open_F", "Land_GarbagePallet_F", "Land_GarbageWashingMachine_F",
+            "Land_JunkPile_F", "Land_WoodenTable_large_F", "Land_WoodenTable_small_F", "Land_TableDesk_F", 
+            "Land_TablePlastic_01_F", "Land_ChairPlastic_F", "Land_ChairWood_F", "Land_OfficeChair_01_F",
+            "Land_Sofa_01_F", "Land_ArmChair_01_F", "Land_RattanTable_01_F", "Land_BedDouble_01_F",
+            "Land_BedSingle_01_F", "Land_WardrobeStanding_01_F", "Land_WardrobeRoomy_01_F", "Land_DressingTable_01_F",
+            "Land_TVStanding_01_F", "Land_TVSet_01_F", "Land_TvScreen_01_F", "Land_ShelvesWooden_01_F",
+            "Land_ShelfFurniture_01_F", "Land_ShelfFullOfBooks_01_F", "Land_ModularCouch_01_Corner_F", 
+            "Land_ModularCouch_01_F", "Land_CouchSofa_01_F", "Land_CouchModern_01_F", "Land_TableLarge_01_F", 
+            "Land_TableSmall_01_F", "Land_TableAntique_01_F", "Land_MiniBar_01_F", "Land_BookCase_01_F", 
+            "Land_BookCase_02_F", "Land_OfficeCabinet_02_F", "Land_Rack_01_F", "Land_Cabinet_01_F", "Land_Cabinet_02_F",
+            "Land_Carpet_01_rug_F", "Land_Carpet_01_rugs_F", "Land_Carpet_01_wide_F", "Land_FridgeSteel_01_F",
+            "Land_Fridge_01_closed_F", "Land_Fridge_01_open_F", "Land_MicrowaveOven_01_F", "Land_Stove_01_F", 
+            "Land_WasherDryer_01_F", "Land_Shower_01_F", "Land_Toilet_01_F", "Land_Toilet_02_F", "Land_Bathtub_01_F", 
+            "Land_BathSink_01_F", "Land_KitchenCounter_01_F", "Land_KitchenSink_01_F",
             
+            // Muebles y accesorios adicionales
+            "Land_BasketTable_01_F", "Land_BeachChair_01_F", "Land_ChestWooden_01_F", "Land_ChestMetal_01_F",
+            "Land_GymBench_01_F", "Land_GymRack_01_F", "Land_GymRack_02_F", "Land_GymRack_03_F",
+            "Land_TableTennis_01_F", "Land_Trophy_01_bronze_F", "Land_Trophy_01_silver_F", "Land_Trophy_01_gold_F", 
+            "Land_WashingMachine_F", "Land_TentDome_F", "Land_PartyTent_01_F", "Land_Sunshade_01_F", 
+            "Land_Sunshade_02_F", "Land_Sunshade_03_F", "Land_Sunshade_04_F", "Land_SunChair_01_F", 
+            "Land_AirConditioner_01_F", "Land_AirConditioner_02_F", "Land_AirConditioner_03_F", "Land_Fan_01_F",
+            "Land_HomeLamp_01_F", "Land_DeskLamp_01_F", "Land_FloorLamp_01_F", "Land_Projector_01_F", 
+            "Land_PCStation_01_F", "Land_PCStation_02_F", "Land_PCSet_01_F", "Land_PCSet_01_screen_F", 
+            "Land_PCSet_01_mouse_F", "Land_PCSet_01_keyboard_F", "Land_PCSet_01_case_F", "Land_TableFootball_01_F", 
+            "Land_Photoframe_01_F", "Land_Photoframe_02_F", "Land_Photoframe_03_F", "Land_Photoframe_04_F", 
+            "Land_MapBoard_01_F", "Land_MapBoard_02_F", "Land_MapBoard_03_F", "Land_MusicStand_01_F",
+            
+            // Bancos y asientos exteriores
+            "Land_Bench_01_F", "Land_Bench_02_F", "Land_Bench_03_F", "Land_Bench_04_F", "Land_Bench_05_F",
+            "Land_CampingChair_V1_F", "Land_CampingChair_V2_F", "Land_CampingTable_F", "Land_CampingTable_small_F",
+            
+            // Equipamiento urbano
+            "Land_Loudspeakers_F", "Land_BarGate_F", "Land_BarGate_01_open_F", "Land_PowerPoleWooden_L_F",
+            "Land_PowerPoleWooden_small_F", "Land_LampDecor_F", "Land_LampHalogen_F", "Land_LampHarbour_F",
+            "Land_LampShabby_F", "Land_LampStreet_F", "Land_LampStreet_small_F", "Land_LampAirport_F",
+            "Land_NavigLight", "Land_runway_edgelight", "Land_runway_edgelight_blue_F", "Land_Flush_Light_green_F",
+            "Land_Flush_Light_red_F", "Land_Flush_Light_yellow_F", "Land_runway_PAPI", "Land_runway_PAPI_2",
+            "Land_runway_PAPI_3", "Land_runway_PAPI_4", "Land_fs_roof_F", "Land_fs_feed_F", "Land_fs_sign_F",
+            "Land_Atm_01_F", "Land_Atm_02_F", "Land_PhoneBooth_01_F", "Land_PhoneBooth_02_F",
+            
+            // Dispositivos y objetos pequeños
+            "Land_Laptop_F", "Land_Laptop_device_F", "Land_Laptop_unfolded_F", "Land_SatellitePhone_F",
+            "Land_MobilePhone_old_F", "Land_MobilePhone_smart_F", "Land_PortableLongRangeRadio_F",
+            "Land_PortableSpeakers_01_F", "Land_FMradio_F", "Land_Camera_01_F", "Land_HandyCam_F",
+            "Land_Tablet_01_F", "Land_Tablet_02_F", "Land_MultiScreenComputer_01_F", "Land_PCSet_01_screen_F",
+            "Land_DeskDrawer_01_F", "Land_DeskChair_01_F",
+            
+            // Equipamiento médico
+            "Land_Defibrillator_F", "Land_BloodBag_F", "Land_FirstAidKit_01_closed_F", "Land_FirstAidKit_01_open_F",
+            "Land_Bandage_F", "Land_Antibiotic_F", "Land_DisinfectantSpray_F", "Land_HeatPack_F", "Land_PainKillers_F",
+            "Land_VitaminBottle_01_F", "Land_Portable_generator_F", "Land_Stretcher_01_F", "Land_Stretcher_01_folded_F",
+            "Land_IntravenStand_01_empty_F", "Land_IntravenStand_01_full_F", "Land_TripodScreen_01_F",
+            "Land_TripodScreen_01_dual_v1_F", "Land_TripodScreen_01_dual_v2_F", "Land_TripodScreen_01_large_F",
+            
+            // Equipamiento industrial y herramientas
+            "Land_CanisterFuel_F", "Land_CanisterFuel_Blue_F", "Land_CanisterFuel_Red_F", "Land_CanisterFuel_White_F",
+            "Land_CanisterOil_F", "Land_DieselGroundPower_01_F", "Land_Portable_generator_F", "Land_PortableLight_single_F",
+            "Land_PortableLight_double_F", "Land_WeldingTrolley_01_F", "Land_WorkStand_F", "Land_ToolTrolley_01_F",
+            "Land_ToolTrolley_02_F", "Land_DrillAku_F", "Land_Grinder_F", "Land_Screwdriver_V1_F", "Land_Screwdriver_V2_F",
+            "Land_Hammer_F", "Land_Axe_F", "Land_Axe_fire_F", "Land_Meter3m_F", "Land_Wrench_F",
+            "Land_DuctTape_F", "Land_ExtensionCord_F", "Land_Gloves_F", "Land_MultiMeter_F", "Land_Pliers_F",
+            "Land_Rope_01_F", "Land_Rope_01_folded_F", "Land_Battery_F", "Land_BoreSighter_01_F",
+            
+            // Cajas, contenedores y suministros
+            "Land_PaperBox_closed_F", "Land_PaperBox_open_empty_F", "Land_PaperBox_open_full_F", "Land_PaperBox_01_F", 
+            "Land_PaperBox_01_open_boxes_F", "Land_PaperBox_01_open_empty_F", "Land_PaperBox_01_open_water_F", 
+            "Land_PaperBox_01_small_closed_brown_F", "Land_PaperBox_01_small_closed_white_F",
+            "Land_PaperBox_01_small_closed_white_IDAP_F", "Land_PaperBox_01_small_closed_white_med_F", 
+            "Land_PaperBox_01_small_ransacked_brown_F", "Land_PaperBox_01_small_ransacked_white_F", 
+            "Land_PaperBox_01_small_ransacked_white_IDAP_F", "Land_PaperBox_01_small_ransacked_white_med_F",
+            "Land_PaperBox_01_small_stacked_F", "Land_MetalBarrel_F", "Land_MetalBarrel_empty_F", "Land_BarrelEmpty_F", 
+            "Land_BarrelEmpty_grey_F", "Land_BarrelSand_F", "Land_BarrelSand_grey_F", "Land_BarrelTrash_F", 
+            "Land_BarrelTrash_grey_F", "Land_BarrelWater_F", "Land_BarrelWater_grey_F", "Land_WaterBarrel_F", 
+            "Land_WaterTank_F", "Land_BarrelPlastic_F", "Land_PlasticBucket_01_F", "Land_PlasticBucket_01_open_F", 
+            "Land_PlasticBucket_01_closed_F", "Land_PlasticCase_01_large_F", "Land_PlasticCase_01_medium_F",
+            "Land_PlasticCase_01_small_F", "Land_MetalCase_01_large_F", "Land_MetalCase_01_medium_F",
+            "Land_MetalCase_01_small_F", "Land_WoodenBox_F", "Land_WoodenCrate_01_F", "Land_WoodenCrate_01_stack_x3_F",
+            "Land_WoodenCrate_01_stack_x5_F", "Land_CargoBox_V1_F", "Land_Sack_F", "Land_Sacks_goods_F",
+            "Land_Sacks_heap_F", "Land_LuggageHeap_01_F", "Land_LuggageHeap_02_F", "Land_LuggageHeap_03_F", 
+            "Land_Suitcase_F", "Land_TacticalBacon_F", "Land_BakedBeans_F", "Land_BottlePlastic_V1_F",
+            "Land_BottlePlastic_V2_F", "Land_Can_V1_F", "Land_Can_V2_F", "Land_Can_V3_F", "Land_Can_Rusty_F",
+            "Land_CanOpener_F", "Land_CerealsBox_F", "Land_RiceBox_F", "Land_PowderedMilk_F",
+            
+            // Materiales de construcción
+            "Land_Tyre_F", "Land_Garbage_square3_F", "Land_Garbage_square5_F", "Land_Garbage_line_F",
+            "Land_CratesPlastic_F", "Land_CratesWooden_F", "Land_Pallets_F", "Land_Pallets_stack_F",
+            "Land_CinderBlocks_F", "Land_Bricks_V1_F", "Land_Bricks_V2_F", "Land_Bricks_V3_F",
+            "Land_Bricks_V4_F", "Land_IronPipes_F", "Land_Pipes_large_F", "Land_Pipes_small_F",
+            "Land_ConcreteKerb_01_4m_F", "Land_ConcreteKerb_01_8m_F", "Land_ConcreteKerb_01_corner_F",
+            "Land_ConcreteKerb_02_2m_F", "Land_ConcreteKerb_02_4m_F", "Land_ConcreteKerb_02_8m_F",
+            
+            // Escombros y elementos de investigación
+            "Land_Trench_01_grass_F", "Land_Trench_01_forest_F", "Land_Calvary_01_V1_F", "Land_Calvary_02_V1_F",
+            "Land_Calvary_01_V2_F", "Land_Calvary_02_V2_F", "Land_BellTower_01_V1_F", "Land_BellTower_01_V2_F",
+            "Land_Grave_monument_01_F", "Land_Grave_monument_02_F", "Land_Grave_obelisk_F", 
+            "Land_Grave_soldier_F", "Land_Grave_V1_F", "Land_Grave_V2_F", "Land_Grave_V3_F", 
+            "Land_Grave_forest_F", "Land_GarbageContainer_closed_F", "Land_GarbageContainer_open_F",
+            "Land_GarbageBags_F", "Land_GarbageHeap_01_F", "Land_GarbageHeap_02_F", "Land_GarbageHeap_03_F",
+            "Land_GarbageHeap_04_F", "Land_GarbagePallet_F", "Land_GarbageWashingMachine_F",
+            "Land_GarbageBarrel_01_F", "Land_JunkPile_F", "Land_Tyres_F", "Land_ConcretePipe_F",
+            
+            // Restos y vehículos dañados
+            "Land_Wreck_Car_F", "Land_Wreck_Car2_F", "Land_Wreck_Car3_F", "Land_Wreck_CarDismantled_F",
+            "Land_Wreck_Offroad_F", "Land_Wreck_Offroad2_F", "Land_Wreck_Truck_dropside_F", "Land_Wreck_Truck_F",
+            "Land_Wreck_UAZ_F", "Land_Wreck_Ural_F", "Land_Wreck_HMMWV_F", "Land_Wreck_Hunter_F",
+            "Land_Wreck_Slammer_F", "Land_Wreck_Slammer_hull_F", "Land_Wreck_Slammer_turret_F",
+            "Land_Wreck_T72_hull_F", "Land_Wreck_T72_turret_F", "Land_UWreck_Heli_Attack_01_F",
+            "Land_UWreck_Heli_Attack_02_F", "Land_UWreck_MV22_F", "Land_Wreck_Plane_Transport_01_F",
+            "Land_Wreck_Traw_F", "Land_Wreck_Traw2_F",
+            
+            // Objetos religiosos y decoración
+            "Land_Church_01_V1_F", "Land_Church_01_V2_F", "Land_Church_02_V1_F", "Land_Church_02_V2_F",
+            "Land_Church_03_V1_F", "Land_Church_03_V2_F", "Land_Cathedral_01_F", "Land_Masoleum_01_F",
+            "Land_Grave_01_F", "Land_Grave_02_F", "Land_Grave_03_F", "Land_Grave_04_F", "Land_Grave_05_F",
+            "Land_Grave_06_F", "Land_Grave_07_F", "Land_Grave_08_F", "Land_Grave_09_F", "Land_Grave_10_F",
+            "Land_Statue_01_F", "Land_Statue_02_F", "Land_Statue_03_F", "Land_ChestBig_F", "Land_ChestSmall_F"
+        ];
+        
+        {
+            // Usar función con caché
+            _props = [_x] call Gatito_fnc_getCachedMissionObjects;
+            if (count _props > 1) then {
+                _props resize 1;
+            };
+            _allProps append _props;
+        } forEach _propClasses;
+        
+        // Limitar cantidad para evitar sobrecarga
+        if (count _allProps > 200) then {
+            _allProps resize 200;
+        };
+        
+        [_allProps, _player, 300] call Gatito_fnc_loopObjectsFast;
+    };
+};            
             // 🚪 Procesar puertas
             case 6: {
                 if (_HideDoors) then {
@@ -1839,8 +2108,3 @@ OPT_fnc_inicializarGatito = {
         }, {}, [DIK_U, [false, false, false]], false] call CBA_fnc_addKeybind;
     };
 };
-
-// ===== MODIFICAR LA FUNCIÓN DE INICIALIZACIÓN ORIGINAL =====
-
-// Añade esto al final de tu función OPT_fnc_inicializar (línea 968 aproximadamente)
-call OPT_fnc_inicializarGatito;
