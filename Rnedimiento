@@ -10,7 +10,7 @@
 // ===== DEFINICIÓN DE PARÁMETROS Y VARIABLES GLOBALES =====
 if (isNil "_this") then {_this = [300, 2000, true, true, true, true]};
 params [
-    ["_radioSimulacionParam", 50, [0]],         // Radio de simulación completa
+    ["_radioSimulacionParam", 750, [0]],         // Radio de simulación completa
     ["_distanciaMaximaParam", 1000, [0]],        // Distancia máxima para optimización
     ["_optimizarIAParam", true, [true]],         // Activar optimización de IA
     ["_optimizarVehiculosParam", true, [true]],  // Activar optimización de vehículos
@@ -45,7 +45,7 @@ OPT_entidadesGestionadas = [];
 OPT_cacheTiempo = time;
 OPT_intervaloCacheado = 5;
 OPT_ultimaPosJugador = [0,0,0];
-OPT_distanciaMovimiento = 50;
+OPT_distanciaMovimiento = 750;
 OPT_sectores = [];
 OPT_sectorActual = "";
 OPT_marcoSectores = 1000;
@@ -66,7 +66,7 @@ OPT_clasesDecorativas = ["Furniture_base_F", "Items_base_F", "House_Small_F", "H
 OPT_ultimaLimpieza = time;
 OPT_radioDecoraciones = 50; // Radio para optimización de decoraciones (más agresivo)
 OPT_version = "3.3";
-OPT_radioJugadores = 50; // Radio para detectar jugadores cercanos
+OPT_radioJugadores = 750; // Radio para detectar jugadores cercanos
 OPT_todosJugadores = []; // Array para almacenar todos los jugadores
 OPT_zeusActivo = false; // Variable para controlar si el Zeus está activo
 OPT_ultimaComprobacionZeus = time; // Última comprobación de Zeus
@@ -2535,3 +2535,45 @@ OPT_fnc_inicializarGatito = {
         }, {}, [DIK_U, [false, false, false]], false] call CBA_fnc_addKeybind;
     };
 };
+
+
+// ====== SOLUCIÓN FINAL ZEUS - COMPATIBLE CON MAPA ======
+if (hasInterface) then {
+    [] spawn {
+        waitUntil {!isNull player};
+        
+        // Variable para rastrear estado de Zeus específicamente
+        private _zeusActivo = false;
+        
+        // Bucle independiente y seguro
+        while {true} do {
+            // Verificar SOLO la interfaz de Zeus (312) y no otras
+            private _zeusAbierto = !isNull findDisplay 312;
+            
+            // Solo hacer cambios si el estado cambió
+            if (_zeusAbierto != _zeusActivo) then {
+                _zeusActivo = _zeusAbierto;
+                
+                if (_zeusActivo) then {
+                    // ENTRAR A ZEUS - Configuración fija
+                    setViewDistance 5000;
+                    setObjectViewDistance [3000, 0];
+                    0 setFog 0;
+                    setTerrainGrid 12.5;
+                };
+            };
+            
+            // Mantener configuración si Zeus sigue activo
+            if (_zeusActivo) then {
+                // Prevenir parpadeo sin afectar mapa
+                if (!isNull findDisplay 312) then {
+                    0 setFog 0;
+                };
+            };
+            
+            // Control de frecuencia para evitar problemas
+            sleep 0.1;
+        };
+    };
+};
+// ========== FIN SOLUCIÓN ZEUS ==========
