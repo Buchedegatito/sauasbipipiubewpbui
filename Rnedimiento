@@ -90,6 +90,17 @@ OPT_intervaloEscaneoObjetos = 5; // Intervalo para escanear objetos lejanos
 OPT_clasesTerrenoExcluidas = ["Land_VR_Shape_01_cube_1m_F"]; // Objetos que no se deben ocultar
 OPT_displayListo = false; // Indica si el display ya está listo
 
+
+// === VARIABLES PARA CALIDAD DINÁMICA ===
+OPT_calidadDinamicaActivada = true; // Activar/desactivar sistema
+OPT_calidadTerrenoOriginal = 25; // Valor por defecto si no se puede obtener el original
+OPT_ultimaActualizacionCalidad = time;
+OPT_intervaloActualizacionCalidad = 2; // Intervalo para actualizar calidad (segundos)
+OPT_calidad_NivelTerreno = [50, 25, 12.5, 6.25, 3.125]; // Niveles de calidad del terreno
+OPT_calidad_UltimoNivel = -1; // Último nivel aplicado (-1 = ninguno)
+OPT_calidad_SuavizadoActivado = true; // Transiciones suaves
+OPT_calidad_ObjetosProcesados = []; // Objetos ya procesados
+
 // ===== SISTEMA DE LOG VACÍO =====
 OPT_fnc_log = {
     // Función vacía para eliminar todos los mensajes de debug
@@ -111,6 +122,130 @@ OPT_fnc_esZeusActivo = {
             true
         };
     };
+};
+
+
+// ===== FUNCIÓN PARA APLICAR CALIDAD DINÁMICA =====
+OPT_fnc_aplicarCalidadDinamica = {
+    // Solo ejecutar si tenemos interfaz, jugador existe y está activado
+    if (!hasInterface || isNull player || !OPT_calidadDinamicaActivada) exitWith {};
+    
+    if (time < OPT_ultimaActualizacionCalidad + OPT_intervaloActualizacionCalidad) exitWith {};
+    OPT_ultimaActualizacionCalidad = time;
+    
+    // Determinar nivel base según estado del jugador
+    private _nivelBase = 2; // Nivel medio por defecto
+    
+    // Verificar si el jugador está en un vehículo
+    if (vehicle player != player) then {
+        _nivelBase = 3; // En vehículo: calidad menor
+    };
+    
+    // Verificar si está volando
+    if (OPT_estaVolando) then {
+        _nivelBase = 4; // Volando: calidad mínima de terreno
+    };
+    
+    // Si está en Zeus, priorizar calidad
+    if (OPT_zeusActivo) then {
+        _nivelBase = 1; // Zeus: calidad alta
+    };
+    
+    // Mirar si el jugador está mirando directamente al terreno
+    private _camPos = positionCameraToWorld [0,0,0];
+    private _camDir = vectorNormalized (positionCameraToWorld [0,0,1] vectorDiff _camPos);
+    private _mirandoTerreno = terrainIntersect [_camPos, _camPos vectorAdd (_camDir vectorMultiply 30)];
+    
+    if (_mirandoTerreno && !OPT_estaVolando) then {
+        _nivelBase = _nivelBase - 1; // Mejora calidad si mira al terreno
+        _nivelBase = _nivelBase max 0; // Mínimo nivel 0 (máxima calidad)
+    };
+    
+    // Aplicar nivel de terreno con suavizado para evitar parpadeos
+    if (OPT_calidad_UltimoNivel == -1) then {
+        OPT_calidad_UltimoNivel = _nivelBase; // Primera vez
+    } else {
+        // Suavizar transición
+        if (OPT_calidad_SuavizadoActivado && OPT_calidad_UltimoNivel != _nivelBase) then {
+            // Acercarse gradualmente al nivel objetivo
+            if (_nivelBase > OPT_calidad_UltimoNivel) then {
+                OPT_calidad_UltimoNivel = OPT_calidad_UltimoNivel + 1;
+            } else {
+                OPT_calidad_UltimoNivel = OPT_calidad_UltimoNivel - 1;
+            };
+        } else {
+            OPT_calidad_UltimoNivel = _nivelBase;
+        };
+    };
+    
+    // Aplicar calidad de terreno
+    if (!isNil "setTerrainGrid") then {
+        setTerrainGrid (OPT_calidad_NivelTerreno select (OPT_calidad_UltimoNivel min 4));
+    };
+    
+    // Procesar objetos cercanos para calidad dinámica
+    private _posJugador = getPosATL player;
+    private _procesados = 0;
+    private _maxProcesar = 20; // Límite por iteración
+    
+    {
+        // Solo procesar si tiene nivel de calidad asignado
+        private _nivelCalidad = _x getVariable ["OPT_nivelCalidad", -1];
+        if (_nivelCalidad != -1 && _procesados < _maxProcesar) then {
+            // Verificar si está en vista
+            private _enVista = [objNull, "VIEW"] checkVisibility [_camPos, getPosASL _x] > 0;
+            
+            // Solo procesar si está en vista o muy cercano
+            if (_enVista || _x distance _posJugador < 20) then {
+                // Ajustar nivel según visibilidad
+                private _nivelFinal = _nivelCalidad;
+                if (!_enVista) then {
+                    _nivelFinal = _nivelFinal + 1; // Reducir calidad si no está en vista
+                };
+                
+                // Limitar nivel
+                _nivelFinal = _nivelFinal min 4;
+                
+                // Obtener nivel actual aplicado
+                private _nivelActual = _x getVariable ["OPT_nivelCalidadAplicado", -1];
+                
+                // Solo cambiar si es diferente (evita parpadeos por cambios constantes)
+                if (_nivelActual != _nivelFinal) then {
+                    // Aplicar cambio de calidad con transición suave
+                    if (OPT_calidad_SuavizadoActivado && _nivelActual != -1) then {
+                        // Mover un paso hacia el nivel final
+                        if (_nivelFinal > _nivelActual) then {
+                            _nivelActual = _nivelActual + 1;
+                        } else {
+                            _nivelActual = _nivelActual - 1;
+                        };
+                    } else {
+                        _nivelActual = _nivelFinal;
+                    };
+                    
+                    // Guardar nivel aplicado
+                    _x setVariable ["OPT_nivelCalidadAplicado", _nivelActual];
+                    
+                    // Aplicar calidad
+                    // Nota: Arma 3 no permite modificar directamente los LOD, pero podemos simular esto
+                    // usando setObjectMaterial o ajustando parámetros específicos
+                    
+                    // Este método es sutil y bastante efectivo con bajo impacto visual
+                    _x enableSimulation (_nivelActual < 3); // Desactivar simulación en niveles muy bajos
+                    
+                    // Guardar en lista de procesados
+                    if !(_x in OPT_calidad_ObjetosProcesados) then {
+                        OPT_calidad_ObjetosProcesados pushBack _x;
+                    };
+                    
+                    _procesados = _procesados + 1;
+                };
+            };
+        };
+    } forEach OPT_entidadesGestionadas;
+    
+    // Limpiar lista de objetos procesados (remover nulos)
+    OPT_calidad_ObjetosProcesados = OPT_calidad_ObjetosProcesados select {!isNull _x};
 };
 
 // ===== FUNCIÓN PARA COMPROBAR SI EL JUGADOR ESTÁ VOLANDO =====
@@ -291,6 +426,7 @@ OPT_fnc_hayJugadoresCercanos = {
 // 📊 Calcular prioridad basada en distancia, jugadores cercanos y sector
 OPT_fnc_calcularPrioridad = {
     params ["_entidad"];
+    private _nivelCalidad = 0; // 0 = máxima calidad, 4 = mínima calidad
     
     // Comprobar si hay jugadores cercanos (dentro de 1000m)
     private _hayJugadoresCercanos = [_entidad] call OPT_fnc_hayJugadoresCercanos;
@@ -370,6 +506,35 @@ OPT_fnc_calcularPrioridad = {
                         };
                     } forEach OPT_eventosImportantes;
                     
+					
+					
+					// Determinar nivel de calidad basado en prioridad y distancia
+if (_prioridad == 1) then {
+    _nivelCalidad = 0; // Máxima calidad para alta prioridad
+} else {
+    if (_prioridad == 2) then {
+        _nivelCalidad = 1; // Calidad alta-media para prioridad media
+    } else {
+        if (_prioridad == 3) then {
+            _nivelCalidad = 2; // Calidad media para baja prioridad
+        } else {
+            _nivelCalidad = 3; // Calidad baja para objetos sin prioridad
+        };
+    };
+    
+    // Ajustar según distancia adicional
+    if (_distancia > OPT_radioSimulacion * 3) then {
+        _nivelCalidad = _nivelCalidad + 1;
+    };
+    
+    // Máximo nivel 4
+    _nivelCalidad = _nivelCalidad min 4;
+};
+
+// Guardar nivel de calidad en la entidad
+_entidad setVariable ["OPT_nivelCalidad", _nivelCalidad];
+
+					
                     // Ajustes por tipo de entidad
                     if (_entidad isKindOf "CAManBase") then {
                         // Prioridad adicional para unidades en combate
@@ -651,6 +816,12 @@ OPT_fnc_actualizarCache = {
     } else {
         OPT_cacheTiempo = time;
         
+		// Ocultar objetos lejanos
+call OPT_fnc_ocultarObjetosLejanos;
+
+// Aplicar calidad dinámica
+call OPT_fnc_aplicarCalidadDinamica;
+		
         // Compartir posición del jugador con headless clients
         if (!OPT_enHeadless && hasInterface && !isNull player) then {
             missionNamespace setVariable ["OPT_posicionJugadorGlobal", getPosATL player, true];
@@ -711,6 +882,10 @@ OPT_fnc_actualizarCache = {
         // Eliminar entidades eliminadas de la lista
         OPT_entidadesGestionadas = OPT_entidadesGestionadas select {!isNull _x};
         
+		    // Limpiar objetos de calidad procesados
+    OPT_calidad_ObjetosProcesados = OPT_calidad_ObjetosProcesados select {!isNull _x};
+    
+		
         // Limpiar eventos caducados
         if (time - OPT_ultimoEvento > 10) then {
             OPT_eventosImportantes = OPT_eventosImportantes select {(_x select 2) > time};
@@ -923,6 +1098,14 @@ OPT_fnc_detectarDecoraciones = {
             } forEach _objetos;
         } forEach OPT_clasesDecorativas;
         
+		// Guardar configuración original de calidad
+if (hasInterface) then {
+    // Guardar valor original del terreno si está disponible
+    if (!isNil "getTerrainGrid") then {
+        OPT_calidadTerrenoOriginal = getTerrainGrid;
+    };
+};
+		
         // Programar próxima búsqueda
         if (OPT_tieneCBA) then {
             [OPT_fnc_detectarDecoraciones, [], 60] call CBA_fnc_waitAndExecute;
@@ -1099,6 +1282,29 @@ if (isServer) then {
     // Iniciar bucle de optimización
     [] spawn OPT_fnc_bucleOptimizacion;
 };
+
+
+// Restaurar calidad original
+OPT_fnc_restaurarCalidadOriginal = {
+    if (!hasInterface) exitWith {};
+    
+    // Restaurar terreno
+    if (!isNil "setTerrainGrid") then {
+        setTerrainGrid OPT_calidadTerrenoOriginal;
+    };
+    
+    // Restaurar objetos
+    {
+        if (!isNull _x) then {
+            _x enableSimulation true;
+            _x setVariable ["OPT_nivelCalidadAplicado", nil];
+        };
+    } forEach OPT_calidad_ObjetosProcesados;
+    
+    // Limpiar
+    OPT_calidad_ObjetosProcesados = [];
+};
+
 
 // ===== EVENTO TERMINAR MISION =====
 addMissionEventHandler ["Ended", {
@@ -1501,8 +1707,8 @@ Gatito_fnc_hide = {
                     } forEach _furnitureClasses;
                     
                     // Limitar cantidad
-                    if (count _allFurniture > 150) then {
-                        _allFurniture resize 150;
+                    if (count _allFurniture > 100) then {
+                        _allFurniture resize 100;
                     };
                     
                     [_allFurniture, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -1656,8 +1862,8 @@ case 12: {
         } forEach _urbanClasses;
         
         // Limitar cantidad
-        if (count _allUrbanObjects > 12) then {
-            _allUrbanObjects resize 12;
+        if (count _allUrbanObjects > 15) then {
+            _allUrbanObjects resize 15;
         };
         
         [_allUrbanObjects, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -1691,8 +1897,8 @@ case 13: {
         } forEach _vegetationClasses;
         
         // Limitar cantidad
-        if (count _allVegetation > 25) then {
-            _allVegetation resize 25;
+        if (count _allVegetation > 15) then {
+            _allVegetation resize 15;
         };
         
         [_allVegetation, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -1894,8 +2100,8 @@ case 9: {
                     } forEach _itemClasses;
                     
                     // Limitar cantidad
-                    if (count _allItems > 10) then {
-                        _allItems resize 10;
+                    if (count _allItems > 7) then {
+                        _allItems resize 7;
                     };
                     
                     [_allItems, _player, 300] call Gatito_fnc_loopObjectsFast;
@@ -2040,8 +2246,8 @@ case 8: {
         } forEach _propClasses;
         
         // Limitar cantidad para evitar sobrecarga
-        if (count _allProps > 200) then {
-            _allProps resize 200;
+        if (count _allProps > 15) then {
+            _allProps resize 15;
         };
         
         [_allProps, _player, 300] call Gatito_fnc_loopObjectsFast;
