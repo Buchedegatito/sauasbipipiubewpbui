@@ -1,0 +1,4059 @@
+class CfgPatches
+{
+	class vests_f_JCA_MCRP
+	{
+		addonRootClass="A3_Characters_F";
+		requiredAddons[]=
+		{
+		};
+		requiredVersion=0.1;
+		units[]=
+		{
+		};
+		weapons[]=
+		{
+		};
+	};
+};
+class CfgWeapons
+{
+	class ItemCore;
+	class Vest_Camo_Base: ItemCore
+	{
+		class ItemInfo;
+	};
+	class V_CarrierRigKBT_01_base_F;
+	class V_CarrierRigKBT_01_light_base_F;
+	class V_CarrierRigKBT_01_heavy_base_F;
+	class JCA_MCRP_V_CarrierRigKBT_06_base_F: Vest_Camo_Base
+	{
+		scope=0;
+		model="vests_f_JCA_MCRP\Data\V_CarrierRigKBT_06_F.p3d";
+		hiddenSelections[]=
+		{
+			"Camo",
+			"Nametag",
+			"Patch_01",
+			"Patch_02",
+			"Patch_03"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"vests_f_JCA_MCRP\Data\V_KBT\Nametag\CarrierRigKBT_Nametag_default_CO.paa",
+			"vests_f_JCA_MCRP\Data\V_KBT\Patch\CarrierRigKBT_Patch_default_CA.paa",
+			"vests_f_JCA_MCRP\Data\V_KBT\Patch\CarrierRigKBT_Patch_default_CA.paa",
+			"vests_f_JCA_MCRP\Data\V_KBT\Patch\CarrierRigKBT_Patch_default_CA.paa"
+		};
+		descriptionShort="Chaleco diseñado para uso de unidad con Ametralladoras pesadas y Ligeras";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="vests_f_JCA_MCRP\Data\V_CarrierRigKBT_06_F.p3d";
+			hiddenSelections[]=
+			{
+				"Camo",
+				"Nametag",
+				"Patch_01",
+				"Patch_02",
+				"Patch_03"
+			};
+			containerClass="Supply60";
+			mass=60;
+			class HitpointsProtectionInfo
+			{
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.30000001;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_combat_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_combat_F.p3d";
+			containerClass="Supply130";
+			mass=65;
+			class HitpointsProtectionInfo
+			{
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.30000001;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_command_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_command_F.p3d";
+			containerClass="Supply130";
+			mass=75;
+			class HitpointsProtectionInfo
+			{
+				class Arms
+				{
+					hitpointName="HitArms";
+					armor=8;
+					passThrough=0.5;
+				};
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.60000002;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_compact_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_compact_F.p3d";
+			containerClass="Supply130";
+			mass=65;
+			class HitpointsProtectionInfo
+			{
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Pelvis
+				{
+					hitpointName="HitPelvis";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.60000002;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_cqb_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_cqb_F.p3d";
+			containerClass="Supply130";
+			mass=75;
+			class HitpointsProtectionInfo
+			{
+				class Neck
+				{
+					hitpointName="HitNeck";
+					armor=0.5;
+					passThrough=0.5;
+				};
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Pelvis
+				{
+					hitpointName="HitPelvis";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.60000002;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_crew_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_crew_F.p3d";
+			containerClass="Supply130";
+			mass=65;
+			class HitpointsProtectionInfo
+			{
+				class Neck
+				{
+					hitpointName="HitNeck";
+					armor=0.5;
+					passThrough=0.5;
+				};
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.60000002;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_holster_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_holster_F.p3d";
+			containerClass="Supply20";
+			mass=10;
+			class HitpointsProtectionInfo
+			{
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_recon_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_recon_F.p3d";
+			containerClass="Supply130";
+			mass=65;
+			class HitpointsProtectionInfo
+			{
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.30000001;
+				};
+			};
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F: JCA_MCRP_V_CarrierRigKBT_06_base_F
+	{
+		model="vests_f_JCA_MCRP\Data\V_CarrierKBT_01_tactical_F.p3d";
+		descriptionShort="$STR_A3_SP_AL_III";
+		class ItemInfo: ItemInfo
+		{
+			uniformModel="\vests_f_JCA_MCRP\Data\V_CarrierKBT_01_tactical_F.p3d";
+			containerClass="Supply130";
+			mass=75;
+			class HitpointsProtectionInfo
+			{
+				class Arms
+				{
+					hitpointName="HitArms";
+					armor=8;
+					passThrough=0.5;
+				};
+				class Chest
+				{
+					hitpointName="HitChest";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Diaphragm
+				{
+					hitpointName="HitDiaphragm";
+					armor=16;
+					passThrough=0.60000002;
+				};
+				class Abdomen
+				{
+					hitpointName="HitAbdomen";
+					armor=16;
+					passThrough=0.30000001;
+				};
+				class Body
+				{
+					hitpointName="HitBody";
+					passThrough=0.60000002;
+				};
+			};
+		};
+	};
+	class V_CarrierRigKBT_01_EAF_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_EAF_F";
+		scope=2;
+		displayName="Chaleco de Ametrallador (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa"
+		};
+	};
+	class V_CarrierRigKBT_01_light_EAF_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_light_EAF_F";
+		scope=2;
+		displayName="Chaleco (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa"
+		};
+	};
+	class V_CarrierRigKBT_01_heavy_EAF_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_heavy_EAF_F";
+		scope=2;
+		displayName="Chaleco Ingeniero (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_EAF_F";
+		scope=2;
+		displayName="Chaleco de HQ (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_EAF_F";
+		scope=2;
+		displayName="Chaleco de Combate (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_EAF_F";
+		scope=2;
+		displayName="Chaleco Radio Operador (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_EAF_F";
+		scope=2;
+		displayName="Chaleco de Piloto (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="Chaleco de Tirador (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_EAF_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="Chaleco AT (Camuflaje)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_EAF_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_EAF_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class V_CarrierRigKBT_01_olive_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_olive_F";
+		scope=2;
+		displayName="Chaleco de Ametrallador (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa"
+		};
+	};
+	class V_CarrierRigKBT_01_light_olive_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_light_olive_F";
+		scope=2;
+		displayName="Chaleco (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa"
+		};
+	};
+	class V_CarrierRigKBT_01_heavy_olive_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="V_CarrierRigKBT_01_heavy_olive_F";
+		scope=2;
+		displayName="Chaleco Ingeniero (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_olive_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_olive_F";
+		scope=2;
+		displayName="Chaleco Médico (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_olive_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_olive_F";
+		scope=2;
+		displayName="Chaleco de HQ (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_olive_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_olive_F";
+		scope=2;
+		displayName="Chaleco de Combate (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_olive_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_olive_F";
+		scope=2;
+		displayName="Chaleco Radio Operador (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_olive_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_olive_F";
+		scope=2;
+		displayName="Chaleco de Piloto (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_olive_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_olive_F";
+		scope=2;
+		displayName="Pistolera (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F";
+		scope=2;
+		displayName="Chaleco de Tirador (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_olive_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F";
+		scope=2;
+		displayName="Chaleco AT (Olivo)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_olive_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\carrierrigkbt_01_olive_co.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_black_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_black_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_black_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_black_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_black_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_black_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_black_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_black_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_black_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_black_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_black_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_black_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_black_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Eigengrau)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_black_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_black_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_coyote_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de HQ";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_coyote_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de Oficial";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_coyote_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco Ingeniero";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco Médico";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de Ametrallador";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de Combate";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco Radio Operador";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de Piloto ";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_coyote_F";
+		scope=2;
+		displayName="[ONU] Pistolera Modular";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_coyote_F";
+		scope=2;
+		displayName="[ONU] Chaleco de Tirador";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_coyote_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[ONU] Chaleco AT";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_coyote_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_coyote_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_khaki_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_khaki_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_khaki_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_khaki_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Volcán)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_khaki_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_khaki_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};	
+	class JCA_MCRP_V_CarrierRigKBT_01_Echo_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlacatlaztecatl";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_Echo_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlāltikpakāni";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_Echo_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlacatecuhtli";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlatlacazca";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlāltikpak";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlakuh";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tlahcuilol";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Kokoyotl";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F";
+		scope=2;
+		displayName="[MXC] Tlacaxil";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Cuāuhtli";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_Echo_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Ichcahuipilli Tōcayotl";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_Echo_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_Echo_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};	
+	class JCA_MCRP_V_CarrierRigKBT_01_woodland_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_woodland_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_woodland_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_woodland_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_woodland_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_woodland_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Bosque)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_woodland_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_woodland_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_desert_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_desert_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_desert_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_desert_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_desert_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_desert_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_desert_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_desert_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_desert_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_desert_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_desert_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_desert_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_desert_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Arena)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_desert_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_desert_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CTRGA_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_CTRGA_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_CTRGA_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGA_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGA_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Urbano)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_CTRGA_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGA_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CTRGJ_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_CTRGJ_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_CTRGJ_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Pistolera (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGJ_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGJ_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (BLC)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_CTRGJ_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_CTRGJ_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_MTP_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_MTP_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_MTP_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_MTP_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_MTP_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_MTP_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Digital)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_MTP_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_MTP_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tropic_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_tropic_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_tropic_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_tropic_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_tropic_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_tropic_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Jungla)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_tropic_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_tropic_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_alpine_F: V_CarrierRigKBT_01_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Ametrallador (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_vest_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_light_alpine_F: V_CarrierRigKBT_01_light_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_light_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Oficial (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_light_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_heavy_alpine_F: V_CarrierRigKBT_01_heavy_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_heavy_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco Ingeniero (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_heavy_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_combat_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_combat_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_combat_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco Médico (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_combat_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_command_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_command_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_command_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de HQ (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_command_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_compact_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_compact_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_compact_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Combate (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_compact_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_CQB_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_CQB_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_CQB_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco Radio Operador (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_cqb_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_crew_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_crew_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_crew_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Piloto (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_crew_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_holster_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_holster_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_holster_alpine_F";
+		scope=2;
+		displayName="[MXC] Pistolera (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_holster_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa"
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_recon_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_recon_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_alpine_F";
+		scope=2;
+		displayName="[MXC] Chaleco de Tirador (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_recon_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			""
+		};
+	};
+	class JCA_MCRP_V_CarrierRigKBT_01_tactical_alpine_F: JCA_MCRP_V_CarrierRigKBT_01_tactical_base_F
+	{
+		author="Vianna";
+		_generalMacro="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+		scope=2;
+		displayName="[MXC] Chaleco AT (Invierno)";
+		picture="\vests_f_JCA_MCRP\Data\V_KBT\UI\Icon_CarrierRigKBT_01_tactical_alpine_F_CA.paa";
+		hiddenSelectionsTextures[]=
+		{
+			"vests_f_JCA_MCRP\Data\V_KBT\CarrierRigKBT_01_alpine_CO.paa",
+			"",
+			"",
+			"",
+			""
+		};
+	};
+};
+class cfgVehicles
+{
+	class Vest_Base_F;
+	class Vest_V_CarrierRigKBT_01_EAF_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="Chaleco de HQ (Camuflaje)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_EAF_F
+			{
+				name="V_CarrierRigKBT_01_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_EAF_F
+			{
+				name="V_CarrierRigKBT_01_light_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco Ingeniero (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_EAF_F
+			{
+				name="V_CarrierRigKBT_01_heavy_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco Médico (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco de HQ (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco de Combate (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco Radio Operador (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco de Piloto (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco de Tirador (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_EAF_F: Vest_V_CarrierRigKBT_01_EAF_F
+	{
+		displayName="Chaleco AT (Camuflaje)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_EAF_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_EAF_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_olive_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="Chaleco de HQ (Olivo)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_olive_F
+			{
+				name="V_CarrierRigKBT_01_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_olive_F
+			{
+				name="V_CarrierRigKBT_01_light_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco Ingeniero (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_olive_F
+			{
+				name="V_CarrierRigKBT_01_heavy_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco Médico (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco de HQ (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco de Combate (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco Radio Operador (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco de Piloto (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Pistolera (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco de Tirador (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_olive_F: Vest_V_CarrierRigKBT_01_olive_F
+	{
+		displayName="Chaleco AT (Olivo)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_olive_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_olive_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_black_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Eigengrau)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_black_F
+			{
+				name="V_CarrierRigKBT_01_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_black_F
+			{
+				name="V_CarrierRigKBT_01_light_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_black_F
+			{
+				name="V_CarrierRigKBT_01_heavy_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco Médico (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco de HQ (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco de Combate (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Pistolera (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_black_F: Vest_V_CarrierRigKBT_01_black_F
+	{
+		displayName="[MXC] Chaleco AT (Eigengrau)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_black_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_black_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_coyote_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_coyote_F
+			{
+				name="V_CarrierRigKBT_01_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco de Oficial";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_coyote_F
+			{
+				name="V_CarrierRigKBT_01_light_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco Ingeniero";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_coyote_F
+			{
+				name="V_CarrierRigKBT_01_heavy_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco Médico";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco de Ametrallador";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco de Combate";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco Radio Operador";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco de Piloto ";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Pistolera Modular";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco de Tirador";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_coyote_F: Vest_V_CarrierRigKBT_01_coyote_F
+	{
+		displayName="[MXC] Chaleco AT";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_coyote_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_coyote_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_khaki_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Volcán)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_khaki_F
+			{
+				name="V_CarrierRigKBT_01_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_khaki_F
+			{
+				name="V_CarrierRigKBT_01_light_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_khaki_F
+			{
+				name="V_CarrierRigKBT_01_heavy_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco Médico (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco de HQ (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco de Combate (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Pistolera (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_khaki_F: Vest_V_CarrierRigKBT_01_khaki_F
+	{
+		displayName="[MXC] Chaleco AT (Volcán)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_khaki_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_khaki_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_CTRGA_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Urbano)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_CTRGA_F
+			{
+				name="V_CarrierRigKBT_01_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_CTRGA_F
+			{
+				name="V_CarrierRigKBT_01_light_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_CTRGA_F
+			{
+				name="V_CarrierRigKBT_01_heavy_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco Médico (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco de HQ (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco de Combate (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Pistolera (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGA_F: Vest_V_CarrierRigKBT_01_CTRGA_F
+	{
+		displayName="[MXC] Chaleco AT (Urbano)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGA_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGA_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_CTRGJ_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (BLC)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_CTRGJ_F
+			{
+				name="V_CarrierRigKBT_01_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco de Oficial (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_CTRGJ_F
+			{
+				name="V_CarrierRigKBT_01_light_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_CTRGJ_F
+			{
+				name="V_CarrierRigKBT_01_heavy_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco Médico (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco de HQ (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco de Combate (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco de Piloto (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Pistolera (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco de Tirador (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGJ_F: Vest_V_CarrierRigKBT_01_CTRGJ_F
+	{
+		displayName="[MXC] Chaleco AT (BLC)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGJ_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_CTRGJ_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_woodland_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Bosque)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_woodland_F
+			{
+				name="V_CarrierRigKBT_01_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_woodland_F
+			{
+				name="V_CarrierRigKBT_01_light_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_woodland_F
+			{
+				name="V_CarrierRigKBT_01_heavy_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco Médico (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco de HQ (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco de Combate (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Pistolera (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_woodland_F: Vest_V_CarrierRigKBT_01_woodland_F
+	{
+		displayName="[MXC] Chaleco AT (Bosque)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_woodland_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_woodland_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_desert_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Arena)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_desert_F
+			{
+				name="V_CarrierRigKBT_01_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_desert_F
+			{
+				name="V_CarrierRigKBT_01_light_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_desert_F
+			{
+				name="V_CarrierRigKBT_01_heavy_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco Médico (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco de HQ (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco de Combate (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Pistolera (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_desert_F: Vest_V_CarrierRigKBT_01_desert_F
+	{
+		displayName="[MXC] Chaleco AT (Arena)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_desert_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_desert_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_MTP_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Digital)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_MTP_F
+			{
+				name="V_CarrierRigKBT_01_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_MTP_F
+			{
+				name="V_CarrierRigKBT_01_light_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_MTP_F
+			{
+				name="V_CarrierRigKBT_01_heavy_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco Médico (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco de HQ (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco de Combate (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Pistolera (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_MTP_F: Vest_V_CarrierRigKBT_01_MTP_F
+	{
+		displayName="[MXC] Chaleco AT (Digital)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_MTP_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_MTP_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_tropic_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Jungla)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_tropic_F
+			{
+				name="V_CarrierRigKBT_01_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_tropic_F
+			{
+				name="V_CarrierRigKBT_01_light_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_tropic_F
+			{
+				name="V_CarrierRigKBT_01_heavy_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco Médico (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco de HQ (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco de Combate (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Pistolera (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_tropic_F: Vest_V_CarrierRigKBT_01_tropic_F
+	{
+		displayName="[MXC] Chaleco AT (Jungla)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_tropic_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_tropic_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_alpine_F: Vest_Base_F
+	{
+		scope=2;
+		scopeCurator=2;
+		displayName="[MXC] Chaleco de HQ (Invierno)";
+		author="Vianna";
+		vehicleClass="ItemsVests";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_alpine_F
+			{
+				name="V_CarrierRigKBT_01_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_light_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco de Oficial (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_light_alpine_F
+			{
+				name="V_CarrierRigKBT_01_light_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_V_CarrierRigKBT_01_heavy_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco Ingeniero (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class V_CarrierRigKBT_01_heavy_alpine_F
+			{
+				name="V_CarrierRigKBT_01_heavy_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_combat_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco Médico (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_combat_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_combat_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_command_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco de HQ (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_command_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_command_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_compact_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco de Combate (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_compact_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_compact_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_CQB_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco Radio Operador (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_CQB_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_CQB_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_crew_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco de Piloto (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_crew_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_crew_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_holster_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Pistolera (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_holster_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_holster_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_recon_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco de Tirador (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_recon_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_recon_alpine_F";
+				count=1;
+			};
+		};
+	};
+	class Vest_JCA_MCRP_V_CarrierRigKBT_01_tactical_alpine_F: Vest_V_CarrierRigKBT_01_alpine_F
+	{
+		displayName="[MXC] Chaleco AT (Invierno)";
+		author="Vianna";
+		class TransportItems
+		{
+			class JCA_MCRP_V_CarrierRigKBT_01_tactical_alpine_F
+			{
+				name="JCA_MCRP_V_CarrierRigKBT_01_tactical_alpine_F";
+				count=1;
+			};
+		};
+	};
+};
+class cfgMods
+{
+	author="Vianna";
+	timepacked="1710353454";
+};
