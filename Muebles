@@ -3,24 +3,14 @@
     🪑 Para Arma 3 - Versión Mejorada y Sincronizada
     👨‍💻 Autor: Buchedegatito
     📅 2025
+/*
     
-    📋 USO: 
-    [radioDetección, tiempoEscaneo] execVM "buchedegatito_amueblado.sqf";
-    
-    Ejemplo: [50, 5] execVM "buchedegatito_amueblado.sqf";
-    
-    ⚙️ PARÁMETROS:
-    - radioDetección: Radio en metros para buscar casas (por defecto: 50m)
-    - tiempoEscaneo: Segundos entre escaneos para muebles (por defecto: 5s)
-    
-    ✨ CARACTERÍSTICAS:
-    - Funcionamiento en cualquier entorno (local, multi, dedicado)
-    - Sincronización total entre jugadores
-    - Sistema optimizado para evitar lag
-    - Múltiples estilos de muebles aleatorios
-    - Sistema de reacción física para edificios destruidos
-    - Limpieza automática cuando el Zeus elimina edificios
-*/
+// ⚠️ == VERIFICACIÓN RÁPIDA DE ARSENAL/VR (2025-05-26) ==
+// Si estamos en el mapa VR o en una misión de arsenal, salir inmediatamente
+if (worldName == "VR" || toLower missionName == "arsenal") exitWith {
+    if (hasInterface) then {systemChat "Script desactivado en Arsenal/VR"};
+    false
+};
 
 // ═════════════════════════════════════════
 // 🔄 INICIALIZACIÓN Y CONFIGURACIÓN
@@ -1050,22 +1040,6 @@ BUCHEDEG_fnc_amueblarCasa = {
 				_edificio setvariable ["BUCHEDEG_amueblado",1];
 				_edificio setvariable ["BUCHEDEG_muebles",_items];
 				};
-				
-			/*	
-			case "":
-				{
-				_plantillas = [];
-				_items = _plantillas select floor random count _plantillas;  
-				_edificio setvariable ["BUCHEDEG_amueblado",1];
-				_edificio setvariable ["BUCHEDEG_muebles",_items];
-				};
-			*/		
-			
-			default
-				{
-				_edificio setvariable ["BUCHEDEG_amueblado",-1]; // non furnishable houses will subsequently be ignored
-				};
-						
 			};
 		};
 		
