@@ -8,7 +8,7 @@
 // ⚠️ == VERIFICACIÓN RÁPIDA DE ARSENAL/VR (2025-05-26) ==
 // Si estamos en el mapa VR o en una misión de arsenal, salir inmediatamente
 if (worldName == "VR" || toLower missionName == "arsenal") exitWith {
-    if (hasInterface) then {systemChat "Script desactivado en Arsenal/VR"};
+    if (hasInterface) then {systemChat ""};
     false
 };
 
@@ -72,7 +72,7 @@ BUCHEDEG_fnc_amueblarCasa = {
         _tipo = typeOf _edificio;
         switch _tipo do {
             // 🏝️ CASAS DE TANOA
-			case "Land_House_Small_01_F": { {
+			case "Land_House_Small_01_F": {
 				{
 				_plantillas = [[["Land_TablePlastic_01_F",[-4.39307,1.2832,-0.699362],88.2366],["Land_ChairPlastic_F",[-5.41113,1.27539,-0.699363],4.16151],["Land_ChairPlastic_F",[-3.12256,0.893555,-0.699363],176.193],["Land_ChairPlastic_F",[-4.40723,3.01758,-0.699363],251.962],["Land_ChairPlastic_F",[-4.42139,-0.375977,-0.699363],79.3795],["Land_WoodenTable_large_F",[-4.95117,-3.03711,-0.699362],90.9798],["Land_WoodenCounter_01_F",[0.318848,2.27832,-0.699363],90.7001],["Land_WoodenTable_small_F",[1.84277,3.00781,-0.699362],181.198],["Land_ShelvesWooden_F",[1.47559,-1.9873,-0.699363],1.68573],["Land_Metal_rack_Tall_F",[6.17578,2.85449,-0.699363],-90.9498],["Land_ChairWood_F",[2.92529,3.0498,-0.699362],-9.95035],["Land_ChairWood_F",[1.91602,1.67285,-0.699362],144.447],["Fridge_01_closed_F",[5.9502,-3.23047,-0.699363],178.229],["Land_Basket_F",[1.72754,-3.37402,-0.699362],132.784],["Land_Sack_F",[5.79102,-1.53223,-0.699362],-54.0081],["Land_Sack_F",[5.9165,0.0205078,-0.699362],-4.26343],["Land_CratesShabby_F",[5.82422,1.44629,-0.699363],0.10672],["Land_PlasticCase_01_large_F",[0.361816,-1.42383,-0.699363],-0.384552]],[["Land_Rug_01_F",[-3.40186,0.012207,-0.699362],90.0139],["Land_Rug_01_Traditional_F",[3.57422,1.31152,-0.699363],-0.219666],["Land_TableBig_01_F",[-3.15137,3.24512,-0.699363],-0.457108],["Land_Sofa_01_F",[-5.76758,0.103516,-0.699363],-91.1863],["Land_ArmChair_01_F",[-3.65186,-3.31689,-0.699363],2.04109],["Land_ArmChair_01_F",[0.208496,-1.30273,-0.699363],90.237],["Land_TableSmall_01_F",[-3.37598,-0.0634766,-0.699362],181.977],["Land_ChairWood_F",[-1.5625,2.9541,-0.699363],-122.695],["Land_ChairWood_F",[-3.0957,2.18848,-0.699363],179.495],["Land_ChairWood_F",[-4.76025,2.89355,-0.699363],134.355],["Land_OfficeCabinet_01_F",[0.508301,1.62598,-0.699363],-88.9799],["Land_WoodenBed_01_F",[2.29395,-2.72656,-0.699363],179.302],["Land_RattanChair_01_F",[1.53223,3.18018,-0.699363],19.4255],["OfficeTable_01_new_F",[5.88477,1.15527,-0.699363],-88.4198],["Land_OfficeChair_01_F",[5.31055,1.44971,-0.699363],50.3321],["Fridge_01_closed_F",[5.88037,-3.57324,-0.699363],-91.4833],["Land_ShelvesWooden_F",[5.9082,-2.39795,-0.699363],-1.48329]]];
 				_items = _plantillas select floor random count _plantillas;  
