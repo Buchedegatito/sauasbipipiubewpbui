@@ -6,6 +6,13 @@
     🔧 Compatibilidad: HC, Dedicado, Multijugador, Local, Editor
 */
 
+// ⚠️ == VERIFICACIÓN RÁPIDA DE ARSENAL/VR (2025-05-26) ==
+// Si estamos en el mapa VR o en una misión de arsenal, salir inmediatamente
+if (worldName == "VR" || toLower missionName == "arsenal") exitWith {
+    if (hasInterface) then {systemChat ""};
+    false
+};
+
 // ════════════════════════════
 // 🔍 DETECCIÓN DE ENTORNO
 // ════════════════════════════
