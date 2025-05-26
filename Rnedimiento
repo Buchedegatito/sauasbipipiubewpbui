@@ -45,7 +45,7 @@ OPT_entidadesGestionadas = [];
 OPT_cacheTiempo = time;
 OPT_intervaloCacheado = 5;
 OPT_ultimaPosJugador = [0,0,0];
-OPT_distanciaMovimiento = 750;
+OPT_distanciaMovimiento = 25;
 OPT_sectores = [];
 OPT_sectorActual = "";
 OPT_marcoSectores = 1000;
@@ -277,6 +277,7 @@ OPT_fnc_estaVolando = {
 };
 
 // ===== FUNCIÓN PARA FORZAR DISTANCIA DE VISIÓN (SIMPLIFICADA) =====
+if (OPT_zeusActivo) exitWith {};
 OPT_fnc_forzarDistanciaVision = {
     // Versión super simplificada para evitar errores
     setViewDistance OPT_distanciaVisionForzada;
