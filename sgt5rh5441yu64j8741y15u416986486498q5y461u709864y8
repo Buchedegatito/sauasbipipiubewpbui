@@ -2362,7 +2362,7 @@ class cfgWeapons
 	{
 		author="Vianna";
 		scope=2;
-		displayName="Chaleco UN (Piloto)";
+		displayName="[ONU] Chaleco (Piloto)";
 		picture="\UN_gear\data_ui\pilotoonu.paa";
 		hiddenSelectionsTextures[]=
 		{
