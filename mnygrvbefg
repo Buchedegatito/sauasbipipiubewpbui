@@ -1,0 +1,1458 @@
+class CfgPatches
+{
+	class UN_vehicles
+	{
+		units[]=
+		{
+			"UN_B_heli_unarmed",
+			"UN_B_Offroad_wood",
+			"UN_B_Offroad_sand",
+			"UN_B_Offroad_HMG_wood",
+			"UN_B_Offroad_HMG_sand",
+			"UN_B_Offroad_AT_wood",
+			"UN_B_Offroad_AT_sand",
+			"UN_B_MRAP_01_wood",
+			"UN_B_MRAP_01_sand",
+			"UN_B_MRAP_01_HMG_wood",
+			"UN_B_MRAP_01_HMG_sand",
+			"UN_B_MRAP_01_GMG_wood",
+			"UN_B_MRAP_01_GMG_sand",
+			"UN_B_HEMTT_mover_wood",
+			"UN_B_HEMTT_mover_sand",
+			"UN_B_HEMTT_cargo_wood",
+			"UN_B_HEMTT_cargo_sand",
+			"UN_B_HEMTT_cover_wood",
+			"UN_B_HEMTT_cover_sand",
+			"UN_B_HEMTT_fuel_wood",
+			"UN_B_HEMTT_fuel_sand",
+			"UN_B_HEMTT_ammo_wood",
+			"UN_B_HEMTT_ammo_sand",
+			"UN_B_HEMTT_repair_wood",
+			"UN_B_HEMTT_repair_sand",
+			"UN_B_HEMTT_box_wood",
+			"UN_B_HEMTT_box_sand",
+			"UN_B_zamak_trans_wood",
+			"UN_B_zamak_trans_sand",
+			"UN_B_zamak_trans_cov_wood",
+			"UN_B_zamak_trans_cov_sand"
+		};
+		weapons[]=
+		{
+			""
+		};
+		requiredVersion=0.1;
+		requiredAddons[]={};
+	};
+};
+class cfgVehicles
+{
+	class B_G_Offroad_01_F;
+	class UN_B_Offroad_wood: B_G_Offroad_01_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$Camioneta";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"SportCarHorn"
+		};
+		hiddenSelections[]=
+		{
+			"camo",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Offroad\UN_offroad_base.paa",
+			"\UN_vehicles\data\Offroad\UN_offroad_base.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TextureSources
+		{
+			class UN
+			{
+				displayName="UN";
+				author="Vianna & Enkeli";
+				textures[]=
+				{
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa",
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa"
+				};
+				faction[]=
+				{
+					"un_blufor"
+				};
+			};
+		};
+		textureList[]=
+		{
+			"UN",
+			1
+		};
+		animationList[]=
+		{
+			"HideDoor3",
+			0.33333299,
+			"HideBumper1",
+			1,
+			"HideBumper2",
+			1
+		};
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_Offroad_sand: UN_B_Offroad_wood
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_offroad";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"SportCarHorn"
+		};
+		hiddenSelections[]=
+		{
+			"camo",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Offroad\UN_offroad_base.paa",
+			"\UN_vehicles\data\Offroad\UN_offroad_base.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		forceInGarage=1;
+	};
+	class B_G_Offroad_01_armed_F;
+	class UN_B_Offroad_HMG_wood: B_G_Offroad_01_armed_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$STR_un_veh_offroad_hmg";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"SportCarHorn"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TextureSources
+		{
+			class UN
+			{
+				displayName="UN";
+				author="Vianna & Enkeli";
+				textures[]=
+				{
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa",
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa"
+				};
+				faction[]=
+				{
+					"un_blufor"
+				};
+			};
+		};
+		textureList[]=
+		{
+			"UN",
+			1
+		};
+		animationList[]=
+		{
+			"HideDoor3",
+			0.33333299,
+			"HideBumper1",
+			1,
+			"HideBumper2",
+			0
+		};
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_Offroad_HMG_sand: UN_B_Offroad_HMG_wood
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_offroad_hmg";
+		author="Vianna & Enkeli";
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		forceInGarage=1;
+	};
+	class B_G_Offroad_01_AT_F;
+	class UN_B_Offroad_AT_wood: B_G_Offroad_01_AT_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$STR_un_veh_offroad_at";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"SportCarHorn"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TextureSources
+		{
+			class UN
+			{
+				displayName="UN";
+				author="Vianna & Enkeli";
+				textures[]=
+				{
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa",
+					"\UN_vehicles\data\Offroad\UN_offroad_base.paa"
+				};
+				faction[]=
+				{
+					"un_blufor"
+				};
+			};
+		};
+		textureList[]=
+		{
+			"UN",
+			1
+		};
+		animationList[]=
+		{
+			"HideDoor3",
+			0.33333299,
+			"HideBumper1",
+			1,
+			"HideBumper2",
+			0
+		};
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_Offroad_AT_sand: UN_B_Offroad_AT_wood
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_offroad_at";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"SportCarHorn"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		forceInGarage=1;
+	};
+	class B_MRAP_01_F;
+	class UN_B_MRAP_01_wood: B_MRAP_01_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$STR_un_veh_hunter";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_MRAP_01_sand: B_MRAP_01_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_hunter";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_MRAP_01_hmg_F;
+	class UN_B_MRAP_01_HMG_wood: B_MRAP_01_hmg_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$STR_un_veh_hunter_hmg";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa",
+			"\UN_vehicles\data\common\UN_turret.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_MRAP_01_HMG_sand: B_MRAP_01_hmg_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_hunter_hmg";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa",
+			"\UN_vehicles\data\common\UN_turret.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_MRAP_01_gmg_F;
+	class UN_B_MRAP_01_GMG_wood: B_MRAP_01_gmg_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_wood";
+		displayName="$STR_un_veh_hunter_gmg";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa",
+			"\UN_vehicles\data\common\UN_turret.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_MRAP_01_GMG_sand: B_MRAP_01_gmg_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_veh_sand";
+		displayName="$STR_un_veh_hunter_gmg";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_base.paa",
+			"\UN_vehicles\data\MRAP_01\UN_MRAP_adds.paa",
+			"\UN_vehicles\data\common\UN_turret.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_mover_F;
+	class UN_B_HEMTT_mover_wood: B_Truck_01_mover_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_mprimer.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_mover_sand: B_Truck_01_mover_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_mprimer.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_transport_F;
+	class UN_B_HEMTT_cargo_wood: B_Truck_01_transport_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_trans";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cargo.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_cargo_sand: B_Truck_01_transport_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_trans";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cargo.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_covered_F;
+	class UN_B_HEMTT_cover_wood: B_Truck_01_covered_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_cover";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cargo.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cover.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_cover_sand: B_Truck_01_covered_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_cover";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cargo.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_cover.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_fuel_F;
+	class UN_B_HEMTT_fuel_wood: B_Truck_01_fuel_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_fuel";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_fuel.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_fuel_sand: B_Truck_01_fuel_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_fuel";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_fuel.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_ammo_F;
+	class UN_B_HEMTT_ammo_wood: B_Truck_01_ammo_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_ammo";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_ammo_sand: B_Truck_01_ammo_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_ammo";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_Repair_F;
+	class UN_B_HEMTT_repair_wood: B_Truck_01_Repair_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_repair";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa",
+			"\UN_vehicles\data\HEMTT\UN_containers_set.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_repair_sand: B_Truck_01_Repair_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_repair";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa",
+			"\UN_vehicles\data\HEMTT\UN_containers_set.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class B_Truck_01_box_F;
+	class UN_B_HEMTT_box_wood: B_Truck_01_box_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_hemtt_box";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa",
+			"\UN_vehicles\data\HEMTT\UN_containers_set.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=5;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_HEMTT_box_sand: B_Truck_01_box_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_hemtt_box";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn2"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2",
+			"camo3",
+			"camo4"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_01.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ext_02.paa",
+			"\UN_vehicles\data\HEMTT\UN_hemtt_ammo.paa",
+			"\UN_vehicles\data\HEMTT\UN_containers_set.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=20;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class I_Truck_02_transport_F;
+	class UN_B_zamak_trans_wood: I_Truck_02_transport_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_zamak_trans";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn3"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kab.paa",
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kuz.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_zamak_trans_sand: I_Truck_02_transport_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_zamak_trans";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn3"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kab.paa",
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kuz.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class I_Truck_02_covered_F;
+	class UN_B_zamak_trans_cov_wood: I_Truck_02_covered_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_wood";
+		displayName="$STR_un_veh_zamak_trans_cov";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		weapons[]=
+		{
+			"TruckHorn3"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kab.paa",
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kuz.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class UN_B_zamak_trans_cov_sand: I_Truck_02_covered_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_truck_sand";
+		displayName="$STR_un_veh_zamak_trans_cov";
+		author="Vianna & Enkeli";
+		weapons[]=
+		{
+			"TruckHorn3"
+		};
+		hiddenSelections[]=
+		{
+			"camo1",
+			"camo2"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kab.paa",
+			"\UN_vehicles\data\Truck_02\UN_truck_02_kuz.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_d_soldier"
+		};
+		crew="UN_B_aaf_d_soldier";
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+	class I_Heli_light_03_unarmed_F;
+	class UN_B_heli_unarmed: I_Heli_light_03_unarmed_F
+	{
+		scope=2;
+		side=1;
+		faction="un_blufor";
+		editorSubcategory="un_heli";
+		displayName="$STR_un_veh_hellcat";
+		author="Vianna & Enkeli";
+		forceInGarage=1;
+		hiddenSelections[]=
+		{
+			"camo"
+		};
+		hiddenSelectionsTextures[]=
+		{
+			"\UN_vehicles\data\Heli_Light_03\UN_heli_light_03_base.paa"
+		};
+		typicalCargo[]=
+		{
+			"UN_B_aaf_soldier"
+		};
+		crew="UN_B_aaf_soldier_helipilot";
+		class TextureSources
+		{
+			class UN
+			{
+				displayName="UN";
+				author="Vianna & Enkeli";
+				textures[]=
+				{
+					"\UN_vehicles\data\Heli_Light_03\UN_heli_light_03_base.paa"
+				};
+				faction[]=
+				{
+					"un_blufor"
+				};
+			};
+		};
+		textureList[]=
+		{
+			"UN",
+			1
+		};
+		class TransportItems
+		{
+			class _xx_FirstAidKit
+			{
+				name="FirstAidKit";
+				count=10;
+			};
+		};
+		class TransportWeapons
+		{
+		};
+		class TransportMagazines
+		{
+		};
+	};
+};
+class cfgMods
+{
+	author="CoseDola | Miller";
+	timepacked="1576431328";
+};
