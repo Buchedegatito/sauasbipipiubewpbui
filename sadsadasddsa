@@ -41,9 +41,9 @@ BE_AI_GroupSizeThreshold = 2;          // NUEVO: Número mínimo de enemigos par
 // Sistema de gestión de vehículos de combate
 BE_AI_UseVehicleSystem = true;         // Activar sistema
 BE_AI_VehicleUpdateInterval = 2;       // MEJORADO: Segundos entre actualizaciones
-BE_AI_VehiclePriority = true;          // Dar siempre alta prioridad a vehículos
+BE_AI_VehiclePriority = false;          // Dar siempre alta prioridad a vehículos
 BE_AI_ForceVehicleEngagement = true;   // NUEVO: Forzar a vehículos a atacar
-BE_AI_VehicleReplaceCrew = true;       // NUEVO: Reemplazar tripulación muerta
+BE_AI_VehicleReplaceCrew = false;       // NUEVO: Reemplazar tripulación muerta
 
 // Sistema de comunicación táctica de equipo
 BE_AI_UseTeamComms = true;             // Activar sistema
@@ -53,7 +53,6 @@ BE_AI_KnowledgeShareInterval = 10;      // Intervalo de compartir información
 // Sistema de formaciones dinámicas
 BE_AI_UseDynamicFormations = true;     // NUEVO: Activar formaciones dinámicas
 BE_AI_FormationUpdateInterval = 15;    // NUEVO: Intervalo de actualización
-
 
 // Función segura para operaciones matemáticas
 BE_AI_SafeOperation = {
